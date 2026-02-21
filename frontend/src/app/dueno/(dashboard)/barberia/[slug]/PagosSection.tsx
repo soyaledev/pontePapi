@@ -12,7 +12,8 @@ function generateCodeVerifier(): string {
 async function sha256Base64Url(verifier: string): Promise<string> {
   const buf = new TextEncoder().encode(verifier);
   const hash = await crypto.subtle.digest('SHA-256', buf);
-  return btoa(String.fromCharCode(...new Uint8Array(hash)))
+  const bytes = Array.from(new Uint8Array(hash));
+  return btoa(String.fromCharCode(...bytes))
     .replace(/\+/g, '-')
     .replace(/\//g, '_')
     .replace(/=+$/, '');

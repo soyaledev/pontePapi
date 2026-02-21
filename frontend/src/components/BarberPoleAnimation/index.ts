@@ -1,0 +1,1 @@
+export { BarberPoleAnimation } from './BarberPoleAnimation';

@@ -12,10 +12,15 @@
 }
 
 .logo {
-  font-size: 1.35rem;
-  font-weight: 700;
-  color: var(--text);
-  letter-spacing: -0.02em;
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.logo img {
+  height: 36px;
+  width: auto !important;
+  object-fit: contain;
 }
 
 .ownerLink {

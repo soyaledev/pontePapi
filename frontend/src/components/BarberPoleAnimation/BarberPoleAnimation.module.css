@@ -20,18 +20,23 @@
   bottom: 0;
   left: 0;
   width: 400%;
-  min-width: 1200px;
+  min-width: 1600px;
+  /* Colores más fuertes y saturados: rojo brillante y azul intenso */
   background: repeating-linear-gradient(
-    -50deg,
-    #c41e3a 0px,
-    #a01830 18px,
-    #1e3a8a 18px,
-    #152a6b 36px
+    45deg,
+    #ff1744 0px,
+    #d50000 24px,
+    #0d47a1 24px,
+    #1565c0 48px
   );
+  background-repeat: repeat;
   box-shadow:
-    inset 6px 0 16px rgba(255, 255, 255, 0.08),
-    inset -6px 0 16px rgba(0, 0, 0, 0.3);
-  animation: slideLeft 1.8s linear infinite;
+    inset 6px 0 16px rgba(255, 255, 255, 0.06),
+    inset -6px 0 16px rgba(0, 0, 0, 0.2);
+  /* 48px a 45° = ~33.94px horizontal. Duración ajustada para fluidez. */
+  animation: slideLeft 1.4s linear infinite;
+  will-change: transform;
+  backface-visibility: hidden;
 }
 
 .wrapper::after {
@@ -41,19 +46,19 @@
   z-index: 1;
   background: linear-gradient(
     90deg,
-    rgba(0, 0, 0, 0.2) 0%,
-    transparent 20%,
-    transparent 80%,
-    rgba(0, 0, 0, 0.2) 100%
+    rgba(0, 0, 0, 0.15) 0%,
+    transparent 15%,
+    transparent 85%,
+    rgba(0, 0, 0, 0.15) 100%
   );
   pointer-events: none;
 }
 
 @keyframes slideLeft {
   0% {
-    transform: translateX(0);
+    transform: translate3d(0, 0, 0);
   }
   100% {
-    transform: translateX(-36px);
+    transform: translate3d(-33.94px, 0, 0);
   }
 }

@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import Link from 'next/link';
+import Image from 'next/image';
 import { DuenoNav } from '../DuenoNav';
 import styles from '../DuenoLayout.module.css';
 
@@ -20,7 +21,12 @@ export default async function DashboardLayout({
     <div className={styles.layout}>
       <header className={styles.header}>
         <Link href="/dueno/turnos" className={styles.logo}>
-          Turnos Barber
+          <Image
+            src="/images/logosvgPontePapi.svg"
+            alt="PontePapi"
+            width={140}
+            height={40}
+          />
         </Link>
       </header>
       <main className={styles.main}>{children}</main>

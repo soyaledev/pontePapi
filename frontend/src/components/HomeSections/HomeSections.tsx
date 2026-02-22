@@ -29,7 +29,7 @@ export function HomeSections() {
   return (
     <section className={styles.section} aria-labelledby="home-sections-title">
       <h2 id="home-sections-title" className={styles.srOnly}>
-        Beneficios de Turnos Barber
+        Beneficios de PontePapi
       </h2>
       <div className={styles.grid}>
         {SECTIONS.map((item) => (

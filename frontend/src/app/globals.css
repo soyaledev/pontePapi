@@ -1,4 +1,8 @@
+@import url('https://fonts.googleapis.com/css2?family=Sansation:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap');
+
 :root {
+  --font-sansation: 'Sansation', sans-serif;
+
   /* Fondos */
   --bg-dark: #0a0a0a;
   --bg-card: rgba(255, 255, 255, 0.05);
@@ -32,11 +36,56 @@
   margin: 0;
 }
 
-html,
+html {
+  min-height: 100%;
+  background-color: var(--bg-dark);
+}
+
 body {
+  min-height: 100vh;
+  min-height: 100dvh;
   max-width: 100vw;
   overflow-x: hidden;
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family: var(--font-sansation), system-ui, -apple-system, sans-serif;
+  background-color: var(--bg-dark);
+  color: var(--text);
+}
+
+/* Sansation - clases utilitarias */
+.sansation-light {
+  font-family: var(--font-sansation), sans-serif;
+  font-weight: 300;
+  font-style: normal;
+}
+
+.sansation-regular {
+  font-family: var(--font-sansation), sans-serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.sansation-bold {
+  font-family: var(--font-sansation), sans-serif;
+  font-weight: 700;
+  font-style: normal;
+}
+
+.sansation-light-italic {
+  font-family: var(--font-sansation), sans-serif;
+  font-weight: 300;
+  font-style: italic;
+}
+
+.sansation-regular-italic {
+  font-family: var(--font-sansation), sans-serif;
+  font-weight: 400;
+  font-style: italic;
+}
+
+.sansation-bold-italic {
+  font-family: var(--font-sansation), sans-serif;
+  font-weight: 700;
+  font-style: italic;
 }
 
 /* Evitar zoom automático en iOS/Android al enfocar inputs (font-size < 16px lo dispara) */

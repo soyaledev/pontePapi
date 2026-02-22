@@ -85,7 +85,15 @@ export function Hero() {
   return (
     <section className={styles.cover}>
       <header className={styles.header}>
-        <span className={styles.logo}>Turnos Barber</span>
+        <Link href="/" className={styles.logo}>
+          <Image
+            src="/images/logosvgPontePapi.svg"
+            alt="PontePapi"
+            width={140}
+            height={40}
+            priority
+          />
+        </Link>
         <Link href={ownerLink.href} className={styles.ownerLink}>
           {ownerLink.label}
         </Link>

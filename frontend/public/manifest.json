@@ -1,6 +1,6 @@
 {
-  "name": "Turnos Barber",
-  "short_name": "Turnos Barber",
+  "name": "PontePapi",
+  "short_name": "PontePapi",
   "description": "Sacá turno en tu barbería de confianza",
   "start_url": "/",
   "display": "standalone",
@@ -9,7 +9,7 @@
   "orientation": "portrait",
   "icons": [
     {
-      "src": "/icon.svg",
+      "src": "/images/faviconsvgPontePapi.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any"

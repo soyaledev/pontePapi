@@ -36,7 +36,7 @@ export default async function TurnosPage() {
     .order('slot_time');
 
   const appointments = (rawAppointments ?? []).filter(
-    (a) => a.estado !== 'completed' && a.estado !== 'cancelled'
+    (a) => a.estado === 'confirmed'
   );
 
   return (

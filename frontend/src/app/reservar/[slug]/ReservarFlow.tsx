@@ -229,7 +229,7 @@ export function ReservarFlow({
             amount: barbershop.monto_sena ?? 0,
             description: `Seña - ${service.name} - ${barbershop.name}`,
             backUrlSuccess: `${frontendUrl}/reservar/confirmado?barberia=${encodeURIComponent(barbershop.name)}&fecha=${fecha}&hora=${slot}&slug=${encodeURIComponent(barbershop.slug)}`,
-            backUrlFailure: `${frontendUrl}/reservar/error?slug=${encodeURIComponent(barbershop.slug)}`,
+            backUrlFailure: `${frontendUrl}/reservar/error?slug=${encodeURIComponent(barbershop.slug)}&appointmentId=${encodeURIComponent(appointment.id)}`,
           }),
         });
 

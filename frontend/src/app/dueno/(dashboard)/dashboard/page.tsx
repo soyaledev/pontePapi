@@ -1,12 +1,19 @@
 import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import styles from './Dashboard.module.css';
 
+export const dynamic = 'force-dynamic';
+
 export default async function DashboardPage() {
   const supabase = await createServerSupabaseClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect('/dueno/login');
+
   const { data: barbershops } = await supabase
     .from('barbershops')
     .select('id, name, slug, city, phone')
+    .eq('owner_id', user.id)
     .order('created_at', { ascending: false });
 
   return (

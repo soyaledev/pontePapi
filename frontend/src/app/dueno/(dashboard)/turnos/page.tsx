@@ -3,6 +3,8 @@ import { redirect } from 'next/navigation';
 import { TurnosList } from './TurnosList';
 import styles from './Turnos.module.css';
 
+export const dynamic = 'force-dynamic';
+
 export default async function TurnosPage() {
   const supabase = await createServerSupabaseClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -26,7 +28,9 @@ export default async function TurnosPage() {
     );
   }
 
-  const today = new Date().toISOString().slice(0, 10);
+  const today = new Date().toLocaleDateString('sv-SE', {
+    timeZone: 'America/Argentina/Buenos_Aires',
+  });
   const { data: rawAppointments } = await supabase
     .from('appointments')
     .select('id, barbershop_id, fecha, slot_time, cliente_nombre, cliente_telefono, estado')

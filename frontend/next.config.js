@@ -1,8 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  // Evita iCloud: .next en node_modules suele excluirse del sync y reduce EPERM/readlink.
-  distDir: 'node_modules/.cache/next-build',
+  // Solo en Windows local: evita iCloud/EPERM. En Vercel (Linux) usa .next por defecto.
+  ...(process.platform === 'win32' && {
+    distDir: 'node_modules/.cache/next-build',
+  }),
 };
 
 module.exports = nextConfig;

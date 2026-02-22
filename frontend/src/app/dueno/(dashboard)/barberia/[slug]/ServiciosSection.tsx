@@ -38,8 +38,8 @@ export function ServiciosSection({
       setServices((s) => [...s, data]);
       setForm({ name: '', price: '', duracion_min: '' });
       setShowForm(false);
-    } catch (err) {
-      console.error(err);
+    } catch {
+      // Error al agregar servicio
     } finally {
       setLoading(false);
     }

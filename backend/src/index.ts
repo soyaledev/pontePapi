@@ -15,6 +15,4 @@ app.get('/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-app.listen(PORT, () => {
-  console.log(`Backend Express en http://localhost:${PORT}`);
-});
+app.listen(PORT);

@@ -2,6 +2,13 @@
   max-width: 640px;
 }
 
+@media (min-width: 768px) {
+  .page {
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
 .back {
   display: inline-block;
   color: rgba(255, 255, 255, 0.7);

@@ -24,7 +24,7 @@ export default async function DashboardLayout({
         </Link>
       </header>
       <main className={styles.main}>{children}</main>
-      <DuenoNav />
+      <DuenoNav userEmail={user?.email ?? ''} />
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { toTitleCase, isLink, formatPeso } from '@/lib/format';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import styles from './BarberiaPublic.module.css';
@@ -59,9 +60,19 @@ export default async function BarberiaPublicPage({
           {barbershop.barberos && barbershop.barberos.length > 0 && (
             <p><strong>Barberos:</strong> {barbershop.barberos.join(', ')}</p>
           )}
-          {barbershop.city && <p>{barbershop.city}</p>}
-          {barbershop.address && <p>{barbershop.address}</p>}
-          {barbershop.phone && <p>{barbershop.phone}</p>}
+          {barbershop.city && <p>{toTitleCase(barbershop.city)}</p>}
+          {barbershop.address && (
+            <p>
+              {isLink(barbershop.address) ? (
+                <a href={barbershop.address} target="_blank" rel="noopener noreferrer" className={styles.addressLink}>
+                  Ver en Google Maps
+                </a>
+              ) : (
+                toTitleCase(barbershop.address)
+              )}
+            </p>
+          )}
+          {barbershop.phone && <p>{barbershop.phone.replace(/\D/g, '').slice(0, 10)}</p>}
         </div>
         <section className={styles.services}>
           <h2 className={styles.servicesTitle}>Servicios</h2>
@@ -69,7 +80,7 @@ export default async function BarberiaPublicPage({
             {(services ?? []).map((s) => (
               <li key={s.id} className={styles.serviceItem}>
                 <span>{s.name}</span>
-                <span className={styles.price}>${s.price}</span>
+                <span className={styles.price}>{formatPeso(s.price)}</span>
               </li>
             ))}
           </ul>

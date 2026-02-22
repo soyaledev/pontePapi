@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { formatPeso } from '@/lib/format';
 import { supabase } from '@/lib/supabase/client';
 import styles from './ServiciosSection.module.css';
 
@@ -57,7 +58,7 @@ export function ServiciosSection({
         {services.map((s) => (
           <li key={s.id} className={styles.item}>
             <span className={styles.itemName}>{s.name}</span>
-            <span className={styles.itemPrice}>${s.price}</span>
+            <span className={styles.itemPrice}>{formatPeso(s.price)}</span>
             <span className={styles.itemDur}>{s.duracion_min} min</span>
             <button
               type="button"

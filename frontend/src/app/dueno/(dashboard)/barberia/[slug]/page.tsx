@@ -1,6 +1,7 @@
-import { createServerSupabaseClient } from '@/lib/supabase/server';
-import { redirect, notFound } from 'next/navigation';
 import Link from 'next/link';
+import { redirect, notFound } from 'next/navigation';
+import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { toTitleCase, isLink, formatPeso } from '@/lib/format';
 import { ServiciosSection } from './ServiciosSection';
 import { HorariosSection } from './HorariosSection';
 import { TurnosHistorialSection } from './TurnosHistorialSection';
@@ -76,24 +77,32 @@ export default async function BarberiaDetailPage({
           {barbershop.city && (
             <div className={styles.infoRow}>
               <dt>Ciudad</dt>
-              <dd>{barbershop.city}</dd>
+              <dd>{toTitleCase(barbershop.city)}</dd>
             </div>
           )}
           {barbershop.address && (
             <div className={styles.infoRow}>
               <dt>Dirección</dt>
-              <dd>{barbershop.address}</dd>
+              <dd>
+                {isLink(barbershop.address) ? (
+                  <a href={barbershop.address} target="_blank" rel="noopener noreferrer" className={styles.addressLink}>
+                    Ver en Google Maps
+                  </a>
+                ) : (
+                  toTitleCase(barbershop.address)
+                )}
+              </dd>
             </div>
           )}
           {barbershop.phone && (
             <div className={styles.infoRow}>
               <dt>Teléfono</dt>
-              <dd>{barbershop.phone}</dd>
+              <dd>{barbershop.phone.replace(/\D/g, '').slice(0, 10)}</dd>
             </div>
           )}
           <div className={styles.infoRow}>
             <dt>Seña</dt>
-            <dd>{barbershop.requiere_sena ? `$${barbershop.monto_sena}` : 'Sin seña'}</dd>
+            <dd>{barbershop.requiere_sena ? formatPeso(barbershop.monto_sena ?? 0) : 'Sin seña'}</dd>
           </div>
         </dl>
       </div>

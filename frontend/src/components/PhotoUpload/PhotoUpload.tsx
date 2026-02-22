@@ -13,6 +13,7 @@ type Props = {
   onChange: (url: string) => void;
   barbershopId?: string;
   label?: string;
+  required?: boolean;
 };
 
 function getExtension(mime: string): string {
@@ -25,7 +26,7 @@ function getExtension(mime: string): string {
   return map[mime] ?? 'jpg';
 }
 
-export function PhotoUpload({ value, onChange, barbershopId, label = 'Foto (portada / logo)' }: Props) {
+export function PhotoUpload({ value, onChange, barbershopId, label = 'Foto (portada / logo)', required }: Props) {
   const id = useId();
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);

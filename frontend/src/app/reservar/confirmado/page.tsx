@@ -1,12 +1,18 @@
 import Link from 'next/link';
+import { ComprobanteReserva } from './ComprobanteReserva';
 import styles from './Confirmado.module.css';
 
 export default async function ConfirmadoPage({
   searchParams,
 }: {
-  searchParams: Promise<{ barberia?: string; fecha?: string; hora?: string }>;
+  searchParams: Promise<{ appointmentId?: string; barberia?: string; fecha?: string; hora?: string }>;
 }) {
-  const { barberia, fecha, hora } = await searchParams;
+  const params = await searchParams;
+  const { appointmentId, barberia, fecha, hora } = params;
+
+  if (appointmentId) {
+    return <ComprobanteReserva appointmentId={appointmentId} />;
+  }
 
   return (
     <div className={styles.page}>

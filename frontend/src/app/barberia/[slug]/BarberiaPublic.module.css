@@ -95,6 +95,15 @@
   margin: 0.25rem 0;
 }
 
+.addressLink {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.addressLink:hover {
+  text-decoration: underline;
+}
+
 .servicesTitle {
   font-size: 1.1rem;
   font-weight: 600;

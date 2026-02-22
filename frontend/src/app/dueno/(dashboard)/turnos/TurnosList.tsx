@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { toTitleCase } from '@/lib/format';
 import { supabase } from '@/lib/supabase/client';
 import styles from './Turnos.module.css';
 
@@ -61,10 +62,14 @@ export function TurnosList({
               .sort((a, b) => a.slot_time.localeCompare(b.slot_time))
               .map((a) => (
                 <li key={a.id} className={styles.item}>
-                  <span className={styles.time}>{a.slot_time.slice(0, 5)}</span>
-                  <span className={styles.client}>{a.cliente_nombre}</span>
-                  <span className={styles.phone}>{a.cliente_telefono}</span>
-                  <span className={styles.barberia}>{barbershopNames[a.barbershop_id] ?? '-'}</span>
+                  <div className={styles.itemMain}>
+                    <span className={styles.time}>{a.slot_time.slice(0, 5)}</span>
+                    <span className={styles.client}>{toTitleCase(a.cliente_nombre)}</span>
+                  </div>
+                  <div className={styles.itemSecondary}>
+                    <span className={styles.phone}>{a.cliente_telefono}</span>
+                    <span className={styles.barberia}>{barbershopNames[a.barbershop_id] ?? '-'}</span>
+                  </div>
                   <button
                     type="button"
                     className={styles.completadoBtn}

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { toTitleCase } from '@/lib/format';
 import styles from './TurnosHistorialSection.module.css';
 
 type Appointment = {
@@ -41,7 +42,7 @@ export function TurnosHistorialSection({
               })}
             </span>
             <span className={styles.time}>{a.slot_time.slice(0, 5)}</span>
-            <span className={styles.client}>{a.cliente_nombre}</span>
+            <span className={styles.client}>{toTitleCase(a.cliente_nombre)}</span>
             <span
               className={`${styles.estado} ${
                 a.estado === 'completed' ? styles.estadoCompleted : styles.estadoCancelled

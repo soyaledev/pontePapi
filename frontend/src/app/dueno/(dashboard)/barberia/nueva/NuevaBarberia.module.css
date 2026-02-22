@@ -34,6 +34,11 @@
   color: var(--text-muted);
 }
 
+.hint {
+  font-size: 0.8rem;
+  color: var(--text-faint);
+}
+
 .fieldLabel {
   display: block;
 }
@@ -92,6 +97,30 @@
 .input:focus {
   outline: none;
   border-color: var(--border-focus);
+}
+
+.senaInputWrap {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: var(--bg-input);
+}
+
+.senaInputWrap .input {
+  flex: 1;
+  border: none;
+  border-radius: 0;
+}
+
+.senaInputWrap .input:focus {
+  border-color: transparent;
+}
+
+.senaPrefix {
+  padding: 0.65rem 0 0.65rem 0.9rem;
+  color: var(--text-muted);
+  font-size: 1rem;
 }
 
 .checkbox {

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { formatPeso, toTitleCase, formatInstagram } from '@/lib/format';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase/client';
@@ -75,14 +76,32 @@ function getSlotsForDate(
   return slots;
 }
 
-function getNextDays(n: number): Date[] {
-  const out: Date[] = [];
+const WEEKDAYS = ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'];
+const MONTHS = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+
+type CalendarDay = { date: Date; isCurrentMonth: boolean; isDisabled: boolean };
+
+const MAX_DAYS_AHEAD = 30;
+
+function getCalendarDays(year: number, month: number, schedules: Schedule[]): CalendarDay[] {
+  const first = new Date(year, month, 1);
+  const start = new Date(first);
+  start.setDate(start.getDate() - start.getDay());
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  for (let i = 0; i < n; i++) {
-    const d = new Date(today);
-    d.setDate(d.getDate() + i);
-    out.push(d);
+  const maxDate = new Date(today);
+  maxDate.setDate(maxDate.getDate() + MAX_DAYS_AHEAD);
+  const openDays = new Set(schedules.map((s) => s.day_of_week));
+  const out: CalendarDay[] = [];
+  const d = new Date(start);
+  for (let i = 0; i < 42; i++) {
+    const isCurrentMonth = d.getMonth() === month;
+    const isPast = d < today;
+    const isBeyondMax = d > maxDate;
+    const isClosed = !openDays.has(d.getDay());
+    const isDisabled = isPast || isBeyondMax || isClosed;
+    out.push({ date: new Date(d), isCurrentMonth, isDisabled });
+    d.setDate(d.getDate() + 1);
   }
   return out;
 }
@@ -125,6 +144,10 @@ export function ReservarFlow({
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [takenBySlot, setTakenBySlot] = useState<Record<string, number>>({});
   const [fetchTrigger, setFetchTrigger] = useState(0);
+  const [calendarMonth, setCalendarMonth] = useState(() => {
+    const now = new Date();
+    return { year: now.getFullYear(), month: now.getMonth() };
+  });
 
   useEffect(() => {
     supabase
@@ -163,6 +186,13 @@ export function ReservarFlow({
     return () => document.removeEventListener('visibilitychange', onVisibility);
   }, [router]);
 
+  useEffect(() => {
+    if (step === 2 && fecha) {
+      const d = new Date(fecha + 'T12:00:00');
+      setCalendarMonth({ year: d.getFullYear(), month: d.getMonth() });
+    }
+  }, [step, fecha]);
+
   const slotMinutes = service?.duracion_min ?? barbershop.slot_minutes ?? 30;
 
   const dateForSlots = fecha ? new Date(fecha + 'T12:00:00') : null;
@@ -178,10 +208,7 @@ export function ReservarFlow({
       )
     : [];
 
-  const nextDays = getNextDays(28).filter((d) => {
-    const day = d.getDay();
-    return schedules.some((s) => s.day_of_week === day);
-  });
+  const calendarDays = getCalendarDays(calendarMonth.year, calendarMonth.month, schedules);
 
   const requiereSena =
     barbershop.requiere_sena && (barbershop.monto_sena ?? 0) > 0;
@@ -203,9 +230,9 @@ export function ReservarFlow({
             service_id: service.id,
             fecha,
             slot_time: slot,
-            cliente_nombre: nombre.trim(),
+            cliente_nombre: toTitleCase(nombre.trim()),
             cliente_telefono: telefono.trim(),
-            cliente_instagram: instagram.trim() || null,
+            cliente_instagram: instagram.trim() ? formatInstagram(instagram.trim()) : null,
             estado: 'pending_payment',
           })
           .select('id')
@@ -228,7 +255,7 @@ export function ReservarFlow({
             barbershopId: barbershop.id,
             amount: barbershop.monto_sena ?? 0,
             description: `Seña - ${service.name} - ${barbershop.name}`,
-            backUrlSuccess: `${frontendUrl}/reservar/confirmado?barberia=${encodeURIComponent(barbershop.name)}&fecha=${fecha}&hora=${slot}&slug=${encodeURIComponent(barbershop.slug)}`,
+            backUrlSuccess: `${frontendUrl}/reservar/confirmado?appointmentId=${encodeURIComponent(appointment.id)}`,
             backUrlFailure: `${frontendUrl}/reservar/error?slug=${encodeURIComponent(barbershop.slug)}&appointmentId=${encodeURIComponent(appointment.id)}`,
           }),
         });
@@ -246,18 +273,23 @@ export function ReservarFlow({
         }
         throw new Error('Error al crear pago');
       } else {
-        const { error } = await supabase.from('appointments').insert({
-          barbershop_id: barbershop.id,
-          service_id: service.id,
-          fecha,
-          slot_time: slot,
-          cliente_nombre: nombre.trim(),
-          cliente_telefono: telefono.trim(),
-          cliente_instagram: instagram.trim() || null,
-          estado: 'confirmed',
-        });
+        const { data: appointment, error } = await supabase
+          .from('appointments')
+          .insert({
+            barbershop_id: barbershop.id,
+            service_id: service.id,
+            fecha,
+            slot_time: slot,
+            cliente_nombre: toTitleCase(nombre.trim()),
+            cliente_telefono: telefono.trim(),
+            cliente_instagram: instagram.trim() ? formatInstagram(instagram.trim()) : null,
+            estado: 'confirmed',
+          })
+          .select('id')
+          .single();
         if (error) throw error;
-        window.location.href = `/reservar/confirmado?barberia=${encodeURIComponent(barbershop.name)}&fecha=${fecha}&hora=${slot}`;
+        if (!appointment) throw new Error('Error al crear turno');
+        window.location.href = `/reservar/confirmado?appointmentId=${encodeURIComponent(appointment.id)}`;
       }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Error al reservar');
@@ -296,7 +328,7 @@ export function ReservarFlow({
                   className={styles.serviceBtn}
                 >
                   <span>{s.name}</span>
-                  <span className={styles.price}>${s.price}</span>
+                  <span className={styles.price}>{formatPeso(s.price)}</span>
                 </button>
               </li>
             ))}
@@ -307,24 +339,69 @@ export function ReservarFlow({
       {step === 2 && (
         <div className={styles.step}>
           <h2>Elegí la fecha</h2>
-          <div className={styles.dateGrid}>
-            {nextDays.map((d) => {
-              const dStr = toLocalDateStr(d);
-              return (
-                <button
-                  key={dStr}
-                  type="button"
-                  onClick={() => {
-                    setFecha(dStr);
-                    setSlot(null);
-                    setStep(3);
-                  }}
-                  className={styles.dateBtn}
-                >
-                  {d.toLocaleDateString('es-AR', { weekday: 'short', day: 'numeric', month: 'short' })}
-                </button>
-              );
-            })}
+          <div className={styles.calendar}>
+            <div className={styles.calendarHeader}>
+              <button
+                type="button"
+                className={styles.calendarNav}
+                onClick={() =>
+                  setCalendarMonth((prev) => {
+                    const d = new Date(prev.year, prev.month - 1);
+                    return { year: d.getFullYear(), month: d.getMonth() };
+                  })
+                }
+              >
+                ‹
+              </button>
+              <span className={styles.calendarTitle}>
+                {MONTHS[calendarMonth.month]} {calendarMonth.year}
+              </span>
+              <button
+                type="button"
+                className={styles.calendarNav}
+                onClick={() =>
+                  setCalendarMonth((prev) => {
+                    const d = new Date(prev.year, prev.month + 1);
+                    return { year: d.getFullYear(), month: d.getMonth() };
+                  })
+                }
+              >
+                ›
+              </button>
+            </div>
+            <div className={styles.calendarWeekdays}>
+              {WEEKDAYS.map((wd) => (
+                <span key={wd} className={styles.weekday}>
+                  {wd}
+                </span>
+              ))}
+            </div>
+            <div className={styles.calendarGrid}>
+              {calendarDays.map(({ date, isCurrentMonth, isDisabled }) => {
+                const dStr = toLocalDateStr(date);
+                return (
+                  <button
+                    key={dStr}
+                    type="button"
+                    disabled={isDisabled}
+                    onClick={() => {
+                      if (!isDisabled) {
+                        setFecha(dStr);
+                        setSlot(null);
+                        setStep(3);
+                      }
+                    }}
+                    className={`${styles.calendarDay} ${
+                      !isCurrentMonth ? styles.calendarDayOther : ''
+                    } ${fecha === dStr ? styles.calendarDaySelected : ''} ${
+                      isDisabled ? styles.calendarDayDisabled : ''
+                    }`}
+                  >
+                    {date.getDate()}
+                  </button>
+                );
+              })}
+            </div>
           </div>
           <button type="button" onClick={() => setStep(1)} className={styles.backStep}>
             Atrás
@@ -368,7 +445,7 @@ export function ReservarFlow({
           </p>
           {barbershop.requiere_sena && (barbershop.monto_sena ?? 0) > 0 && (
             <p className={styles.resumen}>
-              Seña a pagar: ${barbershop.monto_sena}
+              Seña a pagar: {formatPeso(barbershop.monto_sena ?? 0)}
             </p>
           )}
           <form
@@ -388,15 +465,15 @@ export function ReservarFlow({
             />
             <input
               type="tel"
-              placeholder="Teléfono"
+              placeholder="Teléfono (máx. 10 números)"
               value={telefono}
-              onChange={(e) => setTelefono(e.target.value)}
+              onChange={(e) => setTelefono(e.target.value.replace(/\D/g, '').slice(0, 10))}
               className={styles.input}
               required
             />
             <input
               type="text"
-              placeholder="Instagram (opcional)"
+              placeholder="@usuario (opcional)"
               value={instagram}
               onChange={(e) => setInstagram(e.target.value)}
               className={styles.input}

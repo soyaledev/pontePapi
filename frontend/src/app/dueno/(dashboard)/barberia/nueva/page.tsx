@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { toTitleCase, formatAddress, formatPesoInput } from '@/lib/format';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase/client';
@@ -49,14 +50,20 @@ export default function NuevaBarberiaPage() {
 
       const slug = generateSlug(form.name);
 
+      if (!form.photo_url.trim()) {
+        setError('La foto es obligatoria');
+        setLoading(false);
+        return;
+      }
+      const phoneOnly = form.phone.replace(/\D/g, '').slice(0, 10);
       const { error } = await supabase.from('barbershops').insert({
         owner_id: user.id,
         name: form.name.trim(),
         barberos,
         slug,
-        address: form.address.trim() || null,
-        city: form.city.trim() || null,
-        phone: form.phone.trim() || null,
+        address: form.address.trim() ? formatAddress(form.address.trim()) : null,
+        city: form.city.trim() ? toTitleCase(form.city.trim()) : null,
+        phone: phoneOnly || null,
         photo_url: form.photo_url.trim() || null,
         requiere_sena: form.requiere_sena,
         monto_sena: form.requiere_sena ? parseFloat(form.monto_sena) || 0 : 0,
@@ -140,8 +147,11 @@ export default function NuevaBarberiaPage() {
             value={form.address}
             onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))}
             className={styles.input}
-            placeholder="Calle, número"
+            placeholder="Calle, número o link de Google Maps"
           />
+          <span className={styles.hint}>
+            Para mejorar que se encuentre la barbería, podés pegar un link de Google Maps
+          </span>
         </label>
         <label className={styles.label}>
           Ciudad
@@ -154,19 +164,25 @@ export default function NuevaBarberiaPage() {
           />
         </label>
         <label className={styles.label}>
-          Teléfono
+          Teléfono (máx. 10 números)
           <input
             type="tel"
             value={form.phone}
-            onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
+            onChange={(e) => {
+              const v = e.target.value.replace(/\D/g, '').slice(0, 10);
+              setForm((f) => ({ ...f, phone: v }));
+            }}
             className={styles.input}
-            placeholder="11 1234-5678"
+            placeholder="1112345678"
+            maxLength={12}
           />
         </label>
         <div className={styles.label}>
           <PhotoUpload
             value={form.photo_url}
             onChange={(url) => setForm((f) => ({ ...f, photo_url: url }))}
+            label="Foto (portada / logo) *"
+            required
           />
         </div>
         <label className={styles.checkbox}>
@@ -181,15 +197,20 @@ export default function NuevaBarberiaPage() {
           <>
             <label className={styles.label}>
               Monto seña (ARS)
-              <input
-                type="number"
-                min={0}
-                step={0.01}
-                value={form.monto_sena}
-                onChange={(e) => setForm((f) => ({ ...f, monto_sena: e.target.value }))}
-                className={styles.input}
-                placeholder="0"
-              />
+              <div className={styles.senaInputWrap}>
+                <span className={styles.senaPrefix}>$</span>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={form.monto_sena ? formatPesoInput(form.monto_sena) : ''}
+                  onChange={(e) => {
+                    const raw = e.target.value.replace(/\D/g, '');
+                    setForm((f) => ({ ...f, monto_sena: raw }));
+                  }}
+                  className={styles.input}
+                  placeholder="1.500"
+                />
+              </div>
             </label>
             <SenaComisionesInfo monto={parseFloat(form.monto_sena) || 0} />
           </>

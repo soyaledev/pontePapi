@@ -4,6 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
+import { toTitleCase } from '@/lib/format';
 import { supabase } from '@/lib/supabase/client';
 import styles from './Hero.module.css';
 
@@ -19,6 +20,28 @@ const DEBOUNCE_MS = 250;
 export function Hero() {
   const router = useRouter();
   const [query, setQuery] = useState('');
+  const [ownerLink, setOwnerLink] = useState({ href: '/dueno/login', label: 'Soy dueño de barbería' });
+
+  useEffect(() => {
+    async function checkOwner() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        setOwnerLink({ href: '/dueno/login', label: 'Soy dueño de barbería' });
+        return;
+      }
+      const { data } = await supabase
+        .from('barbershops')
+        .select('id')
+        .eq('owner_id', user.id)
+        .limit(1);
+      if ((data?.length ?? 0) > 0) {
+        setOwnerLink({ href: '/dueno/turnos', label: 'Mi panel' });
+      } else {
+        setOwnerLink({ href: '/dueno/login', label: 'Soy dueño de barbería' });
+      }
+    }
+    checkOwner();
+  }, []);
   const [results, setResults] = useState<BarbershopResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
@@ -63,8 +86,8 @@ export function Hero() {
     <section className={styles.cover}>
       <header className={styles.header}>
         <span className={styles.logo}>Turnos Barber</span>
-        <Link href="/dueno/login" className={styles.ownerLink}>
-          Soy dueño de barbería
+        <Link href={ownerLink.href} className={styles.ownerLink}>
+          {ownerLink.label}
         </Link>
       </header>
         <Image
@@ -103,7 +126,7 @@ export function Hero() {
                         onClick={() => handleSelect(b.slug)}
                       >
                         <span className={styles.resultName}>{b.name}</span>
-                        {b.city && <span className={styles.resultCity}>{b.city}</span>}
+                        {b.city && <span className={styles.resultCity}>{toTitleCase(b.city)}</span>}
                       </button>
                     </li>
                   ))

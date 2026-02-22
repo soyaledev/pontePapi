@@ -21,7 +21,7 @@ export function ServiciosSection({
   const [services, setServices] = useState(initialServices);
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [form, setForm] = useState({ name: '', price: '', duracion_min: '30' });
+  const [form, setForm] = useState({ name: '', price: '', duracion_min: '' });
 
   async function handleAdd(e: React.FormEvent) {
     e.preventDefault();
@@ -35,7 +35,7 @@ export function ServiciosSection({
       }).select().single();
       if (error) throw error;
       setServices((s) => [...s, data]);
-      setForm({ name: '', price: '', duracion_min: '30' });
+      setForm({ name: '', price: '', duracion_min: '' });
       setShowForm(false);
     } catch (err) {
       console.error(err);
@@ -96,7 +96,8 @@ export function ServiciosSection({
             value={form.duracion_min}
             onChange={(e) => setForm((f) => ({ ...f, duracion_min: e.target.value }))}
             className={styles.input}
-            min={10}
+            min={1}
+            required
           />
           <div className={styles.formActions}>
             <button type="submit" disabled={loading}>

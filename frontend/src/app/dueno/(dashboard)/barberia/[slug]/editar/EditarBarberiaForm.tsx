@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase/client';
 import { PhotoUpload } from '@/components/PhotoUpload';
+import { SenaComisionesInfo } from '@/components/SenaComisionesInfo';
 import styles from '../../nueva/NuevaBarberia.module.css';
 
 type Barberia = {
@@ -174,17 +175,20 @@ export function EditarBarberiaForm({ barbershop }: { barbershop: Barberia }) {
           Requiere seña
         </label>
         {form.requiere_sena && (
-          <label className={styles.label}>
-            Monto seña (ARS)
-            <input
-              type="number"
-              min={0}
-              step={0.01}
-              value={form.monto_sena}
-              onChange={(e) => setForm((f) => ({ ...f, monto_sena: e.target.value }))}
-              className={styles.input}
-            />
-          </label>
+          <>
+            <label className={styles.label}>
+              Monto seña (ARS)
+              <input
+                type="number"
+                min={0}
+                step={0.01}
+                value={form.monto_sena}
+                onChange={(e) => setForm((f) => ({ ...f, monto_sena: e.target.value }))}
+                className={styles.input}
+              />
+            </label>
+            <SenaComisionesInfo monto={parseFloat(form.monto_sena) || 0} />
+          </>
         )}
         {error && <p className={styles.error}>{error}</p>}
         <button type="submit" className={styles.submit} disabled={loading}>

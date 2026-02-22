@@ -59,7 +59,12 @@ export function PagosSection({
     return (
       <section className={styles.section}>
         <h3 className={styles.sectionTitle}>Pagos</h3>
-        <p className={styles.linked}>Cuenta Mercado Pago vinculada</p>
+        <span className={styles.linked}>
+          <svg className={styles.checkIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+            <path d="M20 6L9 17l-5-5" />
+          </svg>
+          Cuenta Mercado Pago vinculada
+        </span>
       </section>
     );
   }

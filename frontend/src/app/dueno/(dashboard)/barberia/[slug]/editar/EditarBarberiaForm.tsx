@@ -9,11 +9,12 @@ import { PhotoUpload } from '@/components/PhotoUpload';
 import { SenaComisionesInfo } from '@/components/SenaComisionesInfo';
 import styles from '../../nueva/NuevaBarberia.module.css';
 
+type Barber = { id: string; name: string; photo_url: string };
+
 type Barberia = {
   id: string;
   slug: string;
   name: string;
-  barberos: string[] | null;
   address: string | null;
   city: string | null;
   phone: string | null;
@@ -22,15 +23,19 @@ type Barberia = {
   monto_sena: string;
 };
 
-export function EditarBarberiaForm({ barbershop }: { barbershop: Barberia }) {
+export function EditarBarberiaForm({
+  barbershop,
+  initialBarbers,
+}: {
+  barbershop: Barberia;
+  initialBarbers: Barber[];
+}) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [form, setForm] = useState({
     name: barbershop.name,
-    barberos: (barbershop.barberos ?? []).length > 0
-      ? [...(barbershop.barberos ?? [])]
-      : [''] as string[],
+    barbers: initialBarbers,
     address: barbershop.address ?? '',
     city: barbershop.city ?? '',
     phone: barbershop.phone ?? '',
@@ -42,23 +47,24 @@ export function EditarBarberiaForm({ barbershop }: { barbershop: Barberia }) {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError('');
-    const barberos = form.barberos.map((n) => n.trim()).filter(Boolean);
-    if (barberos.length === 0) {
+    const validBarbers = form.barbers
+      .map((b) => ({ ...b, name: b.name.trim() }))
+      .filter((b) => b.name);
+    if (validBarbers.length === 0) {
       setError('Agregá al menos un barbero');
       return;
     }
     if (!form.photo_url.trim()) {
-      setError('La foto es obligatoria');
+      setError('La foto de la barbería es obligatoria');
       return;
     }
     setLoading(true);
     try {
       const phoneOnly = form.phone.replace(/\D/g, '').slice(0, 10);
-      const { error } = await supabase
+      const { error: shopError } = await supabase
         .from('barbershops')
         .update({
           name: form.name.trim(),
-          barberos,
           address: form.address.trim() ? formatAddress(form.address.trim()) : null,
           city: form.city.trim() ? toTitleCase(form.city.trim()) : null,
           phone: phoneOnly || null,
@@ -68,7 +74,33 @@ export function EditarBarberiaForm({ barbershop }: { barbershop: Barberia }) {
         })
         .eq('id', barbershop.id);
 
-      if (error) throw error;
+      if (shopError) throw shopError;
+
+      const existingIds = new Set(form.barbers.filter((b) => b.id).map((b) => b.id));
+      const currentValidIds = new Set(validBarbers.filter((b) => b.id).map((b) => b.id));
+
+      const toDelete = [...existingIds].filter((id) => !currentValidIds.has(id));
+      for (const id of toDelete) {
+        await supabase.from('barbers').delete().eq('id', id);
+      }
+
+      for (let i = 0; i < validBarbers.length; i++) {
+        const b = validBarbers[i];
+        if (b.id) {
+          await supabase
+            .from('barbers')
+            .update({ name: b.name, photo_url: b.photo_url || null, order: i })
+            .eq('id', b.id);
+        } else {
+          await supabase.from('barbers').insert({
+            barbershop_id: barbershop.id,
+            name: b.name,
+            photo_url: b.photo_url || null,
+            order: i,
+          });
+        }
+      }
+
       router.push(`/dueno/barberia/${barbershop.slug}`);
       router.refresh();
     } catch (err: unknown) {
@@ -97,41 +129,58 @@ export function EditarBarberiaForm({ barbershop }: { barbershop: Barberia }) {
         </label>
         <div className={styles.label}>
           <span className={styles.fieldLabel}>Barberos *</span>
-          {form.barberos.map((_, i) => (
-            <div key={i} className={styles.employeeRow}>
-              <input
-                type="text"
-                value={form.barberos[i]}
-                onChange={(e) => {
-                  const next = [...form.barberos];
-                  next[i] = e.target.value;
-                  setForm((f) => ({ ...f, barberos: next }));
-                }}
-                className={styles.input}
-                placeholder="Nombre del barbero"
-                required={i === 0}
-              />
-              <button
-                type="button"
-                onClick={() =>
-                  form.barberos.length > 1 &&
-                  setForm((f) => ({
-                    ...f,
-                    barberos: f.barberos.filter((_, j) => j !== i),
-                  }))
-                }
-                className={styles.removeEmployee}
-                aria-label="Quitar"
-                disabled={form.barberos.length === 1}
-              >
-                ×
-              </button>
+          {form.barbers.map((barber, i) => (
+            <div key={barber.id || `new-${i}`} className={styles.barberCard}>
+              <div className={styles.barberRow}>
+                <input
+                  type="text"
+                  value={barber.name}
+                  onChange={(e) => {
+                    const next = [...form.barbers];
+                    next[i] = { ...next[i], name: e.target.value };
+                    setForm((f) => ({ ...f, barbers: next }));
+                  }}
+                  className={styles.input}
+                  placeholder="Nombre del barbero"
+                  required={i === 0}
+                />
+                <button
+                  type="button"
+                  onClick={() =>
+                    form.barbers.length > 1 &&
+                    setForm((f) => ({
+                      ...f,
+                      barbers: f.barbers.filter((_, j) => j !== i),
+                    }))
+                  }
+                  className={styles.removeEmployee}
+                  aria-label="Quitar"
+                  disabled={form.barbers.length === 1}
+                >
+                  ×
+                </button>
+              </div>
+              <div className={styles.barberPhotoWrap}>
+                <PhotoUpload
+                  value={barber.photo_url}
+                  onChange={(url) => {
+                    const next = [...form.barbers];
+                    next[i] = { ...next[i], photo_url: url };
+                    setForm((f) => ({ ...f, barbers: next }));
+                  }}
+                  barbershopId={barbershop.id}
+                  label="Foto"
+                />
+              </div>
             </div>
           ))}
           <button
             type="button"
             onClick={() =>
-              setForm((f) => ({ ...f, barberos: [...f.barberos, ''] }))
+              setForm((f) => ({
+                ...f,
+                barbers: [...f.barbers, { id: '', name: '', photo_url: '' }],
+              }))
             }
             className={styles.addEmployee}
           >

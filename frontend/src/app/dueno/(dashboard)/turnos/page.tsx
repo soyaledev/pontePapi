@@ -33,11 +33,17 @@ export default async function TurnosPage() {
   });
   const { data: rawAppointments } = await supabase
     .from('appointments')
-    .select('id, barbershop_id, fecha, slot_time, cliente_nombre, cliente_telefono, estado')
+    .select('id, barbershop_id, barber_id, fecha, slot_time, cliente_nombre, cliente_telefono, estado')
     .in('barbershop_id', barbershopIds)
     .gte('fecha', today)
     .order('fecha')
     .order('slot_time');
+
+  const barberIds = [...new Set((rawAppointments ?? []).map((a) => a.barber_id).filter(Boolean))];
+  const { data: barbersData } = barberIds.length > 0
+    ? await supabase.from('barbers').select('id, name').in('id', barberIds)
+    : { data: [] };
+  const barberNames = Object.fromEntries((barbersData ?? []).map((b) => [b.id, b.name]));
 
   const appointments = (rawAppointments ?? []).filter(
     (a) => a.estado === 'confirmed'
@@ -49,6 +55,8 @@ export default async function TurnosPage() {
       <TurnosList
         appointments={appointments}
         barbershopNames={barbershopNames}
+        barberNames={barberNames}
+        barbershopIds={barbershopIds}
       />
     </div>
   );

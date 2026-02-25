@@ -19,9 +19,12 @@ export async function GET(
     return NextResponse.json({ error: 'Turno no encontrado' }, { status: 404 });
   }
 
-  const [barbershopRes, serviceRes] = await Promise.all([
+  const [barbershopRes, serviceRes, barberRes] = await Promise.all([
     supabase.from('barbershops').select('name, slug, address, city, phone, monto_sena, requiere_sena').eq('id', appointment.barbershop_id).single(),
     supabase.from('services').select('name, price').eq('id', appointment.service_id).single(),
+    appointment.barber_id
+      ? supabase.from('barbers').select('name').eq('id', appointment.barber_id).single()
+      : Promise.resolve({ data: null }),
   ]);
 
   return NextResponse.json({
@@ -38,5 +41,6 @@ export async function GET(
     created_at: appointment.created_at,
     barbershop: barbershopRes.data,
     service: serviceRes.data,
+    barber: barberRes.data ? { name: barberRes.data.name } : null,
   });
 }

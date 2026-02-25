@@ -25,9 +25,15 @@ export default async function ReservarPage({
     .eq('barbershop_id', barbershop.id)
     .order('name');
 
+  const { data: barbers } = await supabase
+    .from('barbers')
+    .select('id, name, photo_url')
+    .eq('barbershop_id', barbershop.id)
+    .order('order', { ascending: true });
+
   return (
     <ReservarFlow
-      barbershop={barbershop}
+      barbershop={{ ...barbershop, barbers: barbers ?? [] }}
       services={services ?? []}
     />
   );

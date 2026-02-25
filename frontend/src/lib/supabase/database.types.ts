@@ -11,6 +11,7 @@ export type Database = {
     Tables: {
       appointments: {
         Row: {
+          barber_id: string | null;
           barbershop_id: string;
           cliente_instagram: string | null;
           cliente_nombre: string;
@@ -26,6 +27,7 @@ export type Database = {
           updated_at: string | null;
         };
         Insert: {
+          barber_id?: string | null;
           barbershop_id: string;
           cliente_instagram?: string | null;
           cliente_nombre: string;
@@ -41,6 +43,25 @@ export type Database = {
           updated_at?: string | null;
         };
         Update: Partial<Database["public"]["Tables"]["appointments"]["Insert"]>;
+      };
+      barbers: {
+        Row: {
+          barbershop_id: string;
+          created_at: string | null;
+          id: string;
+          name: string;
+          order: number | null;
+          photo_url: string | null;
+        };
+        Insert: {
+          barbershop_id: string;
+          created_at?: string | null;
+          id?: string;
+          name: string;
+          order?: number | null;
+          photo_url?: string | null;
+        };
+        Update: Partial<Database["public"]["Tables"]["barbers"]["Insert"]>;
       };
       barbershops: {
         Row: {

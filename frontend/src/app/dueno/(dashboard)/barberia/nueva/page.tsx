@@ -26,7 +26,7 @@ export default function NuevaBarberiaPage() {
   const [error, setError] = useState('');
   const [form, setForm] = useState({
     name: '',
-    barberos: [''] as string[],
+    barbers: [{ id: '', name: '', photo_url: '' }] as { id: string; name: string; photo_url: string }[],
     address: '',
     city: '',
     phone: '',
@@ -38,8 +38,10 @@ export default function NuevaBarberiaPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError('');
-    const barberos = form.barberos.map((n) => n.trim()).filter(Boolean);
-    if (barberos.length === 0) {
+    const validBarbers = form.barbers
+      .map((b) => ({ ...b, name: b.name.trim() }))
+      .filter((b) => b.name);
+    if (validBarbers.length === 0) {
       setError('Agregá al menos un barbero');
       return;
     }
@@ -56,24 +58,40 @@ export default function NuevaBarberiaPage() {
         return;
       }
       const phoneOnly = form.phone.replace(/\D/g, '').slice(0, 10);
-      const { error } = await supabase.from('barbershops').insert({
-        owner_id: user.id,
-        name: form.name.trim(),
-        barberos,
-        slug,
-        address: form.address.trim() ? formatAddress(form.address.trim()) : null,
-        city: form.city.trim() ? toTitleCase(form.city.trim()) : null,
-        phone: phoneOnly || null,
-        photo_url: form.photo_url.trim() || null,
-        requiere_sena: form.requiere_sena,
-        monto_sena: form.requiere_sena ? parseFloat(form.monto_sena) || 0 : 0,
-      });
+      const { data: newShop, error: shopError } = await supabase
+        .from('barbershops')
+        .insert({
+          owner_id: user.id,
+          name: form.name.trim(),
+          barberos: [],
+          slug,
+          address: form.address.trim() ? formatAddress(form.address.trim()) : null,
+          city: form.city.trim() ? toTitleCase(form.city.trim()) : null,
+          phone: phoneOnly || null,
+          photo_url: form.photo_url.trim() || null,
+          requiere_sena: form.requiere_sena,
+          monto_sena: form.requiere_sena ? parseFloat(form.monto_sena) || 0 : 0,
+        })
+        .select('id')
+        .single();
 
-      if (error) throw error;
+      if (shopError) throw shopError;
+      if (!newShop) throw new Error('Error al crear barbería');
+
+      for (let i = 0; i < validBarbers.length; i++) {
+        const b = validBarbers[i];
+        await supabase.from('barbers').insert({
+          barbershop_id: newShop.id,
+          name: b.name,
+          photo_url: b.photo_url || null,
+          order: i,
+        });
+      }
+
       router.push(`/dueno/barberia/${slug}`);
       router.refresh();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Error al crear');
+      setError(err instanceof Error ? err.message : 'Error al crear barbería');
     } finally {
       setLoading(false);
     }
@@ -99,41 +117,57 @@ export default function NuevaBarberiaPage() {
         </label>
         <div className={styles.label}>
           <span className={styles.fieldLabel}>Barberos *</span>
-          {form.barberos.map((_, i) => (
-            <div key={i} className={styles.employeeRow}>
-              <input
-                type="text"
-                value={form.barberos[i]}
-                onChange={(e) => {
-                  const next = [...form.barberos];
-                  next[i] = e.target.value;
-                  setForm((f) => ({ ...f, barberos: next }));
-                }}
-                className={styles.input}
-                placeholder="Nombre del barbero"
-                required={i === 0}
-              />
-              <button
-                type="button"
-                onClick={() =>
-                  form.barberos.length > 1 &&
-                  setForm((f) => ({
-                    ...f,
-                    barberos: f.barberos.filter((_, j) => j !== i),
-                  }))
-                }
-                className={styles.removeEmployee}
-                aria-label="Quitar"
-                disabled={form.barberos.length === 1}
-              >
-                ×
-              </button>
+          {form.barbers.map((barber, i) => (
+            <div key={barber.id || `new-${i}`} className={styles.barberCard}>
+              <div className={styles.barberRow}>
+                <input
+                  type="text"
+                  value={barber.name}
+                  onChange={(e) => {
+                    const next = [...form.barbers];
+                    next[i] = { ...next[i], name: e.target.value };
+                    setForm((f) => ({ ...f, barbers: next }));
+                  }}
+                  className={styles.input}
+                  placeholder="Nombre del barbero"
+                  required={i === 0}
+                />
+                <button
+                  type="button"
+                  onClick={() =>
+                    form.barbers.length > 1 &&
+                    setForm((f) => ({
+                      ...f,
+                      barbers: f.barbers.filter((_, j) => j !== i),
+                    }))
+                  }
+                  className={styles.removeEmployee}
+                  aria-label="Quitar"
+                  disabled={form.barbers.length === 1}
+                >
+                  ×
+                </button>
+              </div>
+              <div className={styles.barberPhotoWrap}>
+                <PhotoUpload
+                  value={barber.photo_url}
+                  onChange={(url) => {
+                    const next = [...form.barbers];
+                    next[i] = { ...next[i], photo_url: url };
+                    setForm((f) => ({ ...f, barbers: next }));
+                  }}
+                  label="Foto"
+                />
+              </div>
             </div>
           ))}
           <button
             type="button"
             onClick={() =>
-              setForm((f) => ({ ...f, barberos: [...f.barberos, ''] }))
+              setForm((f) => ({
+                ...f,
+                barbers: [...f.barbers, { id: '', name: '', photo_url: '' }],
+              }))
             }
             className={styles.addEmployee}
           >

@@ -88,6 +88,22 @@
   border: 1px solid var(--border);
 }
 
+.comprobanteLogo {
+  display: block;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.comprobanteLogo img {
+  height: 40px;
+  width: auto;
+  object-fit: contain;
+}
+
+.instagramLower {
+  text-transform: lowercase;
+}
+
 .comprobanteTitle {
   font-size: 1.35rem;
   font-weight: 700;

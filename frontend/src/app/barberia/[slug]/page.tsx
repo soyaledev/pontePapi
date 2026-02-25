@@ -26,6 +26,12 @@ export default async function BarberiaPublicPage({
     .eq('barbershop_id', barbershop.id)
     .order('name');
 
+  const { data: barbers } = await supabase
+    .from('barbers')
+    .select('id, name, photo_url')
+    .eq('barbershop_id', barbershop.id)
+    .order('order', { ascending: true });
+
   const coverSrc = barbershop.photo_url || '/images/portada.png';
 
   return (
@@ -61,8 +67,22 @@ export default async function BarberiaPublicPage({
       </section>
       <div className={styles.body}>
         <div className={styles.info}>
-          {barbershop.barberos && barbershop.barberos.length > 0 && (
-            <p><strong>Barberos:</strong> {barbershop.barberos.join(', ')}</p>
+          {barbers && barbers.length > 0 && (
+            <div className={styles.barbersSection}>
+              <strong>Barberos</strong>
+              <div className={styles.barberGrid}>
+                {barbers.map((b) => (
+                  <div key={b.id} className={styles.barberCard}>
+                    {b.photo_url ? (
+                      <img src={b.photo_url} alt={toTitleCase(b.name)} className={styles.barberAvatar} loading="lazy" />
+                    ) : (
+                      <div className={styles.barberAvatarPlaceholder}>{toTitleCase(b.name).charAt(0)}</div>
+                    )}
+                    <span>{toTitleCase(b.name)}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
           )}
           {barbershop.city && <p>{toTitleCase(barbershop.city)}</p>}
           {barbershop.address && (

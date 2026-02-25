@@ -40,6 +40,12 @@ export default async function BarberiaDetailPage({
     .eq('barbershop_id', barbershop.id)
     .order('day_of_week');
 
+  const { data: barbers } = await supabase
+    .from('barbers')
+    .select('id, name, photo_url')
+    .eq('barbershop_id', barbershop.id)
+    .order('order', { ascending: true });
+
   const { data: historialAppointments } = await supabase
     .from('appointments')
     .select('id, fecha, slot_time, cliente_nombre, cliente_telefono, estado')
@@ -68,10 +74,23 @@ export default async function BarberiaDetailPage({
       )}
       <div className={styles.info}>
         <dl className={styles.infoList}>
-          {barbershop.barberos && barbershop.barberos.length > 0 && (
+          {barbers && barbers.length > 0 && (
             <div className={styles.infoRow}>
               <dt>Barberos</dt>
-              <dd>{barbershop.barberos.join(', ')}</dd>
+              <dd>
+                <div className={styles.barberList}>
+                  {barbers.map((b) => (
+                    <div key={b.id} className={styles.barberItem}>
+                      {b.photo_url ? (
+                        <img src={b.photo_url} alt={toTitleCase(b.name)} className={styles.barberAvatar} loading="lazy" />
+                      ) : (
+                        <div className={styles.barberAvatarPlaceholder}>{toTitleCase(b.name).charAt(0)}</div>
+                      )}
+                      <span>{toTitleCase(b.name)}</span>
+                    </div>
+                  ))}
+                </div>
+              </dd>
             </div>
           )}
           {barbershop.city && (

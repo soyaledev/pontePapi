@@ -15,6 +15,7 @@ type ComprobanteData = {
   created_at: string | null;
   barbershop: { name: string; slug: string; address?: string; city?: string; phone?: string; monto_sena?: number; requiere_sena?: boolean } | null;
   service: { name: string; price: number } | null;
+  barber: { name: string } | null;
 };
 
 export function ComprobanteReserva({ appointmentId }: { appointmentId: string }) {
@@ -124,6 +125,9 @@ export function ComprobanteReserva({ appointmentId }: { appointmentId: string })
   return (
     <div className={styles.page}>
       <div className={styles.comprobante}>
+        <Link href="/" className={styles.comprobanteLogo}>
+          <img src="/images/logosvgPontePapi.svg" alt="PontePapi" />
+        </Link>
         <h1 className={styles.comprobanteTitle}>Comprobante de reserva</h1>
         <p className={styles.comprobanteSubtitle}>
           Guardá este comprobante. Sacale una captura de pantalla para usarlo como respaldo de tu turno.
@@ -140,6 +144,12 @@ export function ComprobanteReserva({ appointmentId }: { appointmentId: string })
               <dt>Servicio</dt>
               <dd>{data.service?.name ?? '-'} {data.service?.price != null && `(${formatPeso(data.service.price)})`}</dd>
             </div>
+            {data.barber && (
+              <div className={styles.comprobanteRow}>
+                <dt>Barbero</dt>
+                <dd>{toTitleCase(data.barber.name)}</dd>
+              </div>
+            )}
             <div className={styles.comprobanteRow}>
               <dt>Fecha</dt>
               <dd>{fechaFormateada} a las {horaCorta}</dd>
@@ -161,7 +171,7 @@ export function ComprobanteReserva({ appointmentId }: { appointmentId: string })
             {data.cliente.instagram && (
               <div className={styles.comprobanteRow}>
                 <dt>Instagram</dt>
-                <dd>{formatInstagram(data.cliente.instagram)}</dd>
+                <dd className={styles.instagramLower}>{formatInstagram(data.cliente.instagram)}</dd>
               </div>
             )}
           </dl>

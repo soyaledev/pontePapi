@@ -7,11 +7,13 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase/client';
 import styles from './ReservarFlow.module.css';
 
+type Barber = { id: string; name: string; photo_url: string | null };
+
 type Barberia = {
   id: string;
   name: string;
   slug: string;
-  barberos: string[] | null;
+  barbers: Barber[];
   slot_minutes: number;
   requiere_sena?: boolean;
   monto_sena?: number;
@@ -49,11 +51,11 @@ function isSameDay(a: Date, b: Date): boolean {
   );
 }
 
-function getSlotsForDate(
+/** Slots disponibles para una fecha según disponibilidad de UN barbero */
+function getSlotsForBarber(
   schedules: Schedule[],
   date: Date,
-  nroBarberos: number,
-  takenCount: Record<string, number>,
+  takenByBarber: Set<string>,
   slotMinutes: number
 ): string[] {
   const day = date.getDay();
@@ -70,8 +72,7 @@ function getSlotsForDate(
     if (sameDay && m <= nowMinutes) continue;
     const t = minutesToTime(m);
     const key = normalizeSlot(t);
-    const count = takenCount[key] ?? takenCount[t] ?? 0;
-    if (count < nroBarberos) slots.push(t);
+    if (!takenByBarber.has(key)) slots.push(t);
   }
   return slots;
 }
@@ -79,12 +80,13 @@ function getSlotsForDate(
 const WEEKDAYS = ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'];
 const MONTHS = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
 
-type CalendarDay = { date: Date; isCurrentMonth: boolean; isDisabled: boolean };
+type CalendarDay = { date: Date; isCurrentMonth: boolean; isDisabled: boolean; isToday: boolean };
 
 const MAX_DAYS_AHEAD = 30;
 
 function getCalendarDays(year: number, month: number, schedules: Schedule[]): CalendarDay[] {
   const first = new Date(year, month, 1);
+  const last = new Date(year, month + 1, 0);
   const start = new Date(first);
   start.setDate(start.getDate() - start.getDay());
   const today = new Date();
@@ -94,19 +96,20 @@ function getCalendarDays(year: number, month: number, schedules: Schedule[]): Ca
   const openDays = new Set(schedules.map((s) => s.day_of_week));
   const out: CalendarDay[] = [];
   const d = new Date(start);
-  for (let i = 0; i < 42; i++) {
+  while (d <= last) {
     const isCurrentMonth = d.getMonth() === month;
     const isPast = d < today;
     const isBeyondMax = d > maxDate;
     const isClosed = !openDays.has(d.getDay());
     const isDisabled = isPast || isBeyondMax || isClosed;
-    out.push({ date: new Date(d), isCurrentMonth, isDisabled });
+    const isToday = isSameDay(d, today);
+    out.push({ date: new Date(d), isCurrentMonth, isDisabled, isToday });
     d.setDate(d.getDate() + 1);
   }
   return out;
 }
 
-/** Fecha en YYYY-MM-DD según hora local (evita bugs de timezone con toISOString) */
+/** Fecha en YYYY-MM-DD según hora local */
 function toLocalDateStr(d: Date): string {
   const y = d.getFullYear();
   const m = String(d.getMonth() + 1).padStart(2, '0');
@@ -114,7 +117,6 @@ function toLocalDateStr(d: Date): string {
   return `${y}-${m}-${day}`;
 }
 
-/** Normaliza slot_time a HH:MM:00 para comparación consistente con la base de datos */
 function normalizeSlot(slot: string): string {
   const s = String(slot ?? '');
   const match = s.match(/^(\d{1,2}):(\d{2})/);
@@ -131,10 +133,18 @@ export function ReservarFlow({
   barbershop: Barberia;
   services: Service[];
 }) {
+  const barbers = barbershop.barbers ?? [];
+  const hasBarberStep = barbers.length > 1;
+
   const [step, setStep] = useState(1);
   const [service, setService] = useState<Service | null>(null);
+  const [selectedBarberId, setSelectedBarberId] = useState<string | null>(
+    barbers.length === 1 ? barbers[0]?.id ?? null : null
+  );
+  const [effectiveBarberId, setEffectiveBarberId] = useState<string | null>(null);
   const [fecha, setFecha] = useState<string | null>(null);
   const [slot, setSlot] = useState<string | null>(null);
+  const [modalDate, setModalDate] = useState<string | null>(null);
   const [nombre, setNombre] = useState('');
   const [telefono, setTelefono] = useState('');
   const [instagram, setInstagram] = useState('');
@@ -142,12 +152,24 @@ export function ReservarFlow({
   const [error, setError] = useState('');
   const router = useRouter();
   const [schedules, setSchedules] = useState<Schedule[]>([]);
-  const [takenBySlot, setTakenBySlot] = useState<Record<string, number>>({});
+  const [takenByBarberByDate, setTakenByBarberByDate] = useState<
+    Record<string, Record<string, Set<string>>>
+  >({});
+  const [takenBySlotNoBarber, setTakenBySlotNoBarber] = useState<
+    Record<string, Record<string, number>>
+  >({});
   const [fetchTrigger, setFetchTrigger] = useState(0);
   const [calendarMonth, setCalendarMonth] = useState(() => {
     const now = new Date();
     return { year: now.getFullYear(), month: now.getMonth() };
   });
+
+  const slotMinutes = service?.duracion_min ?? barbershop.slot_minutes ?? 30;
+  const requiereSena = barbershop.requiere_sena && (barbershop.monto_sena ?? 0) > 0;
+
+  const stepBarbero = 2;
+  const stepFecha = 3;
+  const stepDatos = 4;
 
   useEffect(() => {
     supabase
@@ -158,22 +180,35 @@ export function ReservarFlow({
   }, [barbershop.id]);
 
   useEffect(() => {
-    if (!fecha) return;
+    const first = new Date(calendarMonth.year, calendarMonth.month, 1);
+    const last = new Date(calendarMonth.year, calendarMonth.month + 1, 0);
+    const startStr = toLocalDateStr(first);
+    const endStr = toLocalDateStr(last);
+
     supabase
       .from('appointments')
-      .select('slot_time')
+      .select('fecha, slot_time, barber_id')
       .eq('barbershop_id', barbershop.id)
-      .eq('fecha', fecha)
+      .gte('fecha', startStr)
+      .lte('fecha', endStr)
       .in('estado', ['pending', 'pending_payment', 'confirmed'])
       .then(({ data }) => {
-        const count: Record<string, number> = {};
-        (data ?? []).forEach((r) => {
-          const t = normalizeSlot(r.slot_time);
-          count[t] = (count[t] ?? 0) + 1;
-        });
-        setTakenBySlot(count);
+        const byDateBarber: Record<string, Record<string, Set<string>>> = {};
+        const byDateSlot: Record<string, Record<string, number>> = {};
+        for (const a of data ?? []) {
+          const slot = normalizeSlot(a.slot_time);
+          if (!byDateSlot[a.fecha]) byDateSlot[a.fecha] = {};
+          byDateSlot[a.fecha][slot] = (byDateSlot[a.fecha][slot] ?? 0) + 1;
+          if (a.barber_id) {
+            if (!byDateBarber[a.fecha]) byDateBarber[a.fecha] = {};
+            if (!byDateBarber[a.fecha][a.barber_id]) byDateBarber[a.fecha][a.barber_id] = new Set();
+            byDateBarber[a.fecha][a.barber_id].add(slot);
+          }
+        }
+        setTakenByBarberByDate(byDateBarber);
+        setTakenBySlotNoBarber(byDateSlot);
       });
-  }, [fecha, barbershop.id, fetchTrigger]);
+  }, [barbershop.id, calendarMonth.year, calendarMonth.month, fetchTrigger]);
 
   useEffect(() => {
     const onVisibility = () => {
@@ -187,39 +222,87 @@ export function ReservarFlow({
   }, [router]);
 
   useEffect(() => {
-    if (step === 2 && fecha) {
+    if (!modalDate) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setModalDate(null);
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [modalDate]);
+
+  useEffect(() => {
+    if (step === stepFecha && fecha) {
       const d = new Date(fecha + 'T12:00:00');
       setCalendarMonth({ year: d.getFullYear(), month: d.getMonth() });
     }
   }, [step, fecha]);
 
-  const slotMinutes = service?.duracion_min ?? barbershop.slot_minutes ?? 30;
-
-  const dateForSlots = fecha ? new Date(fecha + 'T12:00:00') : null;
-
-  const nroBarberos = Math.max(1, barbershop.barberos?.length ?? 1);
-  const availableSlots = fecha && dateForSlots
-    ? getSlotsForDate(
-        schedules,
-        dateForSlots,
-        nroBarberos,
-        takenBySlot,
-        slotMinutes
-      )
-    : [];
-
   const calendarDays = getCalendarDays(calendarMonth.year, calendarMonth.month, schedules);
 
-  const requiereSena =
-    barbershop.requiere_sena && (barbershop.monto_sena ?? 0) > 0;
+  function getSlotsForModalDate(dateStr: string): { slots: string[]; barberId: string | null } {
+    const date = new Date(dateStr + 'T12:00:00');
+
+    if (barbers.length === 0) {
+      const takenCount = takenBySlotNoBarber[dateStr] ?? {};
+      const allSlots = getSlotsForBarber(schedules, date, new Set(), slotMinutes);
+      const slots = allSlots.filter((t) => (takenCount[normalizeSlot(t)] ?? 0) === 0);
+      return { slots, barberId: null };
+    }
+
+    const takenForDate = takenByBarberByDate[dateStr] ?? {};
+    let barberId: string | null = null;
+    let takenSet: Set<string> = new Set();
+
+    if (selectedBarberId) {
+      barberId = selectedBarberId;
+      takenSet = takenForDate[selectedBarberId] ?? new Set();
+    } else {
+      let minCount = Infinity;
+      for (const b of barbers) {
+        const taken = takenForDate[b.id] ?? new Set();
+        if (taken.size < minCount) {
+          minCount = taken.size;
+          barberId = b.id;
+          takenSet = taken;
+        }
+      }
+    }
+
+    const slots = getSlotsForBarber(schedules, date, takenSet, slotMinutes);
+    return { slots, barberId };
+  }
+
+  const modalSlots = modalDate ? getSlotsForModalDate(modalDate) : null;
+
+  function handleDayClick(dStr: string) {
+    setModalDate(dStr);
+  }
+
+  function handleSlotSelect(dateStr: string, slotTime: string, barberId: string | null) {
+    setFecha(dateStr);
+    setSlot(normalizeSlot(slotTime));
+    setEffectiveBarberId(barberId);
+    setModalDate(null);
+  }
+
+  function getBarberIdForConfirm(): string | null {
+    if (selectedBarberId) return selectedBarberId;
+    return effectiveBarberId;
+  }
 
   async function handleConfirm() {
     if (!service || !fecha || !slot || !nombre.trim() || !telefono.trim()) {
       setError('Completá todos los datos');
       return;
     }
+    if (nombre.trim().length < 3) {
+      setError('El nombre debe tener al menos 3 letras');
+      return;
+    }
     setError('');
     setLoading(true);
+
+    const barberId = getBarberIdForConfirm();
 
     try {
       if (requiereSena) {
@@ -230,6 +313,7 @@ export function ReservarFlow({
             service_id: service.id,
             fecha,
             slot_time: slot,
+            barber_id: barberId,
             cliente_nombre: toTitleCase(nombre.trim()),
             cliente_telefono: telefono.trim(),
             cliente_instagram: instagram.trim() ? formatInstagram(instagram.trim()) : null,
@@ -280,6 +364,7 @@ export function ReservarFlow({
             service_id: service.id,
             fecha,
             slot_time: slot,
+            barber_id: barberId,
             cliente_nombre: toTitleCase(nombre.trim()),
             cliente_telefono: telefono.trim(),
             cliente_instagram: instagram.trim() ? formatInstagram(instagram.trim()) : null,
@@ -298,6 +383,18 @@ export function ReservarFlow({
     }
   }
 
+  function goBackStep() {
+    if (step === stepDatos) setStep(stepFecha);
+    else if (step === stepFecha) setStep(hasBarberStep ? stepBarbero : 1);
+    else if (step === stepBarbero) setStep(1);
+  }
+
+  const displayBarberName = (): string => {
+    const bid = getBarberIdForConfirm();
+    if (bid) return toTitleCase(barbers.find((b) => b.id === bid)?.name ?? '');
+    return 'Se le asignará un barbero';
+  };
+
   return (
     <div className={styles.page}>
       <header className={styles.header}>
@@ -309,193 +406,300 @@ export function ReservarFlow({
         <h1 className={styles.title}>Reservar en {barbershop.name}</h1>
         <p className={styles.stepIndicator}>
           {step === 1 && 'Paso 1: Servicio'}
-          {step === 2 && 'Paso 2: Fecha'}
-          {step === 3 && 'Paso 3: Horario'}
-          {step === 4 && 'Paso 4: Tus datos'}
+          {step === stepBarbero && 'Paso 2: Barbero'}
+          {step === stepFecha && 'Paso 3: Fecha y horario'}
+          {step === stepDatos && 'Paso 4: Tus datos'}
         </p>
+
         {step === 1 && (
-        <div className={styles.step}>
-          <h2>Elegí el servicio</h2>
-          <ul className={styles.serviceList}>
-            {services.map((s) => (
-              <li key={s.id}>
+          <div className={styles.step}>
+            <h2>Elegí el servicio</h2>
+            <ul className={styles.serviceList}>
+              {services.map((s) => (
+                <li key={s.id}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setService(s);
+                      setStep(hasBarberStep ? stepBarbero : stepFecha);
+                    }}
+                    className={styles.serviceBtn}
+                  >
+                    <span>{s.name}</span>
+                    <span className={styles.price}>{formatPeso(s.price)}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {step === stepBarbero && hasBarberStep && (
+          <div className={styles.step}>
+            <h2>Elegí barbero</h2>
+            <div className={styles.barberGrid}>
+              {barbers.map((b) => (
                 <button
+                  key={b.id}
                   type="button"
                   onClick={() => {
-                    setService(s);
-                    setStep(2);
+                    setSelectedBarberId(b.id);
+                    setStep(stepFecha);
                   }}
-                  className={styles.serviceBtn}
+                  className={`${styles.barberBtn} ${selectedBarberId === b.id ? styles.barberBtnSelected : ''}`}
                 >
-                  <span>{s.name}</span>
-                  <span className={styles.price}>{formatPeso(s.price)}</span>
+                  {b.photo_url ? (
+                    <img src={b.photo_url} alt={toTitleCase(b.name)} className={styles.barberAvatar} loading="lazy" />
+                  ) : (
+                    <div className={styles.barberAvatarPlaceholder}>{toTitleCase(b.name).charAt(0)}</div>
+                  )}
+                  <span className={styles.barberName}>{toTitleCase(b.name)}</span>
                 </button>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {step === 2 && (
-        <div className={styles.step}>
-          <h2>Elegí la fecha</h2>
-          <div className={styles.calendar}>
-            <div className={styles.calendarHeader}>
-              <button
-                type="button"
-                className={styles.calendarNav}
-                onClick={() =>
-                  setCalendarMonth((prev) => {
-                    const d = new Date(prev.year, prev.month - 1);
-                    return { year: d.getFullYear(), month: d.getMonth() };
-                  })
-                }
-              >
-                ‹
-              </button>
-              <span className={styles.calendarTitle}>
-                {MONTHS[calendarMonth.month]} {calendarMonth.year}
-              </span>
-              <button
-                type="button"
-                className={styles.calendarNav}
-                onClick={() =>
-                  setCalendarMonth((prev) => {
-                    const d = new Date(prev.year, prev.month + 1);
-                    return { year: d.getFullYear(), month: d.getMonth() };
-                  })
-                }
-              >
-                ›
-              </button>
-            </div>
-            <div className={styles.calendarWeekdays}>
-              {WEEKDAYS.map((wd) => (
-                <span key={wd} className={styles.weekday}>
-                  {wd}
-                </span>
               ))}
             </div>
-            <div className={styles.calendarGrid}>
-              {calendarDays.map(({ date, isCurrentMonth, isDisabled }) => {
-                const dStr = toLocalDateStr(date);
-                return (
-                  <button
-                    key={dStr}
-                    type="button"
-                    disabled={isDisabled}
-                    onClick={() => {
-                      if (!isDisabled) {
-                        setFecha(dStr);
-                        setSlot(null);
-                        setStep(3);
-                      }
-                    }}
-                    className={`${styles.calendarDay} ${
-                      !isCurrentMonth ? styles.calendarDayOther : ''
-                    } ${fecha === dStr ? styles.calendarDaySelected : ''} ${
-                      isDisabled ? styles.calendarDayDisabled : ''
-                    }`}
-                  >
-                    {date.getDate()}
-                  </button>
-                );
-              })}
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedBarberId(null);
+                setEffectiveBarberId(null);
+                setStep(stepFecha);
+              }}
+              className={styles.sinPreferenciaBtn}
+            >
+              Sin preferencia
+            </button>
+            <button type="button" onClick={() => setStep(1)} className={styles.backStep}>
+              Atrás
+            </button>
+          </div>
+        )}
+
+        {step === stepFecha && (
+          <div className={styles.step}>
+            <h2>Elegí fecha y horario</h2>
+            {selectedBarberId && (
+              <p className={styles.fechaLabel}>
+                Barbero: {toTitleCase(barbers.find((b) => b.id === selectedBarberId)?.name ?? '')}
+              </p>
+            )}
+            <div className={styles.calendar}>
+              <div className={styles.calendarHeader}>
+                <button
+                  type="button"
+                  className={styles.calendarNav}
+                  onClick={() =>
+                    setCalendarMonth((prev) => {
+                      const d = new Date(prev.year, prev.month - 1);
+                      return { year: d.getFullYear(), month: d.getMonth() };
+                    })
+                  }
+                >
+                  ‹
+                </button>
+                <span className={styles.calendarTitle}>
+                  {MONTHS[calendarMonth.month]} {calendarMonth.year}
+                </span>
+                <button
+                  type="button"
+                  className={styles.calendarNav}
+                  onClick={() =>
+                    setCalendarMonth((prev) => {
+                      const d = new Date(prev.year, prev.month + 1);
+                      return { year: d.getFullYear(), month: d.getMonth() };
+                    })
+                  }
+                >
+                  ›
+                </button>
+              </div>
+              <div className={styles.calendarWeekdays}>
+                {WEEKDAYS.map((wd) => (
+                  <span key={wd} className={styles.weekday}>
+                    {wd}
+                  </span>
+                ))}
+              </div>
+              <div className={styles.calendarGrid}>
+                {calendarDays.map(({ date, isCurrentMonth, isDisabled, isToday }) => {
+                  const dStr = toLocalDateStr(date);
+                  return (
+                    <button
+                      key={dStr}
+                      type="button"
+                      disabled={isDisabled}
+                      onClick={() => {
+                        if (!isDisabled) handleDayClick(dStr);
+                      }}
+                      className={`${styles.calendarDay} ${
+                        !isCurrentMonth ? styles.calendarDayOther : ''
+                      } ${fecha === dStr ? styles.calendarDaySelected : ''} ${
+                        isDisabled ? styles.calendarDayDisabled : ''
+                      } ${isToday && !isDisabled ? styles.calendarDayToday : ''}`}
+                    >
+                      {date.getDate()}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+            {fecha && slot && (
+              <p className={styles.fechaSelected}>
+                {new Date(fecha + 'T12:00:00').toLocaleDateString('es-AR', {
+                  weekday: 'long',
+                  day: 'numeric',
+                  month: 'long',
+                })}{' '}
+                a las {slot.slice(0, 5)}
+              </p>
+            )}
+            <div className={styles.stepActions}>
+              <button
+                type="button"
+                onClick={() => setStep(hasBarberStep ? stepBarbero : 1)}
+                className={styles.backStep}
+              >
+                Atrás
+              </button>
+              {fecha && slot && (
+                <button
+                  type="button"
+                  className={styles.confirmBtn}
+                  onClick={() => setStep(stepDatos)}
+                >
+                  Confirmar
+                </button>
+              )}
             </div>
           </div>
-          <button type="button" onClick={() => setStep(1)} className={styles.backStep}>
-            Atrás
-          </button>
-        </div>
-      )}
+        )}
 
-      {step === 3 && (
-        <div className={styles.step}>
-          <h2>Elegí el horario</h2>
-          <p className={styles.fechaLabel}>
-            {fecha && new Date(fecha + 'T12:00:00').toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' })}
-          </p>
-          <div className={styles.slotGrid}>
-            {availableSlots.map((t) => (
-              <button
-                key={t}
-                type="button"
-                onClick={() => {
-                  setSlot(t);
-                  setStep(4);
-                }}
-                className={styles.slotBtn}
-              >
-                {t.slice(0, 5)}
-              </button>
-            ))}
-          </div>
-          {availableSlots.length === 0 && <p className={styles.empty}>No hay horarios disponibles</p>}
-          <button type="button" onClick={() => setStep(2)} className={styles.backStep}>
-            Atrás
-          </button>
-        </div>
-      )}
-
-      {step === 4 && (
-        <div className={styles.step}>
-          <h2>Tus datos</h2>
-          <p className={styles.resumen}>
-            {service?.name} · {fecha} {slot?.slice(0, 5)}
-          </p>
-          {barbershop.requiere_sena && (barbershop.monto_sena ?? 0) > 0 && (
+        {step === stepDatos && (
+          <div className={styles.step}>
+            <h2>Tus datos</h2>
             <p className={styles.resumen}>
-              Seña a pagar: {formatPeso(barbershop.monto_sena ?? 0)}
+              {service?.name}
+              {fecha && (
+                <>
+                  {' '}
+                  · {new Date(fecha + 'T12:00:00').toLocaleDateString('es-AR', {
+                    weekday: 'long',
+                    day: 'numeric',
+                    month: 'long',
+                  })}
+                </>
+              )}
+              {slot && <> · {slot.slice(0, 5)}</>}
             </p>
-          )}
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              handleConfirm();
-            }}
-            className={styles.form}
-          >
-            <input
-              type="text"
-              placeholder="Nombre"
-              value={nombre}
-              onChange={(e) => setNombre(e.target.value)}
-              className={styles.input}
-              required
-            />
-            <input
-              type="tel"
-              placeholder="Teléfono (máx. 10 números)"
-              value={telefono}
-              onChange={(e) => setTelefono(e.target.value.replace(/\D/g, '').slice(0, 10))}
-              className={styles.input}
-              required
-            />
-            <input
-              type="text"
-              placeholder="@usuario (opcional)"
-              value={instagram}
-              onChange={(e) => setInstagram(e.target.value)}
-              className={styles.input}
-              autoComplete="off"
-            />
-            {error && <p className={styles.error}>{error}</p>}
-            <button type="submit" className={styles.confirmBtn} disabled={loading}>
-              {loading
-                ? requiereSena
-                  ? 'Redirigiendo a pago...'
-                  : 'Reservando...'
-                : requiereSena
-                  ? 'Pagar seña y reservar'
-                  : 'Confirmar turno'}
+            {barbers.length > 0 && (
+              <p className={styles.resumen}>Barbero: {displayBarberName()}</p>
+            )}
+            {barbershop.requiere_sena && (barbershop.monto_sena ?? 0) > 0 && (
+              <p className={styles.resumen}>
+                Seña a pagar: {formatPeso(barbershop.monto_sena ?? 0)}
+              </p>
+            )}
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleConfirm();
+              }}
+              className={styles.form}
+            >
+              <input
+                type="text"
+                placeholder="Tu nombre* (mín. 3 letras)"
+                value={nombre}
+                onChange={(e) => setNombre(e.target.value)}
+                className={styles.input}
+                required
+                minLength={3}
+                title="Al menos 3 letras"
+              />
+              <input
+                type="tel"
+                placeholder="Tu teléfono*"
+                value={telefono}
+                onChange={(e) => setTelefono(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                className={styles.input}
+                required
+              />
+              <div className={styles.inputWithPrefix}>
+                <span className={styles.inputPrefix}>@</span>
+                <input
+                  type="text"
+                  placeholder="usuario"
+                  value={instagram}
+                  onChange={(e) => setInstagram(e.target.value.replace(/@/g, '').toLowerCase())}
+                  className={styles.input}
+                  autoComplete="off"
+                />
+              </div>
+              {error && <p className={styles.error}>{error}</p>}
+              <button type="submit" className={styles.confirmBtn} disabled={loading}>
+                {loading
+                  ? requiereSena
+                    ? 'Redirigiendo a pago...'
+                    : 'Reservando...'
+                  : requiereSena
+                    ? 'Pagar seña y reservar'
+                    : 'Confirmar turno'}
+              </button>
+            </form>
+            <button type="button" onClick={goBackStep} className={styles.backStep}>
+              Atrás
             </button>
-          </form>
-          <button type="button" onClick={() => setStep(3)} className={styles.backStep}>
-            Atrás
-          </button>
+          </div>
+        )}
+      </div>
+
+      {modalDate && modalSlots && (
+        <div
+          className={styles.modalOverlay}
+          onClick={() => setModalDate(null)}
+        >
+          <div
+            className={styles.modal}
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="modal-title"
+          >
+            <h3 id="modal-title" className={styles.modalTitle}>
+              Horarios disponibles -{' '}
+              {new Date(modalDate + 'T12:00:00').toLocaleDateString('es-AR', {
+                weekday: 'long',
+                day: 'numeric',
+                month: 'long',
+              })}
+            </h3>
+            {modalSlots.slots.length === 0 ? (
+              <p className={styles.empty}>No hay horarios disponibles</p>
+            ) : (
+              <div className={styles.slotGrid}>
+                {modalSlots.slots.map((t) => (
+                  <button
+                    key={t}
+                    type="button"
+                    className={styles.slotBtn}
+                    onClick={() =>
+                      handleSlotSelect(modalDate, t, modalSlots.barberId)
+                    }
+                  >
+                    {t.slice(0, 5)}
+                  </button>
+                ))}
+              </div>
+            )}
+            <button
+              type="button"
+              className={styles.modalClose}
+              onClick={() => setModalDate(null)}
+            >
+              Cerrar
+            </button>
+          </div>
         </div>
       )}
-      </div>
     </div>
   );
 }

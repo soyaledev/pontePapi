@@ -54,6 +54,28 @@
   flex: 1;
 }
 
+.barberCard {
+  padding: 1rem;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+}
+
+.barberRow {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.barberRow .input {
+  flex: 1;
+}
+
+.barberPhotoWrap {
+  margin-top: 0.5rem;
+}
+
 .removeEmployee {
   flex-shrink: 0;
   width: 2rem;

@@ -39,8 +39,8 @@ export function formatAddress(str: string): string {
   return isLink(t) ? t : toTitleCase(t);
 }
 
-/** Instagram: siempre con @ al inicio */
+/** Instagram: siempre con @ al inicio y minúsculas */
 export function formatInstagram(str: string): string {
-  const t = str.trim().replace(/^@+/, '');
+  const t = str.trim().replace(/^@+/, '').toLowerCase();
   return t ? `@${t}` : '';
 }

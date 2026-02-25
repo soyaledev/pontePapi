@@ -7,8 +7,20 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.75rem 1.5rem;
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0) 100%);
+  padding: 1.5rem 1.5rem 0.75rem;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.4) 60%, rgba(0, 0, 0, 0) 100%);
+}
+
+@media (min-width: 769px) {
+  .header {
+    left: 50%;
+    right: auto;
+    width: 100%;
+    max-width: 1200px;
+    transform: translateX(-50%);
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
 }
 
 .logo {
@@ -44,6 +56,12 @@
   object-fit: cover;
 }
 
+@media (max-width: 768px) {
+  .coverImage {
+    object-position: 37% center;
+  }
+}
+
 .overlay {
   position: absolute;
   inset: 0;
@@ -66,7 +84,7 @@
 }
 
 .searchLabel {
-  font-size: 1.5rem;
+  font-size: 1.85rem;
   font-weight: 600;
   color: var(--text);
   margin-bottom: 1rem;
@@ -76,18 +94,18 @@
 .searchBox {
   position: relative;
   width: 100%;
-  max-width: 360px;
+  max-width: 380px;
 }
 
 .searchInput {
   width: 100%;
-  padding: 0.875rem 1rem;
-  border-radius: 0.5rem;
-  border: 1px solid var(--border);
-  background: rgba(0, 0, 0, 0.5);
+  padding: 0.95rem 1.25rem;
+  border-radius: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.15);
   color: var(--text);
   font-size: 1rem;
-  backdrop-filter: blur(4px);
+  backdrop-filter: blur(8px);
 }
 
 .searchInput::placeholder {
@@ -96,7 +114,8 @@
 
 .searchInput:focus {
   outline: none;
-  border-color: var(--border-focus);
+  border-color: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .resultsList {
@@ -104,11 +123,11 @@
   top: 100%;
   left: 0;
   right: 0;
-  margin: 0.25rem 0 0;
+  margin: 0.35rem 0 0;
   padding: 0.5rem 0;
   list-style: none;
   background: rgba(10, 10, 10, 0.95);
-  border-radius: 0.5rem;
+  border-radius: 1rem;
   border: 1px solid var(--border);
   max-height: 280px;
   overflow-y: auto;

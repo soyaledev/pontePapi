@@ -26,7 +26,7 @@ export default async function BarberiaPublicPage({
     .eq('barbershop_id', barbershop.id)
     .order('name');
 
-  const coverSrc = barbershop.photo_url || '/images/portada.jpg';
+  const coverSrc = barbershop.photo_url || '/images/portada.png';
 
   return (
     <div className={styles.page}>

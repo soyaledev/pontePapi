@@ -99,7 +99,7 @@ export function Hero() {
         </Link>
       </header>
         <Image
-          src="/images/portada.jpg"
+          src="/images/portada.png"
           alt=""
           fill
           priority

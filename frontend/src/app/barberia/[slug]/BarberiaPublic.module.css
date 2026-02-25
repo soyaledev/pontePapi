@@ -14,6 +14,11 @@
   background: linear-gradient(180deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0) 100%);
 }
 
+.headerInner {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
 .back {
   color: var(--text-muted);
   text-decoration: none;
@@ -55,6 +60,17 @@
   padding: 1.5rem;
 }
 
+.coverContentInner {
+  width: 100%;
+}
+
+@media (min-width: 769px) {
+  .coverContentInner {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+}
+
 .title {
   font-size: 1.75rem;
   font-weight: 700;
@@ -87,7 +103,7 @@
 
 @media (min-width: 769px) {
   .body {
-    max-width: 1200px;
+    max-width: 480px;
   }
 }
 

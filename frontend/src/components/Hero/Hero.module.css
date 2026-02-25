@@ -4,20 +4,20 @@
   left: 0;
   right: 0;
   z-index: 10;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
   padding: 1.5rem 1.5rem 0.75rem;
   background: linear-gradient(180deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.4) 60%, rgba(0, 0, 0, 0) 100%);
 }
 
+.headerInner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
 @media (min-width: 769px) {
-  .header {
-    left: 50%;
-    right: auto;
-    width: 100%;
+  .headerInner {
     max-width: 1200px;
-    transform: translateX(-50%);
+    margin: 0 auto;
     padding-left: 2rem;
     padding-right: 2rem;
   }

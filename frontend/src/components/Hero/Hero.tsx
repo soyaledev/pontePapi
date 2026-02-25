@@ -85,6 +85,7 @@ export function Hero() {
   return (
     <section className={styles.cover}>
       <header className={styles.header}>
+        <div className={styles.headerInner}>
         <Link href="/" className={styles.logo}>
           <Image
             src="/images/logosvgPontePapi.svg"
@@ -97,6 +98,7 @@ export function Hero() {
         <Link href={ownerLink.href} className={styles.ownerLink}>
           {ownerLink.label}
         </Link>
+        </div>
       </header>
         <Image
           src="/images/portada.png"

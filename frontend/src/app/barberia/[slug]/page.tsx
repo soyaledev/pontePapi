@@ -32,9 +32,11 @@ export default async function BarberiaPublicPage({
     <div className={styles.page}>
       <section className={styles.cover}>
         <header className={styles.header}>
-          <Link href="/" className={styles.back}>
-            Volver
-          </Link>
+          <div className={styles.headerInner}>
+            <Link href="/" className={styles.back}>
+              Volver
+            </Link>
+          </div>
         </header>
         <Image
           src={coverSrc}
@@ -46,13 +48,15 @@ export default async function BarberiaPublicPage({
         />
         <div className={styles.overlay} />
         <div className={styles.coverContent}>
-          <h1 className={styles.title}>{barbershop.name}</h1>
-          <Link
-            href={`/reservar/${barbershop.slug}`}
-            className={styles.reservarBtn}
-          >
-            Sacar turno
-          </Link>
+          <div className={styles.coverContentInner}>
+            <h1 className={styles.title}>{barbershop.name}</h1>
+            <Link
+              href={`/reservar/${barbershop.slug}`}
+              className={styles.reservarBtn}
+            >
+              Sacar turno
+            </Link>
+          </div>
         </div>
       </section>
       <div className={styles.body}>

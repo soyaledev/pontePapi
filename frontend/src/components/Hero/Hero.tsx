@@ -101,11 +101,15 @@ export function Hero() {
         </div>
       </header>
         <Image
-          src="/images/portada.png"
+          src="/images/portada.webp"
           alt=""
           fill
           priority
-          sizes="100vw"
+          fetchPriority="high"
+          quality={75}
+          sizes="(max-width: 768px) 100vw, (max-width: 1920px) 100vw, 1920px"
+          placeholder="blur"
+          blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFgABAQEAAAAAAAAAAAAAAAAAAAUH/8QAIhAAAgEDBAMBAAAAAAAAAAAAAQIDAAQRBQYSIRMxQVH/xAAVAQEBAAAAAAAAAAAAAAAAAAADBP/EABsRAAICAwEAAAAAAAAAAAAAAAECAAMEESH/2gAMAwEAAhEDEQA/ALfZbbau2xxFdwS7TFPI5Zi7xFiT3ya/9k="
           className={styles.coverImage}
         />
         <div className={styles.overlay} />

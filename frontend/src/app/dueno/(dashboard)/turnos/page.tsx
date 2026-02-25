@@ -39,7 +39,7 @@ export default async function TurnosPage() {
     .order('fecha')
     .order('slot_time');
 
-  const barberIds = [...new Set((rawAppointments ?? []).map((a) => a.barber_id).filter(Boolean))];
+  const barberIds = Array.from(new Set((rawAppointments ?? []).map((a) => a.barber_id).filter(Boolean)));
   const { data: barbersData } = barberIds.length > 0
     ? await supabase.from('barbers').select('id, name').in('id', barberIds)
     : { data: [] };

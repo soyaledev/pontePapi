@@ -79,7 +79,7 @@ export function EditarBarberiaForm({
       const existingIds = new Set(form.barbers.filter((b) => b.id).map((b) => b.id));
       const currentValidIds = new Set(validBarbers.filter((b) => b.id).map((b) => b.id));
 
-      const toDelete = [...existingIds].filter((id) => !currentValidIds.has(id));
+      const toDelete = Array.from(existingIds).filter((id) => !currentValidIds.has(id));
       for (const id of toDelete) {
         await supabase.from('barbers').delete().eq('id', id);
       }

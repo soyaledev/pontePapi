@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { supabase } from '@/lib/supabase/client';
+import { dispatchPanelVisibilityUpdate } from './VisibilityNotice';
 import styles from './HorariosSection.module.css';
 
 const DAYS = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
@@ -40,6 +41,7 @@ export function HorariosSection({
         return [...filtered, data];
       });
       setEditing(null);
+      dispatchPanelVisibilityUpdate();
     }
   }
 
@@ -51,6 +53,7 @@ export function HorariosSection({
       const { error } = await supabase.from('schedules').delete().eq('id', s.id);
       if (!error) {
         setSchedules((prev) => prev.filter((x) => x.day_of_week !== dayOfWeek));
+        dispatchPanelVisibilityUpdate();
       }
     }
     setEditing(null);

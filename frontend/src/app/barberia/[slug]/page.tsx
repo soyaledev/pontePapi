@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { toTitleCase, isLink, formatPeso } from '@/lib/format';
+import { checkBarbershopVisibility } from '@/lib/barbershop-visibility';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import styles from './BarberiaPublic.module.css';
@@ -20,11 +21,22 @@ export default async function BarberiaPublicPage({
 
   if (!barbershop) notFound();
 
-  const { data: services } = await supabase
-    .from('services')
-    .select('*')
-    .eq('barbershop_id', barbershop.id)
-    .order('name');
+  const [
+    { data: services },
+    { data: schedules },
+  ] = await Promise.all([
+    supabase.from('services').select('*').eq('barbershop_id', barbershop.id).order('name'),
+    supabase.from('schedules').select('id').eq('barbershop_id', barbershop.id),
+  ]);
+
+  const visibility = checkBarbershopVisibility({
+    schedulesCount: (schedules ?? []).length,
+    servicesCount: (services ?? []).length,
+    requiereSena: !!barbershop.requiere_sena,
+    mpLinked: !!barbershop.mp_access_token,
+  });
+
+  if (!visibility.isVisible) notFound();
 
   const { data: barbers } = await supabase
     .from('barbers')

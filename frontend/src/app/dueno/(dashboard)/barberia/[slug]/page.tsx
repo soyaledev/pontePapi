@@ -2,10 +2,12 @@ import Link from 'next/link';
 import { redirect, notFound } from 'next/navigation';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { toTitleCase, isLink, formatPeso } from '@/lib/format';
+import { checkBarbershopVisibility } from '@/lib/barbershop-visibility';
 import { ServiciosSection } from './ServiciosSection';
 import { HorariosSection } from './HorariosSection';
 import { TurnosHistorialSection } from './TurnosHistorialSection';
 import { PagosSection } from './PagosSection';
+import { VisibilityNotice } from './VisibilityNotice';
 import styles from './BarberiaDetail.module.css';
 
 export default async function BarberiaDetailPage({
@@ -52,6 +54,13 @@ export default async function BarberiaDetailPage({
     .eq('barbershop_id', barbershop.id)
     .in('estado', ['completed', 'cancelled'])
     .order('updated_at', { ascending: false, nullsFirst: false });
+
+  const visibility = checkBarbershopVisibility({
+    schedulesCount: (schedules ?? []).length,
+    servicesCount: (services ?? []).length,
+    requiereSena: !!barbershop.requiere_sena,
+    mpLinked: !!barbershop.mp_access_token,
+  });
 
   return (
     <div className={styles.page}>
@@ -132,6 +141,11 @@ export default async function BarberiaDetailPage({
       <ServiciosSection barbershopId={barbershop.id} services={services ?? []} />
       <HorariosSection barbershopId={barbershop.id} schedules={schedules ?? []} />
       <TurnosHistorialSection appointments={historialAppointments ?? []} />
+      <VisibilityNotice
+        barbershopId={barbershop.id}
+        initialVisibility={visibility}
+        requiereSena={!!barbershop.requiere_sena}
+      />
     </div>
   );
 }

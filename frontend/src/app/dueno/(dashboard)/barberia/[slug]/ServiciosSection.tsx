@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { formatPeso } from '@/lib/format';
 import { supabase } from '@/lib/supabase/client';
+import { dispatchPanelVisibilityUpdate } from './VisibilityNotice';
 import styles from './ServiciosSection.module.css';
 
 type Service = {
@@ -38,6 +39,7 @@ export function ServiciosSection({
       setServices((s) => [...s, data]);
       setForm({ name: '', price: '', duracion_min: '' });
       setShowForm(false);
+      dispatchPanelVisibilityUpdate();
     } catch {
       // Error al agregar servicio
     } finally {
@@ -48,7 +50,10 @@ export function ServiciosSection({
   async function handleDelete(id: string) {
     if (!confirm('¿Eliminar este servicio?')) return;
     const { error } = await supabase.from('services').delete().eq('id', id);
-    if (!error) setServices((s) => s.filter((x) => x.id !== id));
+    if (!error) {
+      setServices((s) => s.filter((x) => x.id !== id));
+      dispatchPanelVisibilityUpdate();
+    }
   }
 
   return (

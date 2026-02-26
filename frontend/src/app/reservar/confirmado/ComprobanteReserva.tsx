@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { formatPeso, toTitleCase, formatInstagram } from '@/lib/format';
 import styles from './Confirmado.module.css';
@@ -18,54 +18,86 @@ type ComprobanteData = {
   barber: { name: string } | null;
 };
 
-export function ComprobanteReserva({ appointmentId }: { appointmentId: string }) {
+export function ComprobanteReserva({
+  appointmentId,
+  mpPaymentId,
+  mpStatus,
+}: {
+  appointmentId: string;
+  mpPaymentId?: string;
+  mpStatus?: string;
+}) {
   const [data, setData] = useState<ComprobanteData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [pollCount, setPollCount] = useState(0);
+  const [refreshing, setRefreshing] = useState(false);
 
-  useEffect(() => {
-    async function fetchData() {
+  const confirmPaymentIfNeeded = useCallback(async () => {
+    if (mpPaymentId && (mpStatus === 'approved' || mpStatus === 'authorized')) {
       try {
-        const res = await fetch(`/api/appointments/${appointmentId}/comprobante`);
-        if (!res.ok) {
-          const err = await res.json().catch(() => ({}));
-          throw new Error(err.error ?? 'Error al cargar');
-        }
-        const json = await res.json();
-        setData(json);
-        setError('');
-        if (json.estado === 'confirmed') setLoading(false);
-      } catch (e) {
-        setError(e instanceof Error ? e.message : 'Error');
-        setData(null);
-      } finally {
-        setLoading(false);
+        await fetch(`/api/appointments/${appointmentId}/confirm-payment`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ payment_id: mpPaymentId }),
+        });
+      } catch {
+        // ignorar
       }
     }
-    fetchData();
+  }, [appointmentId, mpPaymentId, mpStatus]);
+
+  const fetchComprobante = useCallback(async () => {
+    const res = await fetch(`/api/appointments/${appointmentId}/comprobante`);
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error ?? 'Error al cargar');
+    }
+    return res.json();
   }, [appointmentId]);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      try {
+        await confirmPaymentIfNeeded();
+        const json = await fetchComprobante();
+        if (!cancelled) {
+          setData(json);
+          setError('');
+          if (json.estado === 'confirmed') setLoading(false);
+        }
+      } catch (e) {
+        if (!cancelled) {
+          setError(e instanceof Error ? e.message : 'Error');
+          setData(null);
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+    load();
+    return () => { cancelled = true; };
+  }, [appointmentId, confirmPaymentIfNeeded, fetchComprobante]);
 
   useEffect(() => {
     if (!data || data.estado === 'confirmed') return;
     const tieneSena = data.barbershop?.requiere_sena && (data.barbershop?.monto_sena ?? 0) > 0;
     if (!tieneSena) return;
-    if (pollCount >= 5) return;
+    if (pollCount >= 15) return;
     const t = setTimeout(async () => {
+      await confirmPaymentIfNeeded();
       try {
-        const res = await fetch(`/api/appointments/${appointmentId}/comprobante`);
-        if (res.ok) {
-          const json = await res.json();
-          setData(json);
-          if (json.estado === 'confirmed') setLoading(false);
-        }
+        const json = await fetchComprobante();
+        setData(json);
+        if (json.estado === 'confirmed') setLoading(false);
       } catch {
         // ignorar
       }
       setPollCount((c) => c + 1);
     }, 2000);
     return () => clearTimeout(t);
-  }, [data?.estado, data?.barbershop, appointmentId, pollCount]);
+  }, [data?.estado, data?.barbershop, appointmentId, pollCount, confirmPaymentIfNeeded, fetchComprobante]);
 
   if (loading && !data) {
     return (
@@ -96,19 +128,34 @@ export function ComprobanteReserva({ appointmentId }: { appointmentId: string })
   const tieneSena = data.barbershop?.requiere_sena && (data.barbershop?.monto_sena ?? 0) > 0;
 
   if (tieneSena && !isPaid) {
+    async function handleRefresh() {
+      setRefreshing(true);
+      try {
+        await confirmPaymentIfNeeded();
+        const json = await fetchComprobante();
+        setData(json);
+        if (json.estado === 'confirmed') setLoading(false);
+      } catch {
+        window.location.reload();
+      } finally {
+        setRefreshing(false);
+      }
+    }
+
     return (
       <div className={styles.page}>
         <div className={styles.card}>
           <h1 className={styles.title}>Procesando tu pago</h1>
           <p className={styles.mensaje}>
-            Tu pago está siendo confirmado. Refrescá esta página en unos segundos para ver tu comprobante.
+            Tu pago está siendo confirmado. La página se actualiza sola. Si no ves el comprobante, probá refrescar.
           </p>
           <button
             type="button"
-            onClick={() => window.location.reload()}
+            onClick={handleRefresh}
+            disabled={refreshing}
             className={styles.refreshBtn}
           >
-            Refrescar
+            {refreshing ? 'Actualizando...' : 'Refrescar'}
           </button>
         </div>
       </div>

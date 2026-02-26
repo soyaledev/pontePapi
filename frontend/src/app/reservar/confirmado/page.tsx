@@ -5,13 +5,32 @@ import styles from './Confirmado.module.css';
 export default async function ConfirmadoPage({
   searchParams,
 }: {
-  searchParams: Promise<{ appointmentId?: string; barberia?: string; fecha?: string; hora?: string }>;
+  searchParams: Promise<{
+    appointmentId?: string;
+    barberia?: string;
+    fecha?: string;
+    hora?: string;
+    payment_id?: string;
+    collection_id?: string;
+    status?: string;
+    preference_id?: string;
+    collection_status?: string;
+  }>;
 }) {
   const params = await searchParams;
-  const { appointmentId, barberia, fecha, hora } = params;
+  const { appointmentId, barberia, fecha, hora, payment_id, collection_id, status, preference_id, collection_status } =
+    params;
+
+  const mpPaymentId = payment_id ?? collection_id;
 
   if (appointmentId) {
-    return <ComprobanteReserva appointmentId={appointmentId} />;
+    return (
+      <ComprobanteReserva
+        appointmentId={appointmentId}
+        mpPaymentId={mpPaymentId}
+        mpStatus={status ?? collection_status}
+      />
+    );
   }
 
   return (

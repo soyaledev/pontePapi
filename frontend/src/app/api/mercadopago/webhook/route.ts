@@ -23,16 +23,31 @@ export async function POST(req: Request) {
       }
     );
     const payment = await response.json();
-    const appointmentId =
-      payment.external_reference ??
-      payment.additional_info?.items?.[0]?.id;
 
-    if (payment.status === 'approved' && appointmentId) {
-      const supabase = getSupabaseAdmin();
-      await supabase
-        .from('appointments')
-        .update({ estado: 'confirmed', mp_payment_id: data.id })
-        .eq('id', appointmentId);
+    let appointmentId: string | null =
+      payment.external_reference ??
+      payment.additional_info?.items?.[0]?.id ??
+      null;
+
+    if (!appointmentId && payment.metadata?.preference_id) {
+      appointmentId = payment.metadata.preference_id;
+    }
+
+    const supabase = getSupabaseAdmin();
+
+    if (appointmentId && payment.status === 'approved') {
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(appointmentId);
+      if (isUuid) {
+        await supabase
+          .from('appointments')
+          .update({ estado: 'confirmed', mp_payment_id: String(data.id) })
+          .eq('id', appointmentId);
+      } else {
+        await supabase
+          .from('appointments')
+          .update({ estado: 'confirmed', mp_payment_id: String(data.id) })
+          .eq('mp_preference_id', appointmentId);
+      }
     }
   } catch {
     // Ignorar errores de webhook

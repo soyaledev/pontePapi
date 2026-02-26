@@ -41,7 +41,18 @@
           </table>
         </div>
 
-        {{{pago_sena_html}}}
+        {{#if pago_sena_mostrar}}
+        <div style="margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.12);">
+          <h2 style="font-size: 0.85rem; font-weight: 600; color: rgba(255,255,255,0.7); text-transform: uppercase; letter-spacing: 0.04em; margin: 0 0 0.75rem 0;">Pago de seña</h2>
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="font-size: 0.95rem;">
+            <tr><td style="padding: 0.25rem 0; color: rgba(255,255,255,0.7); width: 110px;">Monto</td><td style="padding: 0.25rem 0;">{{pago_sena_monto}}</td></tr>
+            <tr><td style="padding: 0.25rem 0; color: rgba(255,255,255,0.7);">Estado</td><td style="padding: 0.25rem 0;">Aprobado</td></tr>
+            {{#if pago_sena_id}}
+            <tr><td style="padding: 0.25rem 0; color: rgba(255,255,255,0.7);">ID de transacción</td><td style="padding: 0.25rem 0; font-family: monospace; font-size: 0.85rem; word-break: break-all;">{{pago_sena_id}}</td></tr>
+            {{/if}}
+          </table>
+        </div>
+        {{/if}}
 
         <p style="font-size: 0.9rem; color: rgba(255,255,255,0.7); margin: 0 0 1.5rem 0; line-height: 1.4;">Llegá unos minutos antes. Si tenés que cancelar, comunicate con la barbería.</p>
 

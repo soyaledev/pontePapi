@@ -201,6 +201,7 @@ export function NuevaBarberiaForm() {
           Teléfono (máx. 10 números)
           <input
             type="tel"
+            inputMode="numeric"
             value={form.phone}
             onChange={(e) => {
               const v = e.target.value.replace(/\D/g, '').slice(0, 10);

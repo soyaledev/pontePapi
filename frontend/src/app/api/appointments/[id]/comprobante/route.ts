@@ -34,7 +34,7 @@ export async function GET(
     cliente: {
       nombre: appointment.cliente_nombre,
       telefono: appointment.cliente_telefono,
-      instagram: appointment.cliente_instagram,
+      email: appointment.cliente_email,
     },
     estado: appointment.estado,
     mp_payment_id: appointment.mp_payment_id,

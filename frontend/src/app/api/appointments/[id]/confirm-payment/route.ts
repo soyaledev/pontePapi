@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
+import { sendComprobanteEmail } from '@/lib/email/send-comprobante';
 
 /**
  * Confirma el pago cuando el cliente vuelve de Mercado Pago con status=approved.
@@ -53,6 +54,7 @@ export async function POST(
         .from('appointments')
         .update({ estado: 'confirmed', mp_payment_id: String(paymentId) })
         .eq('id', appointmentId);
+      sendComprobanteEmail(appointmentId).catch(() => {});
       return NextResponse.json({ ok: true, estado: 'confirmed' });
     }
   } catch {

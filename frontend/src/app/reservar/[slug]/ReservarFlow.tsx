@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { formatPeso, toTitleCase, formatInstagram } from '@/lib/format';
+import { formatPeso, toTitleCase } from '@/lib/format';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase/client';
@@ -147,7 +147,7 @@ export function ReservarFlow({
   const [modalDate, setModalDate] = useState<string | null>(null);
   const [nombre, setNombre] = useState('');
   const [telefono, setTelefono] = useState('');
-  const [instagram, setInstagram] = useState('');
+  const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
@@ -290,13 +290,28 @@ export function ReservarFlow({
     return effectiveBarberId;
   }
 
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
   async function handleConfirm() {
-    if (!service || !fecha || !slot || !nombre.trim() || !telefono.trim()) {
+    if (!service || !fecha || !slot || !email.trim() || !nombre.trim() || !telefono.trim()) {
       setError('Completá todos los datos');
+      return;
+    }
+    if (!emailRegex.test(email.trim())) {
+      setError('Ingresá un correo electrónico válido');
       return;
     }
     if (nombre.trim().length < 3) {
       setError('El nombre debe tener al menos 3 letras');
+      return;
+    }
+    if (nombre.trim().length > 40) {
+      setError('El nombre no puede tener más de 40 letras');
+      return;
+    }
+    const telDigits = telefono.replace(/\D/g, '');
+    if (telDigits.length < 6 || telDigits.length > 10) {
+      setError('El teléfono debe tener entre 6 y 10 números');
       return;
     }
     setError('');
@@ -316,7 +331,7 @@ export function ReservarFlow({
             barber_id: barberId,
             cliente_nombre: toTitleCase(nombre.trim()),
             cliente_telefono: telefono.trim(),
-            cliente_instagram: instagram.trim() ? formatInstagram(instagram.trim()) : null,
+            cliente_email: email.trim() || null,
             estado: 'pending_payment',
           })
           .select('id')
@@ -367,13 +382,14 @@ export function ReservarFlow({
             barber_id: barberId,
             cliente_nombre: toTitleCase(nombre.trim()),
             cliente_telefono: telefono.trim(),
-            cliente_instagram: instagram.trim() ? formatInstagram(instagram.trim()) : null,
+            cliente_email: email.trim() || null,
             estado: 'confirmed',
           })
           .select('id')
           .single();
         if (error) throw error;
         if (!appointment) throw new Error('Error al crear turno');
+        fetch(`/api/appointments/${appointment.id}/send-comprobante-email`, { method: 'POST' }).catch(() => {});
         window.location.href = `/reservar/confirmado?appointmentId=${encodeURIComponent(appointment.id)}`;
       }
     } catch (err: unknown) {
@@ -606,14 +622,24 @@ export function ReservarFlow({
               className={styles.form}
             >
               <input
+                type="email"
+                placeholder="Tu correo*"
+                value={email}
+                onChange={(e) => setEmail(e.target.value.trim())}
+                className={styles.input}
+                required
+                inputMode="email"
+              />
+              <input
                 type="text"
-                placeholder="Tu nombre* (mín. 3 letras)"
+                placeholder="Tu nombre*"
                 value={nombre}
-                onChange={(e) => setNombre(e.target.value)}
+                onChange={(e) => setNombre(e.target.value.slice(0, 40))}
                 className={styles.input}
                 required
                 minLength={3}
-                title="Al menos 3 letras"
+                maxLength={40}
+                title="Entre 3 y 40 letras"
               />
               <input
                 type="tel"
@@ -622,18 +648,12 @@ export function ReservarFlow({
                 onChange={(e) => setTelefono(e.target.value.replace(/\D/g, '').slice(0, 10))}
                 className={styles.input}
                 required
+                inputMode="numeric"
+                minLength={6}
+                maxLength={10}
+                pattern="[0-9]{6,10}"
+                title="Entre 6 y 10 números"
               />
-              <div className={styles.inputWithPrefix}>
-                <span className={styles.inputPrefix}>@</span>
-                <input
-                  type="text"
-                  placeholder="usuario"
-                  value={instagram}
-                  onChange={(e) => setInstagram(e.target.value.replace(/@/g, '').toLowerCase())}
-                  className={styles.input}
-                  autoComplete="off"
-                />
-              </div>
               {error && <p className={styles.error}>{error}</p>}
               <button type="submit" className={styles.confirmBtn} disabled={loading}>
                 {loading

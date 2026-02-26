@@ -13,6 +13,7 @@ export type Database = {
         Row: {
           barber_id: string | null;
           barbershop_id: string;
+          cliente_email: string | null;
           cliente_instagram: string | null;
           cliente_nombre: string;
           cliente_telefono: string;
@@ -29,6 +30,7 @@ export type Database = {
         Insert: {
           barber_id?: string | null;
           barbershop_id: string;
+          cliente_email?: string | null;
           cliente_instagram?: string | null;
           cliente_nombre: string;
           cliente_telefono: string;

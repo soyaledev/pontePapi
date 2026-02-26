@@ -2,14 +2,23 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { formatPeso, toTitleCase, formatInstagram } from '@/lib/format';
+import { formatPeso, toTitleCase } from '@/lib/format';
 import styles from './Confirmado.module.css';
+
+const LOADING_PHRASES = [
+  'Estamos creando tu comprobante…',
+  'Te enviamos el comprobante a tu correo',
+  'Gracias por confiar en nosotros',
+  'Tu turno está confirmado',
+  'Guardá tu comprobante para el día del turno',
+  'Te esperamos en la barbería',
+];
 
 type ComprobanteData = {
   id: string;
   fecha: string;
   hora: string;
-  cliente: { nombre: string; telefono: string; instagram: string | null };
+  cliente: { nombre: string; telefono: string; email: string | null };
   estado: string;
   mp_payment_id: string | null;
   created_at: string | null;
@@ -32,6 +41,7 @@ export function ComprobanteReserva({
   const [error, setError] = useState('');
   const [pollCount, setPollCount] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
+  const [phraseIndex, setPhraseIndex] = useState(0);
 
   const confirmPaymentIfNeeded = useCallback(async () => {
     if (mpPaymentId && (mpStatus === 'approved' || mpStatus === 'authorized')) {
@@ -55,6 +65,14 @@ export function ComprobanteReserva({
     }
     return res.json();
   }, [appointmentId]);
+
+  useEffect(() => {
+    if (!loading || data) return;
+    const t = setInterval(() => {
+      setPhraseIndex((i) => (i + 1) % LOADING_PHRASES.length);
+    }, 2800);
+    return () => clearInterval(t);
+  }, [loading, data]);
 
   useEffect(() => {
     let cancelled = false;
@@ -102,9 +120,9 @@ export function ComprobanteReserva({
   if (loading && !data) {
     return (
       <div className={styles.page}>
-        <div className={styles.card}>
-          <p className={styles.mensaje}>Cargando comprobante...</p>
-        </div>
+        <p className={styles.loadingPhrase} key={phraseIndex}>
+          {LOADING_PHRASES[phraseIndex]}
+        </p>
       </div>
     );
   }
@@ -177,7 +195,7 @@ export function ComprobanteReserva({
         </Link>
         <h1 className={styles.comprobanteTitle}>Comprobante de reserva</h1>
         <p className={styles.comprobanteSubtitle}>
-          Guardá este comprobante. Sacale una captura de pantalla para usarlo como respaldo de tu turno.
+          Guardalo o sacale captura. También te lo enviamos por correo.
         </p>
 
         <div className={styles.comprobanteSection}>
@@ -211,14 +229,16 @@ export function ComprobanteReserva({
               <dt>Nombre</dt>
               <dd>{toTitleCase(data.cliente.nombre)}</dd>
             </div>
-            <div className={styles.comprobanteRow}>
-              <dt>Teléfono</dt>
-              <dd>{data.cliente.telefono}</dd>
-            </div>
-            {data.cliente.instagram && (
+            {data.cliente.telefono && (
               <div className={styles.comprobanteRow}>
-                <dt>Instagram</dt>
-                <dd className={styles.instagramLower}>{formatInstagram(data.cliente.instagram)}</dd>
+                <dt>Teléfono</dt>
+                <dd>{data.cliente.telefono}</dd>
+              </div>
+            )}
+            {data.cliente.email && (
+              <div className={styles.comprobanteRow}>
+                <dt>Correo</dt>
+                <dd>{data.cliente.email}</dd>
               </div>
             )}
           </dl>

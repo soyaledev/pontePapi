@@ -36,7 +36,7 @@ export default async function TurnosPage() {
 
   const { data: rawAppointments } = await supabase
     .from('appointments')
-    .select('id, barbershop_id, barber_id, fecha, slot_time, cliente_nombre, cliente_telefono, cliente_instagram, estado')
+    .select('id, barbershop_id, barber_id, fecha, slot_time, cliente_nombre, cliente_telefono, cliente_email, estado')
     .eq('barbershop_id', barbershop.id)
     .gte('fecha', today)
     .order('fecha')

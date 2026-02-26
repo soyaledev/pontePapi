@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { toTitleCase, formatInstagram } from '@/lib/format';
+import { toTitleCase } from '@/lib/format';
 import { supabase } from '@/lib/supabase/client';
 import styles from './Turnos.module.css';
 
@@ -13,7 +13,7 @@ type Appointment = {
   slot_time: string;
   cliente_nombre: string;
   cliente_telefono: string;
-  cliente_instagram: string | null;
+  cliente_email: string | null;
   estado: string;
 };
 
@@ -134,17 +134,17 @@ export function TurnosList({
             <dl className={styles.modalInfo}>
               <dt>Teléfono</dt>
               <dd>
-                <a href={`tel:${modalAppointment.cliente_telefono}`}>{modalAppointment.cliente_telefono}</a>
+                {modalAppointment.cliente_telefono ? (
+                  <a href={`tel:${modalAppointment.cliente_telefono}`}>{modalAppointment.cliente_telefono}</a>
+                ) : (
+                  '—'
+                )}
               </dd>
-              <dt>Instagram</dt>
+              <dt>Correo</dt>
               <dd>
-                {modalAppointment.cliente_instagram ? (
-                  <a
-                    href={`https://instagram.com/${modalAppointment.cliente_instagram.replace(/^@/, '')}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    {formatInstagram(modalAppointment.cliente_instagram)}
+                {modalAppointment.cliente_email ? (
+                  <a href={`mailto:${modalAppointment.cliente_email}`}>
+                    {modalAppointment.cliente_email}
                   </a>
                 ) : (
                   '—'

@@ -6,15 +6,8 @@ function toTitleCase(s: string): string {
 }
 
 function formatPeso(n: number): string {
-  return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(n);
-}
-
-function sanitizeForEmailJS(value: string): string {
-  return String(value ?? '')
-    .normalize('NFC')
-    .replace(/[\u200B-\u200D\uFEFF]/g, '')
-    .replace(/\r\n|\r|\n/g, ' ')
-    .trim();
+  const num = Math.round(n);
+  return '$ ' + num.toLocaleString('es-AR');
 }
 
 export async function sendComprobanteEmail(appointmentId: string): Promise<{ ok: boolean; error?: string }> {
@@ -68,20 +61,20 @@ export async function sendComprobanteEmail(appointmentId: string): Promise<{ ok:
 
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://barbert.vercel.app';
   const templateParams: Record<string, string> = {
-    to_email: sanitizeForEmailJS(email),
-    cliente_nombre: sanitizeForEmailJS(toTitleCase(appointment.cliente_nombre)),
-    cliente_telefono: sanitizeForEmailJS(appointment.cliente_telefono || '-'),
-    barbershop_name: sanitizeForEmailJS(barbershop?.name ?? '-'),
-    service_name: sanitizeForEmailJS(serviceNameWithPrice + servicePriceStr),
-    barber_name: sanitizeForEmailJS(barber ? toTitleCase(barber.name) : 'Se le asignará un barbero'),
-    fecha: sanitizeForEmailJS(fechaFormateada),
-    hora: sanitizeForEmailJS(horaCorta),
-    appointment_id: sanitizeForEmailJS(appointmentId),
+    to_email: email,
+    cliente_nombre: toTitleCase(appointment.cliente_nombre),
+    cliente_telefono: appointment.cliente_telefono || '-',
+    barbershop_name: barbershop?.name ?? '-',
+    service_name: serviceNameWithPrice + servicePriceStr,
+    barber_name: barber ? toTitleCase(barber.name) : 'Se le asignará un barbero',
+    fecha: fechaFormateada,
+    hora: horaCorta,
+    appointment_id: appointmentId,
     comprobante_url: `${baseUrl}/reservar/confirmado?appointmentId=${encodeURIComponent(appointmentId)}`,
     logo_url: `${baseUrl}/images/logosvgPontePapi.svg`,
-    pago_sena_mostrar: tieneSenaPagada ? '1' : '',
-    pago_sena_monto: tieneSenaPagada ? sanitizeForEmailJS(formatPeso(barbershop!.monto_sena!)) : '',
-    pago_sena_id: tieneSenaPagada ? sanitizeForEmailJS(appointment.mp_payment_id || '-') : '',
+    pago_sena_monto: tieneSenaPagada ? formatPeso(barbershop!.monto_sena!) : 'No aplica',
+    pago_sena_estado: tieneSenaPagada ? 'Aprobado' : 'No aplica',
+    pago_sena_id: tieneSenaPagada ? (appointment.mp_payment_id || '-') : 'No aplica',
   };
 
   try {

@@ -8,41 +8,29 @@ export const dynamic = 'force-dynamic';
 export default async function DashboardPage() {
   const supabase = await createServerSupabaseClient();
   const { data: { user } } = await supabase.auth.getUser();
+
   if (!user) redirect('/dueno/login');
 
-  const { data: barbershops } = await supabase
+  const { data: barbershop } = await supabase
     .from('barbershops')
-    .select('id, name, slug, city, phone')
+    .select('id, name, slug')
     .eq('owner_id', user.id)
-    .order('created_at', { ascending: false });
+    .limit(1)
+    .single();
 
-  return (
-    <div className={styles.dashboard}>
-      <div className={styles.header}>
-        <h1>Mis barberías</h1>
-        <Link href="/dueno/barberia/nueva" className={styles.addButton}>
-          + Nueva barbería
-        </Link>
-      </div>
-      {!barbershops?.length ? (
+  if (!barbershop) {
+    return (
+      <div className={styles.dashboard}>
+        <h1 className={styles.title}>Panel</h1>
         <div className={styles.empty}>
-          <p>No tenés barberías registradas.</p>
+          <p>No tenés una barbería registrada.</p>
           <Link href="/dueno/barberia/nueva" className={styles.link}>
-            Crear la primera
+            Registrar barbería
           </Link>
         </div>
-      ) : (
-        <ul className={styles.list}>
-          {barbershops.map((b) => (
-            <li key={b.id} className={styles.item}>
-              <Link href={`/dueno/barberia/${b.slug}`} className={styles.itemLink}>
-                <span className={styles.itemName}>{b.name}</span>
-                {b.city && <span className={styles.itemCity}>{b.city}</span>}
-              </Link>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
+      </div>
+    );
+  }
+
+  redirect(`/dueno/barberia/${barbershop.slug}`);
 }

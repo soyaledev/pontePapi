@@ -1,5 +1,6 @@
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
+import Link from 'next/link';
 import { TurnosList } from './TurnosList';
 import styles from './Turnos.module.css';
 
@@ -11,19 +12,20 @@ export default async function TurnosPage() {
 
   if (!user) redirect('/dueno/login');
 
-  const { data: barbershops } = await supabase
+  const { data: barbershop } = await supabase
     .from('barbershops')
-    .select('id, name')
-    .eq('owner_id', user.id);
+    .select('id')
+    .eq('owner_id', user.id)
+    .limit(1)
+    .single();
 
-  const barbershopIds = (barbershops ?? []).map((b) => b.id);
-  const barbershopNames = Object.fromEntries((barbershops ?? []).map((b) => [b.id, b.name]));
-
-  if (barbershopIds.length === 0) {
+  if (!barbershop) {
     return (
       <div className={styles.page}>
         <h1 className={styles.title}>Próximos turnos</h1>
-        <p className={styles.empty}>No tenés barberías. Creá una desde el Panel.</p>
+        <p className={styles.empty}>
+          No tenés una barbería. <Link href="/dueno/dashboard">Registrarla desde el Panel</Link>.
+        </p>
       </div>
     );
   }
@@ -31,10 +33,11 @@ export default async function TurnosPage() {
   const today = new Date().toLocaleDateString('sv-SE', {
     timeZone: 'America/Argentina/Buenos_Aires',
   });
+
   const { data: rawAppointments } = await supabase
     .from('appointments')
-    .select('id, barbershop_id, barber_id, fecha, slot_time, cliente_nombre, cliente_telefono, estado')
-    .in('barbershop_id', barbershopIds)
+    .select('id, barbershop_id, barber_id, fecha, slot_time, cliente_nombre, cliente_telefono, cliente_instagram, estado')
+    .eq('barbershop_id', barbershop.id)
     .gte('fecha', today)
     .order('fecha')
     .order('slot_time');
@@ -45,19 +48,12 @@ export default async function TurnosPage() {
     : { data: [] };
   const barberNames = Object.fromEntries((barbersData ?? []).map((b) => [b.id, b.name]));
 
-  const appointments = (rawAppointments ?? []).filter(
-    (a) => a.estado === 'confirmed'
-  );
+  const proximos = (rawAppointments ?? []).filter((a) => a.estado === 'confirmed');
 
   return (
     <div className={styles.page}>
       <h1 className={styles.title}>Próximos turnos</h1>
-      <TurnosList
-        appointments={appointments}
-        barbershopNames={barbershopNames}
-        barberNames={barberNames}
-        barbershopIds={barbershopIds}
-      />
+      <TurnosList appointments={proximos} barberNames={barberNames} />
     </div>
   );
 }

@@ -12,6 +12,15 @@
   padding: 1rem 1.5rem;
 }
 
+@media (min-width: 769px) {
+  .header {
+    max-width: 720px;
+    margin: 0 auto;
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
 .logo {
   display: flex;
   align-items: center;
@@ -29,6 +38,14 @@
   padding-bottom: 6rem;
   max-width: 1200px;
   margin: 0 auto;
+}
+
+@media (min-width: 769px) {
+  .main {
+    max-width: 720px;
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
 }
 
 .bottomNav {
@@ -83,9 +100,6 @@
   font-weight: 600;
 }
 
-.navItemTurnos {
-  /* base para Turnos */
-}
 
 .navItemTurnosActive {
   background: var(--bg-dark);

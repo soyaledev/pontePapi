@@ -48,15 +48,14 @@ export default async function BarberiaDetailPage({
 
   const { data: historialAppointments } = await supabase
     .from('appointments')
-    .select('id, fecha, slot_time, cliente_nombre, cliente_telefono, estado')
+    .select('id, fecha, slot_time, cliente_nombre, cliente_telefono, estado, updated_at')
     .eq('barbershop_id', barbershop.id)
     .in('estado', ['completed', 'cancelled'])
-    .order('fecha', { ascending: false })
-    .order('slot_time', { ascending: false });
+    .order('updated_at', { ascending: false, nullsFirst: false });
 
   return (
     <div className={styles.page}>
-      <Link href="/dueno/dashboard" className={styles.back}>
+      <Link href="/dueno/turnos" className={styles.back}>
         ← Volver
       </Link>
       <div className={styles.header}>

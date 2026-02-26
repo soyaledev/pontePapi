@@ -45,12 +45,14 @@ export async function sendComprobanteEmail(appointmentId: string): Promise<{ ok:
 
   const tieneSenaPagada = barbershop?.requiere_sena && (barbershop?.monto_sena ?? 0) > 0 && appointment.estado === 'confirmed';
   const pagoSenaHtml = tieneSenaPagada
-    ? `<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.12);">
-        <tr><td colspan="2" style="font-size: 0.7rem; font-weight: 600; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 0.05em; padding-bottom: 6px;">Pago de seña</td></tr>
-        <tr><td style="font-size: 0.8rem; color: rgba(255,255,255,0.6); padding: 3px 0; width: 90px;">Monto</td><td style="font-size: 0.85rem; padding: 3px 0;">${formatPeso(barbershop!.monto_sena!)}</td></tr>
-        <tr><td style="font-size: 0.8rem; color: rgba(255,255,255,0.6); padding: 3px 0;">Estado</td><td style="font-size: 0.85rem; padding: 3px 0;">Aprobado</td></tr>
-        ${appointment.mp_payment_id ? `<tr><td style="font-size: 0.8rem; color: rgba(255,255,255,0.6); padding: 3px 0;">ID transacción</td><td style="font-size: 0.75rem; padding: 3px 0; font-family: monospace; word-break: break-all;">${appointment.mp_payment_id}</td></tr>` : ''}
-      </table>`
+    ? `<div style="margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.12);">
+        <h2 style="font-size: 0.85rem; font-weight: 600; color: rgba(255,255,255,0.7); text-transform: uppercase; letter-spacing: 0.04em; margin: 0 0 0.75rem 0;">Pago de seña</h2>
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="font-size: 0.95rem;">
+          <tr><td style="padding: 0.25rem 0; color: rgba(255,255,255,0.7); width: 110px;">Monto</td><td style="padding: 0.25rem 0;">${formatPeso(barbershop!.monto_sena!)}</td></tr>
+          <tr><td style="padding: 0.25rem 0; color: rgba(255,255,255,0.7);">Estado</td><td style="padding: 0.25rem 0;">Aprobado</td></tr>
+          ${appointment.mp_payment_id ? `<tr><td style="padding: 0.25rem 0; color: rgba(255,255,255,0.7);">ID de transacción</td><td style="padding: 0.25rem 0; font-family: monospace; font-size: 0.85rem; word-break: break-all;">${appointment.mp_payment_id}</td></tr>` : ''}
+        </table>
+      </div>`
     : '';
 
   const fechaFormateada = new Date(appointment.fecha + 'T12:00:00').toLocaleDateString('es-AR', {

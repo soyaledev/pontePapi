@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sansation:wght@300;400;700&display=swap" rel="stylesheet">
+</head>
+<body style="margin: 0; padding: 20px; font-family: 'Sansation', -apple-system, BlinkMacSystemFont, sans-serif; background: #fff; color: #1a1a1a;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width: 420px; margin: 0 auto;">
+    <tr>
+      <td style="background: #1a1a1a; border-radius: 1rem; border: 1px solid rgba(255,255,255,0.12); padding: 2rem; color: #fff;">
+        
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+          <tr>
+            <td align="center" style="padding-bottom: 1.5rem;">
+              <img src="{{logo_url}}" alt="PontePapi" width="120" height="40" style="height: 40px; width: auto; display: block;">
+            </td>
+          </tr>
+        </table>
+
+        <h1 style="font-size: 1.35rem; font-weight: 700; margin: 0 0 0.5rem 0; color: #fff;">Comprobante de reserva</h1>
+        <p style="font-size: 0.95rem; color: #e94560; margin: 0 0 1.5rem 0; line-height: 1.4;">Guardalo o sacale captura. También te lo enviamos por correo.</p>
+
+        <div style="margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.12);">
+          <h2 style="font-size: 0.85rem; font-weight: 600; color: rgba(255,255,255,0.7); text-transform: uppercase; letter-spacing: 0.04em; margin: 0 0 0.75rem 0;">Detalle del turno</h2>
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="font-size: 0.95rem;">
+            <tr><td style="padding: 0.25rem 0; color: rgba(255,255,255,0.7); width: 110px;">Barbería</td><td style="padding: 0.25rem 0;">{{barbershop_name}}</td></tr>
+            <tr><td style="padding: 0.25rem 0; color: rgba(255,255,255,0.7);">Servicio</td><td style="padding: 0.25rem 0;">{{service_name}}</td></tr>
+            <tr><td style="padding: 0.25rem 0; color: rgba(255,255,255,0.7);">Barbero</td><td style="padding: 0.25rem 0;">{{barber_name}}</td></tr>
+            <tr><td style="padding: 0.25rem 0; color: rgba(255,255,255,0.7);">Fecha</td><td style="padding: 0.25rem 0;">{{fecha}} a las {{hora}}</td></tr>
+          </table>
+        </div>
+
+        <div style="margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.12);">
+          <h2 style="font-size: 0.85rem; font-weight: 600; color: rgba(255,255,255,0.7); text-transform: uppercase; letter-spacing: 0.04em; margin: 0 0 0.75rem 0;">Tus datos</h2>
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="font-size: 0.95rem;">
+            <tr><td style="padding: 0.25rem 0; color: rgba(255,255,255,0.7); width: 110px;">Nombre</td><td style="padding: 0.25rem 0;">{{cliente_nombre}}</td></tr>
+            <tr><td style="padding: 0.25rem 0; color: rgba(255,255,255,0.7);">Teléfono</td><td style="padding: 0.25rem 0;">{{cliente_telefono}}</td></tr>
+          </table>
+        </div>
+
+        {{pago_sena_html}}
+
+        <p style="font-size: 0.9rem; color: rgba(255,255,255,0.7); margin: 0 0 1.5rem 0; line-height: 1.4;">Llegá unos minutos antes. Si tenés que cancelar, comunicate con la barbería.</p>
+
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+          <tr>
+            <td align="center">
+              <a href="{{comprobante_url}}" style="display: inline-block; padding: 0.75rem 1.5rem; background: #e94560; color: #fff; border-radius: 0.5rem; text-decoration: none; font-weight: 600;">Ver comprobante online</a>
+            </td>
+          </tr>
+        </table>
+
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

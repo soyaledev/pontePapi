@@ -4,6 +4,8 @@
   color: var(--text);
 }
 
+/* Desktop: split layout - imagen 50% izquierda, info 50% derecha */
+
 .header {
   position: absolute;
   top: 0;
@@ -71,6 +73,20 @@
   }
 }
 
+.titleDesktop {
+  display: none;
+}
+
+@media (min-width: 769px) {
+  .titleDesktop {
+    display: block;
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    color: var(--text);
+  }
+}
+
 .title {
   font-size: 1.75rem;
   font-weight: 700;
@@ -95,6 +111,11 @@
   opacity: 0.95;
 }
 
+/* En móvil ocultar el botón del cover (debajo del nombre) */
+.reservarBtnCover {
+  display: none;
+}
+
 .body {
   max-width: 480px;
   margin: 0 auto;
@@ -102,9 +123,71 @@
 }
 
 @media (min-width: 769px) {
-  .body {
-    max-width: 480px;
+  .page {
+    display: grid;
+    grid-template-columns: 50% 50%;
+    min-height: 100vh;
   }
+
+  .cover {
+    position: sticky;
+    top: 0;
+    width: 100%;
+    min-width: 0;
+    height: 100vh;
+    min-height: 100vh;
+  }
+
+  .coverContent {
+    display: none !important;
+  }
+
+  .overlay {
+    background: rgba(0, 0, 0, 0.15);
+  }
+
+  .body {
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+    margin: 0;
+    padding: 3rem 2.5rem;
+    overflow-y: auto;
+  }
+
+  .services {
+    max-width: 360px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+.infoRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.5rem;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin-bottom: 1.25rem;
+}
+
+.infoItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.infoIcon {
+  flex-shrink: 0;
+  color: var(--text-muted);
+  opacity: 0.8;
+}
+
+.infoSep {
+  color: rgba(255, 255, 255, 0.35);
+  font-weight: 600;
+  user-select: none;
 }
 
 .info {
@@ -132,7 +215,9 @@
 
 .barbersSection strong {
   display: block;
-  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
   color: var(--text);
 }
 

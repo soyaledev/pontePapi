@@ -56,9 +56,15 @@
   object-fit: cover;
 }
 
+@media (min-width: 769px) {
+  .coverImage {
+    object-position: center 30%;
+  }
+}
+
 @media (max-width: 768px) {
   .coverImage {
-    object-position: 37% center;
+    object-position: 40% center;
   }
 }
 

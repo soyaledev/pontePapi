@@ -44,18 +44,17 @@ export function ComprobanteReserva({
   const [phraseIndex, setPhraseIndex] = useState(0);
 
   const confirmPaymentIfNeeded = useCallback(async () => {
-    if (mpPaymentId && (mpStatus === 'approved' || mpStatus === 'authorized')) {
-      try {
-        await fetch(`/api/appointments/${appointmentId}/confirm-payment`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ payment_id: mpPaymentId }),
-        });
-      } catch {
-        // ignorar
-      }
+    if (!mpPaymentId) return;
+    try {
+      await fetch(`/api/appointments/${appointmentId}/confirm-payment`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ payment_id: mpPaymentId }),
+      });
+    } catch {
+      // ignorar
     }
-  }, [appointmentId, mpPaymentId, mpStatus]);
+  }, [appointmentId, mpPaymentId]);
 
   const fetchComprobante = useCallback(async () => {
     const res = await fetch(`/api/appointments/${appointmentId}/comprobante`);

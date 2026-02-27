@@ -159,10 +159,28 @@ export function ReservarFlow({
     Record<string, Record<string, number>>
   >({});
   const [fetchTrigger, setFetchTrigger] = useState(0);
+  const [isOwner, setIsOwner] = useState<boolean | null>(null);
   const [calendarMonth, setCalendarMonth] = useState(() => {
     const now = new Date();
     return { year: now.getFullYear(), month: now.getMonth() };
   });
+
+  useEffect(() => {
+    async function checkOwner() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        setIsOwner(false);
+        return;
+      }
+      const { data } = await supabase
+        .from('barbershops')
+        .select('id')
+        .eq('owner_id', user.id)
+        .limit(1);
+      setIsOwner((data?.length ?? 0) > 0);
+    }
+    checkOwner();
+  }, []);
 
   const slotMinutes = service?.duracion_min ?? barbershop.slot_minutes ?? 30;
   const requiereSena = barbershop.requiere_sena && (barbershop.monto_sena ?? 0) > 0;
@@ -293,6 +311,7 @@ export function ReservarFlow({
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   async function handleConfirm() {
+    if (isOwner) return;
     if (!service || !fecha || !slot || !email.trim() || !nombre.trim() || !telefono.trim()) {
       setError('Completá todos los datos');
       return;
@@ -614,6 +633,26 @@ export function ReservarFlow({
                 Seña a pagar: {formatPeso(barbershop.monto_sena ?? 0)}
               </p>
             )}
+            {isOwner && (
+              <div className={styles.ownerBlock}>
+                <p className={styles.ownerBlockText}>
+                  No podés sacar turnos mientras tengas la cuenta de dueño iniciada.
+                </p>
+                <p className={styles.ownerBlockSub}>
+                  Cerrando sesión vas a poder reservar como cliente.
+                </p>
+                <button
+                  type="button"
+                  className={styles.ownerBlockBtn}
+                  onClick={async () => {
+                    await supabase.auth.signOut();
+                    window.location.reload();
+                  }}
+                >
+                  Cerrar sesión para reservar
+                </button>
+              </div>
+            )}
             <form
               onSubmit={(e) => {
                 e.preventDefault();
@@ -655,7 +694,7 @@ export function ReservarFlow({
                 title="Entre 6 y 10 números"
               />
               {error && <p className={styles.error}>{error}</p>}
-              <button type="submit" className={styles.confirmBtn} disabled={loading}>
+              <button type="submit" className={styles.confirmBtn} disabled={loading || isOwner === true}>
                 {loading
                   ? requiereSena
                     ? 'Redirigiendo a pago...'

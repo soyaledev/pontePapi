@@ -1,0 +1,231 @@
+.page {
+  max-width: 560px;
+}
+
+@media (min-width: 769px) {
+  .page {
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+.back {
+  display: inline-block;
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.back:hover {
+  color: var(--text);
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+}
+
+.section {
+  margin-bottom: 2rem;
+  padding: 1.25rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+}
+
+.sectionTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--text);
+}
+
+.field {
+  margin-bottom: 1rem;
+}
+
+.fieldLabel {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 0.35rem;
+}
+
+.inputWrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input {
+  width: 100%;
+  padding: 0.75rem 2.75rem 0.75rem 1rem;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  color: var(--text);
+  font-size: 1rem;
+  font-family: inherit;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--border-focus);
+}
+
+.eyeBtn {
+  position: absolute;
+  right: 0.75rem;
+  padding: 0.35rem;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.eyeBtn:hover {
+  color: var(--text);
+}
+
+.btn {
+  padding: 0.65rem 1.25rem;
+  border-radius: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+  transition: background 0.2s;
+}
+
+.btnPrimary {
+  background: var(--accent);
+  color: var(--text);
+}
+
+.btnPrimary:hover {
+  background: var(--accent-hover);
+}
+
+.btnPrimary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btnDanger {
+  background: transparent;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+}
+
+.btnDanger:hover {
+  background: rgba(233, 69, 96, 0.15);
+}
+
+.error {
+  font-size: 0.875rem;
+  color: var(--accent);
+  margin-top: 0.5rem;
+}
+
+.success {
+  font-size: 0.875rem;
+  color: #22c55e;
+  margin-top: 0.5rem;
+}
+
+.dangerZone {
+  border-color: rgba(233, 69, 96, 0.3);
+  background: rgba(233, 69, 96, 0.05);
+}
+
+.dangerZone .sectionTitle {
+  color: var(--accent);
+}
+
+.warning {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+  line-height: 1.5;
+}
+
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.modal {
+  background: var(--bg-dark);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  max-width: 400px;
+  width: 100%;
+}
+
+.modalTitle {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+.modalText {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-bottom: 1.25rem;
+  line-height: 1.5;
+}
+
+.modalActions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+}
+
+.modalBtnCancel {
+  padding: 0.65rem 1.25rem;
+  background: var(--bg-input);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.modalBtnCancel:hover {
+  background: var(--bg-input-hover);
+}
+
+.modalBtnConfirm {
+  padding: 0.65rem 1.25rem;
+  background: var(--accent);
+  color: var(--text);
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.modalBtnConfirm:hover {
+  background: var(--accent-hover);
+}
+
+.modalBtnConfirm:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

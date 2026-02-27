@@ -1,0 +1,144 @@
+/* Mobile-first welcome overlay */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  padding-bottom: calc(1.5rem + env(safe-area-inset-bottom, 0));
+  background: linear-gradient(
+    180deg,
+    #0a0a0a 0%,
+    #0f0f0f 40%,
+    #0a0a0a 100%
+  );
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.5s ease, visibility 0.5s ease;
+}
+
+.overlayVisible {
+  opacity: 1;
+  visibility: visible;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  max-width: 360px;
+  width: 100%;
+}
+
+.logoWrap {
+  margin-bottom: 2rem;
+  animation: fadeBlurIn 0.8s ease 0.1s both;
+}
+
+.logo {
+  filter: drop-shadow(0 2px 12px rgba(233, 69, 96, 0.15));
+}
+
+.greeting {
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  margin: 0 0 1rem;
+  background: linear-gradient(
+    135deg,
+    #fff 0%,
+    rgba(255, 255, 255, 0.9) 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: fadeBlurIn 0.7s ease 0.35s both;
+}
+
+.tagline {
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+  margin: 0 0 2.5rem;
+  font-weight: 400;
+  animation: fadeBlurIn 0.7s ease 0.55s both;
+}
+
+.cta {
+  padding: 1rem 2.5rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text);
+  background: var(--accent);
+  border: none;
+  border-radius: 2rem;
+  cursor: pointer;
+  font-family: inherit;
+  transition: transform 0.2s, background 0.2s, box-shadow 0.2s;
+  animation: fadeBlurIn 0.6s ease 0.75s both;
+}
+
+.cta:hover {
+  background: var(--accent-hover);
+  transform: scale(1.02);
+  box-shadow: 0 4px 20px rgba(233, 69, 96, 0.35);
+}
+
+.cta:active {
+  transform: scale(0.98);
+}
+
+/* Reduce motion para accesibilidad */
+@media (prefers-reduced-motion: reduce) {
+  .overlay {
+    transition-duration: 0.2s;
+  }
+
+  .logoWrap,
+  .greeting,
+  .tagline,
+  .cta {
+    animation: fadeIn 0.3s ease both;
+  }
+
+  .logoWrap { animation-delay: 0s; }
+  .greeting { animation-delay: 0.05s; }
+  .tagline { animation-delay: 0.1s; }
+  .cta { animation-delay: 0.15s; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeBlurIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+/* Tablet y desktop */
+@media (min-width: 480px) {
+  .content {
+    max-width: 420px;
+  }
+
+  .greeting {
+    font-size: 2.25rem;
+  }
+
+  .tagline {
+    font-size: 1.1rem;
+  }
+}

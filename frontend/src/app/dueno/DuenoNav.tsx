@@ -54,6 +54,13 @@ export function DuenoNav({ userEmail }: { userEmail: string }) {
             {userEmail && (
               <p className={styles.avatarEmail}>{userEmail}</p>
             )}
+            <Link
+              href="/dueno/configuracion"
+              className={styles.avatarMenuItem}
+              onClick={() => setMenuOpen(false)}
+            >
+              Configuración
+            </Link>
             {isOnClientView ? (
               <Link
                 href="/dueno/turnos"

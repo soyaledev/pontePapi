@@ -3,6 +3,7 @@ import { createServerSupabaseClient } from '@/lib/supabase/server';
 import Link from 'next/link';
 import Image from 'next/image';
 import { DuenoNav } from '../DuenoNav';
+import { WelcomeOverlay } from './WelcomeOverlay/WelcomeOverlay';
 import styles from '../DuenoLayout.module.css';
 
 export default async function DashboardLayout({
@@ -19,6 +20,7 @@ export default async function DashboardLayout({
 
   return (
     <div className={styles.layout}>
+      <WelcomeOverlay userEmail={user.email ?? ''} />
       <header className={styles.header}>
         <Link href="/dueno/turnos" className={styles.logo}>
           <Image

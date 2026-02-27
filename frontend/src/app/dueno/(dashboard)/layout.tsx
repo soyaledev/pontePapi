@@ -20,7 +20,7 @@ export default async function DashboardLayout({
 
   return (
     <div className={styles.layout}>
-      <WelcomeOverlay userEmail={user.email ?? ''} />
+      <WelcomeOverlay userId={user.id} userEmail={user.email ?? ''} />
       <header className={styles.header}>
         <Link href="/dueno/turnos" className={styles.logo}>
           <Image

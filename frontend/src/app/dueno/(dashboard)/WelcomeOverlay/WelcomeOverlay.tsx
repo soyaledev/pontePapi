@@ -4,25 +4,26 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import styles from './WelcomeOverlay.module.css';
 
-const STORAGE_KEY = 'pontepapi_welcome_v1';
+const STORAGE_PREFIX = 'pontepapi_welcome_v1';
 
-export function WelcomeOverlay(_props: { userEmail: string }) {
+export function WelcomeOverlay({ userId, userEmail: _userEmail }: { userId: string; userEmail: string }) {
   const [visible, setVisible] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const storageKey = `${STORAGE_PREFIX}_${userId}`;
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const seen = localStorage.getItem(STORAGE_KEY);
+    if (typeof window === 'undefined' || !userId) return;
+    const seen = localStorage.getItem(storageKey);
     setMounted(true);
     if (!seen) {
       requestAnimationFrame(() => setVisible(true));
     }
-  }, []);
+  }, [userId, storageKey]);
 
   function handleDismiss() {
     setVisible(false);
     setTimeout(() => {
-      localStorage.setItem(STORAGE_KEY, '1');
+      localStorage.setItem(storageKey, '1');
     }, 400);
   }
 

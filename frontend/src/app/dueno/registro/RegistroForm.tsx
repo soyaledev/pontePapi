@@ -94,6 +94,9 @@ export function RegistroForm() {
       <button type="submit" className={styles.button} disabled={loading}>
         {loading ? 'Creando cuenta...' : 'Crear cuenta'}
       </button>
+      <p className={styles.footer}>
+        ¿Tenés cuenta? <Link href="/dueno/login">Inicia sesión</Link>
+      </p>
     </form>
   );
 }

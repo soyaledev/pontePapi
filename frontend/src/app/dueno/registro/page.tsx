@@ -11,8 +11,8 @@ export default function RegistroPage() {
           <p className={styles.subtitle}>Panel de dueños de barbería</p>
           <RegistroForm />
         </div>
-        <Link href="/dueno/login" className={styles.back}>
-          Ya tengo cuenta
+        <Link href="/" className={styles.back}>
+          Volver al panel cliente
         </Link>
       </div>
     </div>

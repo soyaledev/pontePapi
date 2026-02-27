@@ -408,8 +408,9 @@ export function ReservarFlow({
           .single();
         if (error) throw error;
         if (!appointment) throw new Error('Error al crear turno');
-        fetch(`/api/appointments/${appointment.id}/send-comprobante-email`, { method: 'POST' }).catch(() => {});
-        window.location.href = `/reservar/confirmado?appointmentId=${encodeURIComponent(appointment.id)}`;
+        const emailRes = await fetch(`/api/appointments/${appointment.id}/send-comprobante-email`, { method: 'POST' });
+        const emailFailed = !emailRes.ok;
+        window.location.href = `/reservar/confirmado?appointmentId=${encodeURIComponent(appointment.id)}${emailFailed ? '&emailFailed=1' : ''}`;
       }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Error al reservar');
@@ -439,6 +440,30 @@ export function ReservarFlow({
       </header>
       <div className={styles.body}>
         <h1 className={styles.title}>Reservar en {barbershop.name}</h1>
+
+        {isOwner && (
+          <div className={styles.ownerBlock}>
+            <p className={styles.ownerBlockText}>
+              No podés sacar turnos mientras tengas la cuenta de dueño iniciada.
+            </p>
+            <p className={styles.ownerBlockSub}>
+              Cerrando sesión vas a poder reservar como cliente.
+            </p>
+            <button
+              type="button"
+              className={styles.ownerBlockBtn}
+              onClick={async () => {
+                await supabase.auth.signOut();
+                window.location.reload();
+              }}
+            >
+              Cerrar sesión para reservar
+            </button>
+          </div>
+        )}
+
+        {!isOwner && (
+          <>
         <p className={styles.stepIndicator}>
           {step === 1 && 'Paso 1: Servicio'}
           {step === stepBarbero && 'Paso 2: Barbero'}
@@ -633,26 +658,6 @@ export function ReservarFlow({
                 Seña a pagar: {formatPeso(barbershop.monto_sena ?? 0)}
               </p>
             )}
-            {isOwner && (
-              <div className={styles.ownerBlock}>
-                <p className={styles.ownerBlockText}>
-                  No podés sacar turnos mientras tengas la cuenta de dueño iniciada.
-                </p>
-                <p className={styles.ownerBlockSub}>
-                  Cerrando sesión vas a poder reservar como cliente.
-                </p>
-                <button
-                  type="button"
-                  className={styles.ownerBlockBtn}
-                  onClick={async () => {
-                    await supabase.auth.signOut();
-                    window.location.reload();
-                  }}
-                >
-                  Cerrar sesión para reservar
-                </button>
-              </div>
-            )}
             <form
               onSubmit={(e) => {
                 e.preventDefault();
@@ -694,7 +699,7 @@ export function ReservarFlow({
                 title="Entre 6 y 10 números"
               />
               {error && <p className={styles.error}>{error}</p>}
-              <button type="submit" className={styles.confirmBtn} disabled={loading || isOwner === true}>
+              <button type="submit" className={styles.confirmBtn} disabled={loading}>
                 {loading
                   ? requiereSena
                     ? 'Redirigiendo a pago...'
@@ -708,6 +713,8 @@ export function ReservarFlow({
               Atrás
             </button>
           </div>
+        )}
+          </>
         )}
       </div>
 

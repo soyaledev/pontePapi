@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
-import { Footer } from '@/components/Footer';
 
 export const metadata: Metadata = {
   title: 'PontePapi',
@@ -29,10 +28,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es">
-      <body>
-        {children}
-        <Footer />
-      </body>
+      <body>{children}</body>
     </html>
   );
 }

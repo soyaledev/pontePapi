@@ -185,3 +185,21 @@
 .googleButton:hover {
   background: #f8f8f8;
 }
+
+.googleButton:disabled {
+  opacity: 0.8;
+  cursor: wait;
+}
+
+.googleSpinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #e0e0e0;
+  border-top-color: #4285f4;
+  border-radius: 50%;
+  animation: googleSpin 0.7s linear infinite;
+}
+
+@keyframes googleSpin {
+  to { transform: rotate(360deg); }
+}

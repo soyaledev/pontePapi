@@ -130,7 +130,7 @@ export function Hero() {
                 {loading ? (
                   <li className={styles.resultItem}>Buscando...</li>
                 ) : results.length === 0 ? (
-                  <li className={styles.resultItem}>Sin resultados</li>
+                  <li className={styles.resultItem}>No encontramos barberías con ese criterio. Probá con otro término.</li>
                 ) : (
                   results.map((b) => (
                     <li key={b.id}>

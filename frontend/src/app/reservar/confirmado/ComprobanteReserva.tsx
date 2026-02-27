@@ -31,10 +31,12 @@ export function ComprobanteReserva({
   appointmentId,
   mpPaymentId,
   mpStatus,
+  emailFailed,
 }: {
   appointmentId: string;
   mpPaymentId?: string;
   mpStatus?: string;
+  emailFailed?: boolean;
 }) {
   const [data, setData] = useState<ComprobanteData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -188,13 +190,20 @@ export function ComprobanteReserva({
 
   return (
     <div className={styles.page}>
+      {emailFailed && (
+        <div className={styles.emailFailedBanner} role="alert">
+          Tu turno está confirmado, pero no pudimos enviar el comprobante por email. Guardá o sacale captura a los datos que ves acá.
+        </div>
+      )}
       <div className={styles.comprobante}>
         <Link href="/" className={styles.comprobanteLogo}>
           <img src="/images/logosvgPontePapi.svg" alt="PontePapi" />
         </Link>
         <h1 className={styles.comprobanteTitle}>Comprobante de reserva</h1>
         <p className={styles.comprobanteSubtitle}>
-          Guardalo o sacale captura. También te lo enviamos por correo.
+          {emailFailed
+            ? 'Guardalo o sacale captura para tener los datos a mano.'
+            : 'Guardalo o sacale captura. También te lo enviamos por correo.'}
         </p>
 
         <div className={styles.comprobanteSection}>

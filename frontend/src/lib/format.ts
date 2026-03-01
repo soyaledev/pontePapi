@@ -33,6 +33,18 @@ export function isLink(text: string): boolean {
   return /^https?:\/\//i.test(t) || /^(maps\.google|goo\.gl|maps\.app\.goo\.gl)/i.test(t);
 }
 
+/** Valida que sea un link de Google Maps */
+export function isGoogleMapsLink(text: string): boolean {
+  const t = text.trim();
+  if (!t) return true;
+  return (
+    /google\.com(\.[a-z]{2})?\/maps/i.test(t) ||
+    /maps\.google/i.test(t) ||
+    /goo\.gl\/maps/i.test(t) ||
+    /maps\.app\.goo\.gl/i.test(t)
+  );
+}
+
 /** Aplica toTitleCase solo si no es un link */
 export function formatAddress(str: string): string {
   const t = str.trim();

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { toTitleCase, formatAddress, formatPesoInput } from '@/lib/format';
+import { toTitleCase, formatPesoInput, isGoogleMapsLink } from '@/lib/format';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase/client';
@@ -57,6 +57,12 @@ export function NuevaBarberiaForm() {
         setLoading(false);
         return;
       }
+      const addressTrimmed = form.address.trim();
+      if (addressTrimmed && !isGoogleMapsLink(addressTrimmed)) {
+        setError('La ubicación debe ser un link de Google Maps (ej: maps.google.com o goo.gl/maps)');
+        setLoading(false);
+        return;
+      }
       const phoneOnly = form.phone.replace(/\D/g, '').slice(0, 10);
       const { data: newShop, error: shopError } = await supabase
         .from('barbershops')
@@ -65,7 +71,7 @@ export function NuevaBarberiaForm() {
           name: form.name.trim(),
           barberos: [],
           slug,
-          address: form.address.trim() ? formatAddress(form.address.trim()) : null,
+          address: addressTrimmed || null,
           city: form.city.trim() ? toTitleCase(form.city.trim()) : null,
           phone: phoneOnly || null,
           photo_url: form.photo_url.trim() || null,
@@ -175,16 +181,16 @@ export function NuevaBarberiaForm() {
           </button>
         </div>
         <label className={styles.label}>
-          Dirección
+          Ubicación
           <input
-            type="text"
+            type="url"
             value={form.address}
             onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))}
             className={styles.input}
-            placeholder="Calle, número o link de Google Maps"
+            placeholder="https://maps.google.com/... o https://goo.gl/maps/..."
           />
           <span className={styles.hint}>
-            Para mejorar que se encuentre la barbería, podés pegar un link de Google Maps
+            Pegá el link de Google Maps de tu barbería (Compartir → Copiar enlace)
           </span>
         </label>
         <label className={styles.label}>

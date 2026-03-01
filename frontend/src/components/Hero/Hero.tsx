@@ -118,7 +118,7 @@ export function Hero() {
           <div className={styles.searchBox}>
             <input
               type="search"
-              placeholder="Barbería, barbero, calle o ciudad..."
+              placeholder="Barbería, barbero o ciudad..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onFocus={() => query.trim() && setOpen(true)}

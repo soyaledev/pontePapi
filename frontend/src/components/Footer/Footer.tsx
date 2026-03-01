@@ -21,7 +21,7 @@ export function Footer() {
       >
         @ponte_papi
       </a>
-      <p className={styles.version}>v1.0.0</p>
+      <p className={styles.version}>v1.1.0</p>
       <p className={styles.credit}>
         Creada por{' '}
         <a href="https://alekey.com.ar" target="_blank" rel="noopener noreferrer">

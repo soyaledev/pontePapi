@@ -27,6 +27,7 @@ export function TurnosList({
   const [appointments, setAppointments] = useState(initialAppointments);
   const [modalAppointment, setModalAppointment] = useState<Appointment | null>(null);
   const [modalLoading, setModalLoading] = useState(false);
+  const [copiedDate, setCopiedDate] = useState<string | null>(null);
 
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
@@ -74,16 +75,33 @@ export function TurnosList({
     }, {});
   }
 
+  async function copiarDia(fecha: string, items: Appointment[]) {
+    const sorted = [...items].sort((a, b) => a.slot_time.localeCompare(b.slot_time));
+    const lineas = sorted.map(
+      (a) =>
+        `${a.slot_time.slice(0, 5)} ${toTitleCase(a.cliente_nombre)}${a.barber_id && barberNames[a.barber_id] ? ` - ${toTitleCase(barberNames[a.barber_id])}` : ''}`
+    );
+    const texto = [formatDateLabel(fecha), ...lineas].join('\n');
+    try {
+      await navigator.clipboard.writeText(texto);
+      setCopiedDate(fecha);
+      setTimeout(() => setCopiedDate(null), 2000);
+    } catch {
+      // Fallback si clipboard API falla
+    }
+  }
+
   function renderItem(a: Appointment) {
     return (
-      <li key={a.id} className={styles.item}>
-        <div
-          className={`${styles.itemMain} ${styles.itemMainClickable}`}
-          role="button"
-          tabIndex={0}
-          onClick={() => setModalAppointment(a)}
-          onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), setModalAppointment(a))}
-        >
+      <li
+        key={a.id}
+        className={`${styles.item} ${styles.itemClickable}`}
+        role="button"
+        tabIndex={0}
+        onClick={() => setModalAppointment(a)}
+        onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), setModalAppointment(a))}
+      >
+        <div className={styles.itemMain}>
           <span className={styles.time}>{a.slot_time.slice(0, 5)}</span>
           <span className={styles.client}>{toTitleCase(a.cliente_nombre)}</span>
         </div>
@@ -102,9 +120,27 @@ export function TurnosList({
       {sortedDatesProximos.length > 0 ? (
         sortedDatesProximos.map((fecha) => (
           <div key={fecha} className={styles.dayGroup}>
-            <h2 className={`${styles.date} ${fecha === today ? styles.dateToday : ''}`}>
-              {formatDateLabel(fecha)}
-            </h2>
+            <div className={styles.dateRow}>
+              <h2 className={`${styles.date} ${fecha === today ? styles.dateToday : ''}`}>
+                {formatDateLabel(fecha)}
+              </h2>
+              <button
+                type="button"
+                className={styles.copyBtn}
+                onClick={() => copiarDia(fecha, groupedProximos[fecha])}
+                title="Copiar turnos para pegar en Notas"
+                aria-label={copiedDate === fecha ? 'Copiado' : 'Copiar turnos del día'}
+              >
+                {copiedDate === fecha ? (
+                  <span className={styles.copyCheck}>✓</span>
+                ) : (
+                  <svg className={styles.copyIcon} xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                  </svg>
+                )}
+              </button>
+            </div>
             <ul>
               {groupedProximos[fecha]
                 .sort((a, b) => a.slot_time.localeCompare(b.slot_time))

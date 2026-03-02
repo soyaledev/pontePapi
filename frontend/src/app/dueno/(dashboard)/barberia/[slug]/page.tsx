@@ -109,7 +109,7 @@ export default async function BarberiaDetailPage({
           )}
           {barbershop.address && (
             <div className={styles.infoRow}>
-              <dt>Dirección</dt>
+              <dt>Ubicación</dt>
               <dd>
                 {isLink(barbershop.address) ? (
                   <a href={barbershop.address} target="_blank" rel="noopener noreferrer" className={styles.addressLink}>

@@ -39,11 +39,53 @@
   margin-bottom: 1.5rem;
 }
 
+.dateRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
 .date {
   font-size: 1rem;
   font-weight: 600;
-  margin-bottom: 0.75rem;
+  margin: 0;
   text-transform: capitalize;
+  flex: 1;
+}
+
+.copyBtn {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.copyBtn:hover {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.copyBtn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.copyIcon {
+  display: block;
+}
+
+.copyCheck {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--accent);
 }
 
 .list ul {
@@ -64,14 +106,20 @@
   align-items: center;
 }
 
+.itemClickable {
+  cursor: pointer;
+}
+
+.itemClickable:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+  border-radius: 0.5rem;
+}
+
 .itemMain {
   display: flex;
   align-items: baseline;
   gap: 0.6rem;
-}
-
-.itemMainClickable {
-  cursor: pointer;
 }
 
 .time {

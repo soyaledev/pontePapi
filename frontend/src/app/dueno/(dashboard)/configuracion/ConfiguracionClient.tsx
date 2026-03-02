@@ -188,15 +188,14 @@ export function ConfiguracionClient({
         </section>
       )}
 
-      <section className={`${styles.section} ${styles.dangerZone}`}>
-        <h2 className={styles.sectionTitle}>Eliminar cuenta</h2>
-        <p className={styles.warning}>
+      <section className={`${styles.section} ${styles.dangerZoneSubtle}`}>
+        <p className={styles.dangerZoneText}>
           Esta acción es irreversible. Se eliminarán todas tus barberías, turnos y datos asociados de forma permanente.
         </p>
         {deleteError && <p className={styles.error}>{deleteError}</p>}
         <button
           type="button"
-          className={`${styles.btn} ${styles.btnDanger}`}
+          className={styles.btnLinkDanger}
           onClick={() => setDeleteModalOpen(true)}
         >
           Eliminar mi cuenta

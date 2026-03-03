@@ -30,6 +30,10 @@ export function TurnosList({
   const [copiedDate, setCopiedDate] = useState<string | null>(null);
 
   useEffect(() => {
+    setAppointments(initialAppointments);
+  }, [initialAppointments]);
+
+  useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
       if (e.key === 'Escape') setModalAppointment(null);
     }

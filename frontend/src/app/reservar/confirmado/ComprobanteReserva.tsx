@@ -145,8 +145,9 @@ export function ComprobanteReserva({
 
   const isPaid = data.estado === 'confirmed';
   const tieneSena = data.barbershop?.requiere_sena && (data.barbershop?.monto_sena ?? 0) > 0;
+  const esperandoPago = tieneSena && !isPaid && data.estado === 'pending_payment';
 
-  if (tieneSena && !isPaid) {
+  if (esperandoPago) {
     async function handleRefresh() {
       setRefreshing(true);
       try {
@@ -252,7 +253,7 @@ export function ComprobanteReserva({
           </dl>
         </div>
 
-        {tieneSena && isPaid && (
+        {tieneSena && isPaid && data.mp_payment_id && (
           <div className={styles.comprobanteSection}>
             <h2 className={styles.sectionTitle}>Pago de seña</h2>
             <dl className={styles.comprobanteList}>

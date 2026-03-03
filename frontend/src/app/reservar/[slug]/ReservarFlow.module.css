@@ -373,6 +373,106 @@
   color: var(--text-muted);
 }
 
+.datosTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--text);
+}
+
+.resumenBlock {
+  padding: 1.25rem 1.5rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.resumenPrincipal {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0 0 0.6rem;
+  line-height: 1.4;
+  text-transform: capitalize;
+}
+
+.resumenLinea {
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0 0 0.4rem;
+}
+
+.resumenSeña {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--accent);
+  margin: 0.5rem 0 0;
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.senaOpcionChoice {
+  margin-bottom: 1.25rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.senaOpcionLabel {
+  font-size: 0.95rem;
+  font-weight: 500;
+  margin: 0 0 0.75rem;
+  color: var(--text);
+}
+
+.senaOpcionBtns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.senaOpcionBtn {
+  flex: 1;
+  min-width: 140px;
+  padding: 0.65rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0.5rem;
+  color: rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.senaOpcionBtn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.senaOpcionBtnActive {
+  flex: 1;
+  min-width: 140px;
+  padding: 0.65rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  background: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: 0.5rem;
+  color: var(--text);
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.2s;
+}
+
+.senaOpcionBtnActive:hover {
+  background: var(--accent-hover);
+}
+
 .ownerBlock {
   margin-bottom: 1.5rem;
   padding: 1.25rem;

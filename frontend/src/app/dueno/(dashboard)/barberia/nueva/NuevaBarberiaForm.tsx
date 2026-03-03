@@ -32,6 +32,7 @@ export function NuevaBarberiaForm() {
     phone: '',
     photo_url: '',
     requiere_sena: false,
+    sena_opcional: false,
     monto_sena: '',
   });
 
@@ -76,6 +77,7 @@ export function NuevaBarberiaForm() {
           phone: phoneOnly || null,
           photo_url: form.photo_url.trim() || null,
           requiere_sena: form.requiere_sena,
+          sena_opcional: form.requiere_sena ? form.sena_opcional : false,
           monto_sena: form.requiere_sena ? parseFloat(form.monto_sena) || 0 : 0,
         })
         .select('id')
@@ -230,12 +232,38 @@ export function NuevaBarberiaForm() {
           <input
             type="checkbox"
             checked={form.requiere_sena}
-            onChange={(e) => setForm((f) => ({ ...f, requiere_sena: e.target.checked }))}
+            onChange={(e) =>
+              setForm((f) => ({
+                ...f,
+                requiere_sena: e.target.checked,
+                sena_opcional: e.target.checked ? f.sena_opcional : false,
+              }))
+            }
           />
-          Requiere seña
+          Cobrar seña
         </label>
         {form.requiere_sena && (
           <>
+            <div className={styles.senaOpcion}>
+              <label className={styles.radioLabel}>
+                <input
+                  type="radio"
+                  name="sena_tipo"
+                  checked={!form.sena_opcional}
+                  onChange={() => setForm((f) => ({ ...f, sena_opcional: false }))}
+                />
+                Obligatoria (el cliente debe pagar)
+              </label>
+              <label className={styles.radioLabel}>
+                <input
+                  type="radio"
+                  name="sena_tipo"
+                  checked={form.sena_opcional}
+                  onChange={() => setForm((f) => ({ ...f, sena_opcional: true }))}
+                />
+                Opcional (el cliente decide si pagar o no)
+              </label>
+            </div>
             <label className={styles.label}>
               Monto seña (ARS)
               <div className={styles.senaInputWrap}>

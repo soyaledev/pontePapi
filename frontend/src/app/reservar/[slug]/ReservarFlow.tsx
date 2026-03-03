@@ -16,6 +16,7 @@ type Barberia = {
   barbers: Barber[];
   slot_minutes: number;
   requiere_sena?: boolean;
+  sena_opcional?: boolean;
   monto_sena?: number;
 };
 
@@ -148,6 +149,7 @@ export function ReservarFlow({
   const [nombre, setNombre] = useState('');
   const [telefono, setTelefono] = useState('');
   const [email, setEmail] = useState('');
+  const [clientePagaSena, setClientePagaSena] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
@@ -183,7 +185,9 @@ export function ReservarFlow({
   }, []);
 
   const slotMinutes = service?.duracion_min ?? barbershop.slot_minutes ?? 30;
-  const requiereSena = barbershop.requiere_sena && (barbershop.monto_sena ?? 0) > 0;
+  const tieneSena = barbershop.requiere_sena && (barbershop.monto_sena ?? 0) > 0;
+  const senaOpcional = !!(barbershop.sena_opcional && tieneSena);
+  const requiereSena = tieneSena && (!senaOpcional || clientePagaSena);
 
   const stepBarbero = 2;
   const stepFecha = 3;
@@ -635,28 +639,55 @@ export function ReservarFlow({
 
         {step === stepDatos && (
           <div className={styles.step}>
-            <h2>Tus datos</h2>
-            <p className={styles.resumen}>
-              {service?.name}
-              {fecha && (
-                <>
-                  {' '}
-                  · {new Date(fecha + 'T12:00:00').toLocaleDateString('es-AR', {
-                    weekday: 'long',
-                    day: 'numeric',
-                    month: 'long',
-                  })}
-                </>
-              )}
-              {slot && <> · {slot.slice(0, 5)}</>}
-            </p>
-            {barbers.length > 0 && (
-              <p className={styles.resumen}>Barbero: {displayBarberName()}</p>
-            )}
-            {barbershop.requiere_sena && (barbershop.monto_sena ?? 0) > 0 && (
-              <p className={styles.resumen}>
-                Seña a pagar: {formatPeso(barbershop.monto_sena ?? 0)}
+            <h2 className={styles.datosTitle}>Tus datos</h2>
+            <div className={styles.resumenBlock}>
+              <p className={styles.resumenPrincipal}>
+                {service?.name}
+                {fecha && (
+                  <>
+                    {' · '}
+                    {new Date(fecha + 'T12:00:00').toLocaleDateString('es-AR', {
+                      weekday: 'long',
+                      day: 'numeric',
+                      month: 'long',
+                    })}
+                  </>
+                )}
+                {slot && <> · {slot.slice(0, 5)}</>}
               </p>
+              {barbers.length > 0 && (
+                <p className={styles.resumenLinea}>
+                  Barbero: {displayBarberName()}
+                </p>
+              )}
+              {tieneSena && (
+                <p className={styles.resumenSeña}>
+                  {senaOpcional
+                    ? `Seña opcional: ${formatPeso(barbershop.monto_sena ?? 0)}`
+                    : `Seña a pagar: ${formatPeso(barbershop.monto_sena ?? 0)}`}
+                </p>
+              )}
+            </div>
+            {senaOpcional && (
+              <div className={styles.senaOpcionChoice}>
+                <p className={styles.senaOpcionLabel}>¿Querés pagar la seña?</p>
+                <div className={styles.senaOpcionBtns}>
+                  <button
+                    type="button"
+                    className={clientePagaSena ? styles.senaOpcionBtnActive : styles.senaOpcionBtn}
+                    onClick={() => setClientePagaSena(true)}
+                  >
+                    Sí, pagar {formatPeso(barbershop.monto_sena ?? 0)}
+                  </button>
+                  <button
+                    type="button"
+                    className={!clientePagaSena ? styles.senaOpcionBtnActive : styles.senaOpcionBtn}
+                    onClick={() => setClientePagaSena(false)}
+                  >
+                    No, reservar sin seña
+                  </button>
+                </div>
+              </div>
             )}
             <form
               onSubmit={(e) => {

@@ -129,7 +129,11 @@ export default async function BarberiaDetailPage({
           )}
           <div className={styles.infoRow}>
             <dt>Seña</dt>
-            <dd>{barbershop.requiere_sena ? formatPeso(barbershop.monto_sena ?? 0) : 'Sin seña'}</dd>
+            <dd>
+              {barbershop.requiere_sena
+                ? `${formatPeso(barbershop.monto_sena ?? 0)} (${barbershop.sena_opcional ? 'opcional' : 'obligatoria'})`
+                : 'Sin seña'}
+            </dd>
           </div>
         </dl>
       </div>

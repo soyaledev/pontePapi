@@ -2,9 +2,8 @@
 
 import { formatPeso } from '@/lib/format';
 
-const MP_PERCENT = 7.61;
-const PLATAFORMA_PERCENT = 3;
-const FACTOR_NETO = 1 - MP_PERCENT / 100 - PLATAFORMA_PERCENT / 100;
+const MP_PERCENT = 10.61;
+const FACTOR_NETO = 1 - MP_PERCENT / 100;
 
 export function SenaComisionesInfo({ monto }: { monto: number }) {
   if (monto <= 0) return null;
@@ -21,7 +20,7 @@ export function SenaComisionesInfo({ monto }: { monto: number }) {
       marginBottom: '1rem',
       lineHeight: 1.5,
     }}>
-      Si cobrás {formatPeso(monto)}, recibís aprox. {formatPeso(recibis)} (descontando {MP_PERCENT}% Mercado Pago + {PLATAFORMA_PERCENT}% plataforma). Si querés recibir {formatPeso(redondeo)} netos, cobrá {formatPeso(montoParaRedondeo)} de seña.
+      Si cobrás {formatPeso(monto)}, recibís aprox. {formatPeso(recibis)} (descontando {MP_PERCENT}% Mercado Pago). Si querés recibir {formatPeso(redondeo)} netos, cobrá {formatPeso(montoParaRedondeo)} de seña.
     </p>
   );
 }

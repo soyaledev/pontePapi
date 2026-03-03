@@ -47,7 +47,7 @@ export async function sendComprobanteEmail(appointmentId: string): Promise<{ ok:
   const service = serviceRes.data;
   const barber = barberRes.data ? { name: barberRes.data.name } : null;
 
-  const tieneSenaPagada = barbershop?.requiere_sena && (barbershop?.monto_sena ?? 0) > 0 && appointment.estado === 'confirmed';
+  const tieneSenaPagada = barbershop?.requiere_sena && (barbershop?.monto_sena ?? 0) > 0 && appointment.estado === 'confirmed' && !!appointment.mp_payment_id;
 
   const fechaFormateada = new Date(appointment.fecha + 'T12:00:00').toLocaleDateString('es-AR', {
     weekday: 'long',

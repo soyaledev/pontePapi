@@ -111,14 +111,14 @@
 .barberAvatar {
   width: 48px;
   height: 48px;
-  border-radius: 50%;
+  border-radius: 0.5rem;
   object-fit: cover;
 }
 
 .barberAvatarPlaceholder {
   width: 48px;
   height: 48px;
-  border-radius: 50%;
+  border-radius: 0.5rem;
   background: var(--bg-input);
   border: 1px solid var(--border);
   display: flex;

@@ -468,12 +468,11 @@ export function ReservarFlow({
 
         {!isOwner && (
           <>
-        <p className={styles.stepIndicator}>
-          {step === 1 && 'Paso 1: Servicio'}
-          {step === stepBarbero && 'Paso 2: Barbero'}
-          {step === stepFecha && 'Paso 3: Fecha y horario'}
-          {step === stepDatos && 'Paso 4: Tus datos'}
-        </p>
+        {step > 1 && (
+          <button type="button" onClick={goBackStep} className={styles.backStep}>
+            ← Atrás
+          </button>
+        )}
 
         {step === 1 && (
           <div className={styles.step}>
@@ -532,20 +531,12 @@ export function ReservarFlow({
             >
               Sin preferencia
             </button>
-            <button type="button" onClick={() => setStep(1)} className={styles.backStep}>
-              Atrás
-            </button>
           </div>
         )}
 
         {step === stepFecha && (
           <div className={styles.step}>
             <h2>Elegí fecha y horario</h2>
-            {selectedBarberId && (
-              <p className={styles.fechaLabel}>
-                Barbero: {toTitleCase(barbers.find((b) => b.id === selectedBarberId)?.name ?? '')}
-              </p>
-            )}
             <div className={styles.calendar}>
               <div className={styles.calendarHeader}>
                 <button
@@ -616,15 +607,8 @@ export function ReservarFlow({
                 a las {slot.slice(0, 5)}
               </p>
             )}
-            <div className={styles.stepActions}>
-              <button
-                type="button"
-                onClick={() => setStep(hasBarberStep ? stepBarbero : 1)}
-                className={styles.backStep}
-              >
-                Atrás
-              </button>
-              {fecha && slot && (
+            {fecha && slot && (
+              <div className={styles.confirmBtnWrap}>
                 <button
                   type="button"
                   className={styles.confirmBtn}
@@ -632,8 +616,8 @@ export function ReservarFlow({
                 >
                   Confirmar
                 </button>
-              )}
-            </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -667,28 +651,28 @@ export function ReservarFlow({
                     : `Seña a pagar: ${formatPeso(barbershop.monto_sena ?? 0)}`}
                 </p>
               )}
-            </div>
-            {senaOpcional && (
-              <div className={styles.senaOpcionChoice}>
-                <p className={styles.senaOpcionLabel}>¿Querés pagar la seña?</p>
-                <div className={styles.senaOpcionBtns}>
-                  <button
-                    type="button"
-                    className={clientePagaSena ? styles.senaOpcionBtnActive : styles.senaOpcionBtn}
-                    onClick={() => setClientePagaSena(true)}
-                  >
-                    Sí, pagar {formatPeso(barbershop.monto_sena ?? 0)}
-                  </button>
-                  <button
-                    type="button"
-                    className={!clientePagaSena ? styles.senaOpcionBtnActive : styles.senaOpcionBtn}
-                    onClick={() => setClientePagaSena(false)}
-                  >
-                    No, reservar sin seña
-                  </button>
+              {senaOpcional && (
+                <div className={styles.senaOpcionChoiceInline}>
+                  <p className={styles.senaOpcionLabel}>¿Querés pagar la seña?</p>
+                  <div className={styles.senaOpcionBtns}>
+                    <button
+                      type="button"
+                      className={clientePagaSena ? styles.senaOpcionBtnActive : styles.senaOpcionBtn}
+                      onClick={() => setClientePagaSena(true)}
+                    >
+                      Sí, pagar {formatPeso(barbershop.monto_sena ?? 0)}
+                    </button>
+                    <button
+                      type="button"
+                      className={!clientePagaSena ? styles.senaOpcionBtnActive : styles.senaOpcionBtn}
+                      onClick={() => setClientePagaSena(false)}
+                    >
+                      No, reservar sin seña
+                    </button>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
             <form
               onSubmit={(e) => {
                 e.preventDefault();
@@ -740,9 +724,6 @@ export function ReservarFlow({
                     : 'Confirmar turno'}
               </button>
             </form>
-            <button type="button" onClick={goBackStep} className={styles.backStep}>
-              Atrás
-            </button>
           </div>
         )}
           </>

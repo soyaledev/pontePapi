@@ -42,9 +42,7 @@
 }
 
 .stepIndicator {
-  font-size: 0.9rem;
-  color: var(--text-muted);
-  margin-bottom: 1.25rem;
+  display: none;
 }
 
 .step {
@@ -178,12 +176,12 @@
 }
 
 .calendarDayToday {
-  color: var(--accent);
+  color: var(--text);
   font-weight: 600;
 }
 
 .calendarDayToday:hover {
-  color: var(--accent);
+  color: var(--text);
 }
 
 .calendarDaySelected {
@@ -292,14 +290,14 @@
 .barberAvatar {
   width: 72px;
   height: 72px;
-  border-radius: 50%;
+  border-radius: 0.5rem;
   object-fit: cover;
 }
 
 .barberAvatarPlaceholder {
   width: 72px;
   height: 72px;
-  border-radius: 50%;
+  border-radius: 0.5rem;
   background: var(--bg-card);
   border: 1px solid var(--border);
   display: flex;
@@ -322,7 +320,7 @@
   border: none;
   border-bottom: 1px solid var(--border);
   border-radius: 0;
-  color: var(--accent);
+  color: var(--text);
   font-size: 0.95rem;
   cursor: pointer;
   font-family: inherit;
@@ -330,7 +328,7 @@
 }
 
 .sinPreferenciaBtn:hover {
-  color: var(--accent-hover);
+  color: var(--text-muted);
 }
 
 .barberResumen {
@@ -349,14 +347,14 @@
 .barberResumenAvatar {
   width: 48px;
   height: 48px;
-  border-radius: 50%;
+  border-radius: 0.5rem;
   object-fit: cover;
 }
 
 .barberResumenPlaceholder {
   width: 48px;
   height: 48px;
-  border-radius: 50%;
+  border-radius: 0.5rem;
   background: var(--bg-input);
   border: 1px solid var(--border);
   display: flex;
@@ -419,6 +417,12 @@
   background: rgba(255, 255, 255, 0.05);
   border-radius: 0.5rem;
   border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.senaOpcionChoiceInline {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .senaOpcionLabel {
@@ -607,6 +611,7 @@
   font-size: 0.9rem;
   cursor: pointer;
   font-family: inherit;
+  margin-bottom: 1rem;
 }
 
 .backStep:hover {
@@ -663,6 +668,12 @@
 .modalClose:hover {
   color: var(--text);
   border-color: rgba(255, 255, 255, 0.2);
+}
+
+.confirmBtnWrap {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1rem;
 }
 
 .stepActions {

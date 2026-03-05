@@ -1,6 +1,7 @@
 /**
  * Envío de comprobante de reserva por correo.
  * Usa Ultramail (https://ultramailad.vercel.app) — API: POST /api/send con header X-API-Key.
+ * Funciona tanto para reservas con seña (tras pago MP) como sin seña (confirmación directa).
  */
 
 import { getSupabaseAdmin } from '@/lib/supabase/admin';

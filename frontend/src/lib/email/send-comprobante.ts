@@ -46,7 +46,7 @@ export async function sendComprobanteEmail(
   ] = await Promise.all([
     supabase
       .from('barbershops')
-      .select('name, monto_sena, requiere_sena')
+      .select('name, monto_sena, requiere_sena, sena_comision_cliente')
       .eq('id', appointment.barbershop_id)
       .single(),
     supabase.from('services').select('name, price').eq('id', appointment.service_id).single(),
@@ -72,8 +72,20 @@ export async function sendComprobanteEmail(
     ? `${service.name}${service.price != null ? ` (${formatPeso(service.price)})` : ''}`
     : '-';
 
-  const senaBlock = tieneSenaPagada && barbershop?.monto_sena
-    ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #eee"><tr><td><p style="margin:0 0 12px;font-size:0.85rem;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:0.04em">Pago de seña</p><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td style="padding:6px 0;font-size:0.95rem"><span style="color:#888">Monto</span><br/><span style="color:#1a1a1a;font-weight:500">${formatPeso(barbershop.monto_sena)}</span></td></tr><tr><td style="padding:6px 0;font-size:0.95rem"><span style="color:#888">Estado</span><br/><span style="color:#22c55e;font-weight:600">Aprobado</span></td></tr></table></td></tr></table>`
+  const MP_PERCENT = 10.61;
+  const comisionCliente = !!barbershop?.sena_comision_cliente;
+  const montoSenaNeto = barbershop?.monto_sena ?? 0;
+  const senaCobrada = comisionCliente && montoSenaNeto > 0
+    ? Math.ceil((montoSenaNeto / (1 - MP_PERCENT / 100)) / 50) * 50
+    : montoSenaNeto;
+  const restanteEnLocal = (service?.price ?? 0) - montoSenaNeto;
+
+  const restanteRow = tieneSenaPagada && restanteEnLocal > 0
+    ? `<tr><td style="padding:6px 0;font-size:0.95rem"><span style="color:#888">Restante a abonar en la barbería</span><br/><span style="color:#1a1a1a;font-weight:700">${formatPeso(restanteEnLocal)}</span></td></tr>`
+    : '';
+
+  const senaBlock = tieneSenaPagada && senaCobrada > 0
+    ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #eee"><tr><td><p style="margin:0 0 12px;font-size:0.85rem;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:0.04em">Pago de seña</p><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td style="padding:6px 0;font-size:0.95rem"><span style="color:#888">Seña pagada</span><br/><span style="color:#1a1a1a;font-weight:500">${formatPeso(senaCobrada)}</span></td></tr><tr><td style="padding:6px 0;font-size:0.95rem"><span style="color:#888">Estado</span><br/><span style="color:#22c55e;font-weight:600">Aprobado</span></td></tr>${restanteRow}</table></td></tr></table>`
     : '';
 
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://pontepapi.com';

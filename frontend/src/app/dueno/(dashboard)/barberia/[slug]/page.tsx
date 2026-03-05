@@ -1,12 +1,13 @@
 import Link from 'next/link';
 import { redirect, notFound } from 'next/navigation';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
-import { toTitleCase, isLink, formatPeso } from '@/lib/format';
+import { toTitleCase, isLink } from '@/lib/format';
 import { checkBarbershopVisibility } from '@/lib/barbershop-visibility';
 import { ServiciosSection } from './ServiciosSection';
 import { HorariosSection } from './HorariosSection';
 import { TurnosHistorialSection } from './TurnosHistorialSection';
 import { PagosSection } from './PagosSection';
+import { SenaSection } from './SenaSection';
 import { VisibilityNotice } from './VisibilityNotice';
 import styles from './BarberiaDetail.module.css';
 
@@ -48,12 +49,29 @@ export default async function BarberiaDetailPage({
     .eq('barbershop_id', barbershop.id)
     .order('order', { ascending: true });
 
-  const { data: historialAppointments } = await supabase
-    .from('appointments')
-    .select('id, fecha, slot_time, cliente_nombre, cliente_telefono, estado, updated_at')
-    .eq('barbershop_id', barbershop.id)
-    .in('estado', ['completed', 'cancelled'])
-    .order('updated_at', { ascending: false, nullsFirst: false });
+  const [{ data: historialAppointments }, { data: pagosRaw }] = await Promise.all([
+    supabase
+      .from('appointments')
+      .select('id, fecha, slot_time, cliente_nombre, cliente_telefono, estado, updated_at')
+      .eq('barbershop_id', barbershop.id)
+      .in('estado', ['completed', 'cancelled'])
+      .order('updated_at', { ascending: false, nullsFirst: false }),
+    supabase
+      .from('appointments')
+      .select('id, fecha, slot_time, cliente_nombre, mp_payment_id')
+      .eq('barbershop_id', barbershop.id)
+      .not('mp_payment_id', 'is', null)
+      .order('fecha', { ascending: false })
+      .limit(50),
+  ]);
+
+  const pagos = (pagosRaw ?? []).map((a) => ({
+    id: a.id,
+    fecha: a.fecha,
+    slot_time: a.slot_time,
+    cliente_nombre: a.cliente_nombre ?? 'Cliente',
+    monto: barbershop.monto_sena ?? 0,
+  }));
 
   const visibility = checkBarbershopVisibility({
     schedulesCount: (schedules ?? []).length,
@@ -127,20 +145,21 @@ export default async function BarberiaDetailPage({
               <dd>{barbershop.phone.replace(/\D/g, '').slice(0, 10)}</dd>
             </div>
           )}
-          <div className={styles.infoRow}>
-            <dt>Seña</dt>
-            <dd>
-              {barbershop.requiere_sena
-                ? `${formatPeso(barbershop.monto_sena ?? 0)} (${barbershop.sena_opcional ? 'opcional' : 'obligatoria'})`
-                : 'Sin seña'}
-            </dd>
-          </div>
         </dl>
       </div>
+      <SenaSection
+        barbershopId={barbershop.id}
+        initialRequiereSena={!!barbershop.requiere_sena}
+        initialSenaOpcional={!!barbershop.sena_opcional}
+        initialMontoSena={barbershop.monto_sena ?? 0}
+        initialComisionCliente={!!barbershop.sena_comision_cliente}
+      />
       <PagosSection
         barbershopId={barbershop.id}
         requiereSena={!!barbershop.requiere_sena}
         mpLinked={!!barbershop.mp_access_token}
+        pagos={pagos}
+        montoSena={barbershop.monto_sena ?? 0}
       />
       <ServiciosSection barbershopId={barbershop.id} services={services ?? []} />
       <HorariosSection barbershopId={barbershop.id} schedules={schedules ?? []} />

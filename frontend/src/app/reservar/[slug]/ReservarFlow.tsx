@@ -18,7 +18,15 @@ type Barberia = {
   requiere_sena?: boolean;
   sena_opcional?: boolean;
   monto_sena?: number;
+  sena_comision_cliente?: boolean;
 };
+
+const MP_PERCENT = 10.61;
+function calcClientePaga(montoNeto: number, comisionCliente: boolean): number {
+  if (!comisionCliente || montoNeto <= 0) return montoNeto;
+  const exacto = montoNeto / (1 - MP_PERCENT / 100);
+  return Math.ceil(exacto / 50) * 50;
+}
 
 type Service = {
   id: string;
@@ -188,6 +196,10 @@ export function ReservarFlow({
   const tieneSena = barbershop.requiere_sena && (barbershop.monto_sena ?? 0) > 0;
   const senaOpcional = !!(barbershop.sena_opcional && tieneSena);
   const requiereSena = tieneSena && (!senaOpcional || clientePagaSena);
+  const montoSenaNeto = barbershop.monto_sena ?? 0;
+  const comisionCliente = !!barbershop.sena_comision_cliente;
+  const senaClientePaga = calcClientePaga(montoSenaNeto, comisionCliente);
+  const restanteEnLocal = service ? service.price - montoSenaNeto : 0;
 
   const stepBarbero = 2;
   const stepFecha = 3;
@@ -375,7 +387,6 @@ export function ReservarFlow({
           body: JSON.stringify({
             appointmentId: appointment.id,
             barbershopId: barbershop.id,
-            amount: barbershop.monto_sena ?? 0,
             description: `Seña - ${service.name} - ${barbershop.name}`,
             backUrlSuccess: `${frontendUrl}/reservar/confirmado?appointmentId=${encodeURIComponent(appointment.id)}`,
             backUrlFailure: `${frontendUrl}/reservar/error?slug=${encodeURIComponent(barbershop.slug)}&appointmentId=${encodeURIComponent(appointment.id)}`,
@@ -647,8 +658,16 @@ export function ReservarFlow({
               {tieneSena && (
                 <p className={styles.resumenSeña}>
                   {senaOpcional
-                    ? `Seña opcional: ${formatPeso(barbershop.monto_sena ?? 0)}`
-                    : `Seña a pagar: ${formatPeso(barbershop.monto_sena ?? 0)}`}
+                    ? `Seña opcional: ${formatPeso(senaClientePaga)}`
+                    : `Seña a pagar: ${formatPeso(senaClientePaga)}`}
+                  {comisionCliente && senaClientePaga !== montoSenaNeto && (
+                    <span className={styles.resumenNota}> (incluye recargo por pago online)</span>
+                  )}
+                </p>
+              )}
+              {tieneSena && service && requiereSena && restanteEnLocal > 0 && (
+                <p className={styles.resumenRestante}>
+                  Al llegar a la barbería abonarás: {formatPeso(restanteEnLocal)}
                 </p>
               )}
               {senaOpcional && (
@@ -660,7 +679,7 @@ export function ReservarFlow({
                       className={clientePagaSena ? styles.senaOpcionBtnActive : styles.senaOpcionBtn}
                       onClick={() => setClientePagaSena(true)}
                     >
-                      Sí, pagar {formatPeso(barbershop.monto_sena ?? 0)}
+                      Sí, pagar {formatPeso(senaClientePaga)}
                     </button>
                     <button
                       type="button"

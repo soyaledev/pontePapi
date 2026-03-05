@@ -7,24 +7,23 @@ const MP_ACCESS_TOKEN = process.env.MERCADOPAGO_ACCESS_TOKEN;
 const FRONTEND_URL = process.env.FRONTEND_URL ?? 'http://localhost:3000';
 
 router.post('/create-preference', async (req, res) => {
-  const { appointmentId, barbershopId, amount, description, backUrlSuccess, backUrlFailure } =
+  const { appointmentId, barbershopId, description, backUrlSuccess, backUrlFailure } =
     req.body as {
       appointmentId: string;
       barbershopId: string;
-      amount: number;
       description: string;
       backUrlSuccess?: string;
       backUrlFailure?: string;
     };
 
-  if (!appointmentId || !barbershopId || !amount || amount <= 0) {
+  if (!appointmentId || !barbershopId) {
     return res.status(400).json({ error: 'Datos inválidos' });
   }
 
   const supabase = getSupabase();
   const { data: barbershop, error: barbershopError } = await supabase
     .from('barbershops')
-    .select('mp_access_token')
+    .select('mp_access_token, monto_sena, requiere_sena, sena_comision_cliente')
     .eq('id', barbershopId)
     .single();
 
@@ -34,7 +33,24 @@ router.post('/create-preference', async (req, res) => {
     });
   }
 
-  const marketplaceFee = Math.round(amount * 0.03);
+  const montoNeto = barbershop.monto_sena ?? 0;
+  if (!barbershop.requiere_sena || montoNeto <= 0) {
+    return res.status(400).json({ error: 'Esta barbería no requiere seña' });
+  }
+
+  const MP_PERCENT = 10.61;
+  let amount: number;
+  let marketplaceFee: number;
+
+  if (barbershop.sena_comision_cliente) {
+    const exacto = montoNeto / (1 - MP_PERCENT / 100);
+    amount = Math.ceil(exacto / 50) * 50;
+    const surplus = amount - exacto;
+    marketplaceFee = Math.round(amount * 0.03 + surplus);
+  } else {
+    amount = montoNeto;
+    marketplaceFee = Math.round(amount * 0.03);
+  }
 
   try {
     const response = await fetch('https://api.mercadopago.com/checkout/preferences', {

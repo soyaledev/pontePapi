@@ -265,6 +265,82 @@
   border-color: rgba(255, 255, 255, 0.3);
 }
 
+/* ── Sección turnos anteriores sin marcar ── */
+
+.pastSection {
+  margin-top: 2rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 1rem;
+}
+
+.pastToggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.75rem 0.85rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.6rem;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.95rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pastToggle:hover {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+.pastToggle:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.pastToggleText {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pastBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.4rem;
+  height: 1.4rem;
+  padding: 0 0.4rem;
+  background: var(--accent);
+  color: var(--bg);
+  font-size: 0.75rem;
+  font-weight: 700;
+  border-radius: 10rem;
+}
+
+.pastChevron {
+  flex-shrink: 0;
+  transition: transform 0.25s ease;
+}
+
+.pastChevronOpen {
+  transform: rotate(180deg);
+}
+
+.pastContent {
+  margin-top: 0.75rem;
+}
+
+.pastHint {
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.45);
+  margin: 0 0 1rem;
+  line-height: 1.4;
+}
+
 @media (max-width: 380px) {
   .item {
     grid-template-rows: auto auto;

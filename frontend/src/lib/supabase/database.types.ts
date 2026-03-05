@@ -81,6 +81,7 @@ export type Database = {
           phone: string | null;
           photo_url: string | null;
           requiere_sena: boolean | null;
+          sena_comision_cliente: boolean | null;
           sena_opcional: boolean | null;
           slot_minutes: number | null;
           slug: string;
@@ -101,6 +102,7 @@ export type Database = {
           phone?: string | null;
           photo_url?: string | null;
           requiere_sena?: boolean | null;
+          sena_comision_cliente?: boolean | null;
           sena_opcional?: boolean | null;
           slot_minutes?: number | null;
           slug: string;

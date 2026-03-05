@@ -1,12 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { toTitleCase, formatPesoInput, isGoogleMapsLink } from '@/lib/format';
+import { toTitleCase, isGoogleMapsLink } from '@/lib/format';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase/client';
 import { PhotoUpload } from '@/components/PhotoUpload';
-import { SenaComisionesInfo } from '@/components/SenaComisionesInfo';
 import styles from './NuevaBarberia.module.css';
 
 function generateSlug(name: string): string {
@@ -31,9 +30,6 @@ export function NuevaBarberiaForm() {
     city: '',
     phone: '',
     photo_url: '',
-    requiere_sena: false,
-    sena_opcional: false,
-    monto_sena: '',
   });
 
   async function handleSubmit(e: React.FormEvent) {
@@ -76,9 +72,6 @@ export function NuevaBarberiaForm() {
           city: form.city.trim() ? toTitleCase(form.city.trim()) : null,
           phone: phoneOnly || null,
           photo_url: form.photo_url.trim() || null,
-          requiere_sena: form.requiere_sena,
-          sena_opcional: form.requiere_sena ? form.sena_opcional : false,
-          monto_sena: form.requiere_sena ? parseFloat(form.monto_sena) || 0 : 0,
         })
         .select('id')
         .single();
@@ -228,62 +221,6 @@ export function NuevaBarberiaForm() {
             required
           />
         </div>
-        <label className={styles.checkbox}>
-          <input
-            type="checkbox"
-            checked={form.requiere_sena}
-            onChange={(e) =>
-              setForm((f) => ({
-                ...f,
-                requiere_sena: e.target.checked,
-                sena_opcional: e.target.checked ? f.sena_opcional : false,
-              }))
-            }
-          />
-          Cobrar seña
-        </label>
-        {form.requiere_sena && (
-          <>
-            <div className={styles.senaOpcion}>
-              <label className={styles.radioLabel}>
-                <input
-                  type="radio"
-                  name="sena_tipo"
-                  checked={!form.sena_opcional}
-                  onChange={() => setForm((f) => ({ ...f, sena_opcional: false }))}
-                />
-                Obligatoria (el cliente debe pagar)
-              </label>
-              <label className={styles.radioLabel}>
-                <input
-                  type="radio"
-                  name="sena_tipo"
-                  checked={form.sena_opcional}
-                  onChange={() => setForm((f) => ({ ...f, sena_opcional: true }))}
-                />
-                Opcional (el cliente decide si pagar o no)
-              </label>
-            </div>
-            <label className={styles.label}>
-              Monto seña (ARS)
-              <div className={styles.senaInputWrap}>
-                <span className={styles.senaPrefix}>$</span>
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  value={form.monto_sena ? formatPesoInput(form.monto_sena) : ''}
-                  onChange={(e) => {
-                    const raw = e.target.value.replace(/\D/g, '');
-                    setForm((f) => ({ ...f, monto_sena: raw }));
-                  }}
-                  className={styles.input}
-                  placeholder="1.500"
-                />
-              </div>
-            </label>
-            <SenaComisionesInfo monto={parseFloat(form.monto_sena) || 0} />
-          </>
-        )}
         {error && <p className={styles.error}>{error}</p>}
         <button type="submit" className={styles.submit} disabled={loading}>
           {loading ? 'Creando...' : 'Crear barbería'}

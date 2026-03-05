@@ -5,27 +5,25 @@ export async function POST(req: Request) {
   const {
     appointmentId,
     barbershopId,
-    amount,
     description,
     backUrlSuccess,
     backUrlFailure,
   } = (await req.json()) as {
     appointmentId: string;
     barbershopId: string;
-    amount: number;
     description: string;
     backUrlSuccess?: string;
     backUrlFailure?: string;
   };
 
-  if (!appointmentId || !barbershopId || !amount || amount <= 0) {
+  if (!appointmentId || !barbershopId) {
     return NextResponse.json({ error: 'Datos inválidos' }, { status: 400 });
   }
 
   const supabase = getSupabaseAdmin();
   const { data: barbershop, error: barbershopError } = await supabase
     .from('barbershops')
-    .select('mp_access_token')
+    .select('mp_access_token, monto_sena, requiere_sena, sena_comision_cliente')
     .eq('id', barbershopId)
     .single();
 
@@ -36,14 +34,31 @@ export async function POST(req: Request) {
     );
   }
 
+  const montoNeto = barbershop.monto_sena ?? 0;
+  if (!barbershop.requiere_sena || montoNeto <= 0) {
+    return NextResponse.json({ error: 'Esta barbería no requiere seña' }, { status: 400 });
+  }
+
+  const MP_PERCENT = 10.61;
+  let amount: number;
+  let marketplaceFee: number;
+
+  if (barbershop.sena_comision_cliente) {
+    const exacto = montoNeto / (1 - MP_PERCENT / 100);
+    amount = Math.ceil(exacto / 50) * 50;
+    const surplus = amount - exacto;
+    marketplaceFee = Math.round(amount * 0.03 + surplus);
+  } else {
+    amount = montoNeto;
+    marketplaceFee = Math.round(amount * 0.03);
+  }
+
   const baseUrl =
     process.env.VERCEL_URL
       ? `https://${process.env.VERCEL_URL}`
       : process.env.NEXT_PUBLIC_VERCEL_URL
         ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
         : process.env.FRONTEND_URL ?? 'http://localhost:3000';
-
-  const marketplaceFee = Math.round(amount * 0.03);
 
   try {
     const response = await fetch(

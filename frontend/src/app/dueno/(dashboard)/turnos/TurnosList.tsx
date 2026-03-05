@@ -19,19 +19,28 @@ type Appointment = {
 
 export function TurnosList({
   appointments: initialAppointments,
+  pastAppointments: initialPast = [],
   barberNames = {},
 }: {
   appointments: Appointment[];
+  pastAppointments?: Appointment[];
   barberNames?: Record<string, string>;
 }) {
   const [appointments, setAppointments] = useState(initialAppointments);
+  const [pastAppointments, setPastAppointments] = useState(initialPast);
+  const [pastOpen, setPastOpen] = useState(false);
   const [modalAppointment, setModalAppointment] = useState<Appointment | null>(null);
+  const [modalSource, setModalSource] = useState<'upcoming' | 'past'>('upcoming');
   const [modalLoading, setModalLoading] = useState(false);
   const [copiedDate, setCopiedDate] = useState<string | null>(null);
 
   useEffect(() => {
     setAppointments(initialAppointments);
   }, [initialAppointments]);
+
+  useEffect(() => {
+    setPastAppointments(initialPast);
+  }, [initialPast]);
 
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
@@ -49,7 +58,11 @@ export function TurnosList({
       .update({ estado })
       .eq('id', id);
     if (error) return;
-    setAppointments((prev) => prev.filter((a) => a.id !== id));
+    if (modalSource === 'past') {
+      setPastAppointments((prev) => prev.filter((a) => a.id !== id));
+    } else {
+      setAppointments((prev) => prev.filter((a) => a.id !== id));
+    }
     setModalAppointment(null);
   }
 
@@ -59,10 +72,14 @@ export function TurnosList({
   const tomorrow = new Date(Date.now() + 86400000).toLocaleDateString('sv-SE', {
     timeZone: 'America/Argentina/Buenos_Aires',
   });
+  const yesterday = new Date(Date.now() - 86400000).toLocaleDateString('sv-SE', {
+    timeZone: 'America/Argentina/Buenos_Aires',
+  });
 
   function formatDateLabel(fecha: string): string {
     if (fecha === today) return 'Hoy';
     if (fecha === tomorrow) return 'Mañana';
+    if (fecha === yesterday) return 'Ayer';
     return new Date(fecha + 'T12:00:00').toLocaleDateString('es-AR', {
       weekday: 'long',
       day: 'numeric',
@@ -95,15 +112,20 @@ export function TurnosList({
     }
   }
 
-  function renderItem(a: Appointment) {
+  function openModal(a: Appointment, source: 'upcoming' | 'past') {
+    setModalAppointment(a);
+    setModalSource(source);
+  }
+
+  function renderItem(a: Appointment, source: 'upcoming' | 'past') {
     return (
       <li
         key={a.id}
         className={`${styles.item} ${styles.itemClickable}`}
         role="button"
         tabIndex={0}
-        onClick={() => setModalAppointment(a)}
-        onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), setModalAppointment(a))}
+        onClick={() => openModal(a, source)}
+        onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), openModal(a, source))}
       >
         <div className={styles.itemMain}>
           <span className={styles.time}>{a.slot_time.slice(0, 5)}</span>
@@ -118,6 +140,9 @@ export function TurnosList({
 
   const groupedProximos = groupByDate(appointments);
   const sortedDatesProximos = Object.keys(groupedProximos).sort();
+
+  const groupedPast = groupByDate(pastAppointments);
+  const sortedDatesPast = Object.keys(groupedPast).sort().reverse();
 
   return (
     <div className={styles.list}>
@@ -148,12 +173,62 @@ export function TurnosList({
             <ul>
               {groupedProximos[fecha]
                 .sort((a, b) => a.slot_time.localeCompare(b.slot_time))
-                .map((a) => renderItem(a))}
+                .map((a) => renderItem(a, 'upcoming'))}
             </ul>
           </div>
         ))
       ) : (
         <p className={styles.empty}>No hay turnos próximos</p>
+      )}
+
+      {sortedDatesPast.length > 0 && (
+        <div className={styles.pastSection}>
+          <button
+            type="button"
+            className={styles.pastToggle}
+            onClick={() => setPastOpen((o) => !o)}
+            aria-expanded={pastOpen}
+          >
+            <span className={styles.pastToggleText}>
+              Turnos sin marcar
+              <span className={styles.pastBadge}>{pastAppointments.length}</span>
+            </span>
+            <svg
+              className={`${styles.pastChevron} ${pastOpen ? styles.pastChevronOpen : ''}`}
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M6 9l6 6 6-6" />
+            </svg>
+          </button>
+          {pastOpen && (
+            <div className={styles.pastContent}>
+              <p className={styles.pastHint}>
+                Estos turnos ya pasaron pero no fueron marcados. Tocá uno para marcar si vino o no.
+              </p>
+              {sortedDatesPast.map((fecha) => (
+                <div key={fecha} className={styles.dayGroup}>
+                  <div className={styles.dateRow}>
+                    <h2 className={styles.date}>
+                      {formatDateLabel(fecha)}
+                    </h2>
+                  </div>
+                  <ul>
+                    {groupedPast[fecha]
+                      .sort((a, b) => a.slot_time.localeCompare(b.slot_time))
+                      .map((a) => renderItem(a, 'past'))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       )}
 
       {modalAppointment && (

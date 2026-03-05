@@ -33,8 +33,8 @@
   box-shadow:
     inset 6px 0 16px rgba(255, 255, 255, 0.06),
     inset -6px 0 16px rgba(0, 0, 0, 0.2);
-  /* 48px period at 45°: translateX(-48/√2) = -33.941px para loop exacto. */
-  animation: slideLeft 1.4s linear infinite;
+  /* 48px period at 45°: horizontal pitch = 48 × √2 ≈ 67.882px for seamless loop */
+  animation: slideLeft 2.4s linear infinite;
   will-change: transform;
   backface-visibility: hidden;
 }
@@ -59,6 +59,6 @@
     transform: translate3d(0, 0, 0);
   }
   to {
-    transform: translate3d(-33.94112549695428px, 0, 0);
+    transform: translate3d(-67.88225099390856px, 0, 0);
   }
 }

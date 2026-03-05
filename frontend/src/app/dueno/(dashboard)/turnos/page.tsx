@@ -6,6 +6,8 @@ import styles from './Turnos.module.css';
 
 export const dynamic = 'force-dynamic';
 
+const PAST_DAYS = 7;
+
 export default async function TurnosPage() {
   const supabase = await createServerSupabaseClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -34,15 +36,34 @@ export default async function TurnosPage() {
     timeZone: 'America/Argentina/Buenos_Aires',
   });
 
-  const { data: rawAppointments } = await supabase
-    .from('appointments')
-    .select('id, barbershop_id, barber_id, fecha, slot_time, cliente_nombre, cliente_telefono, cliente_email, estado')
-    .eq('barbershop_id', barbershop.id)
-    .gte('fecha', today)
-    .order('fecha')
-    .order('slot_time');
+  const pastDate = new Date(Date.now() - PAST_DAYS * 86400000).toLocaleDateString('sv-SE', {
+    timeZone: 'America/Argentina/Buenos_Aires',
+  });
 
-  const barberIds = Array.from(new Set((rawAppointments ?? []).map((a) => a.barber_id).filter(Boolean)));
+  const [{ data: rawAppointments }, { data: rawPastAppointments }] = await Promise.all([
+    supabase
+      .from('appointments')
+      .select('id, barbershop_id, barber_id, fecha, slot_time, cliente_nombre, cliente_telefono, cliente_email, estado')
+      .eq('barbershop_id', barbershop.id)
+      .gte('fecha', today)
+      .order('fecha')
+      .order('slot_time'),
+    supabase
+      .from('appointments')
+      .select('id, barbershop_id, barber_id, fecha, slot_time, cliente_nombre, cliente_telefono, cliente_email, estado')
+      .eq('barbershop_id', barbershop.id)
+      .eq('estado', 'confirmed')
+      .gte('fecha', pastDate)
+      .lt('fecha', today)
+      .order('fecha', { ascending: false })
+      .order('slot_time'),
+  ]);
+
+  const allIds = [
+    ...(rawAppointments ?? []),
+    ...(rawPastAppointments ?? []),
+  ];
+  const barberIds = Array.from(new Set(allIds.map((a) => a.barber_id).filter(Boolean)));
   const { data: barbersData } = barberIds.length > 0
     ? await supabase.from('barbers').select('id, name').in('id', barberIds)
     : { data: [] };
@@ -53,7 +74,11 @@ export default async function TurnosPage() {
   return (
     <div className={styles.page}>
       <h1 className={styles.title}>Próximos turnos</h1>
-      <TurnosList appointments={proximos} barberNames={barberNames} />
+      <TurnosList
+        appointments={proximos}
+        pastAppointments={rawPastAppointments ?? []}
+        barberNames={barberNames}
+      />
     </div>
   );
 }

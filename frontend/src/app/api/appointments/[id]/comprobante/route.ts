@@ -20,7 +20,7 @@ export async function GET(
   }
 
   const [barbershopRes, serviceRes, barberRes] = await Promise.all([
-    supabase.from('barbershops').select('name, slug, address, city, phone, monto_sena, requiere_sena').eq('id', appointment.barbershop_id).single(),
+    supabase.from('barbershops').select('name, slug, address, city, phone, monto_sena, requiere_sena, sena_comision_cliente').eq('id', appointment.barbershop_id).single(),
     supabase.from('services').select('name, price').eq('id', appointment.service_id).single(),
     appointment.barber_id
       ? supabase.from('barbers').select('name').eq('id', appointment.barber_id).single()

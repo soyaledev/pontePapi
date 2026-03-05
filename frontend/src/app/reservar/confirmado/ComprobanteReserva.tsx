@@ -22,7 +22,7 @@ type ComprobanteData = {
   estado: string;
   mp_payment_id: string | null;
   created_at: string | null;
-  barbershop: { name: string; slug: string; address?: string; city?: string; phone?: string; monto_sena?: number; requiere_sena?: boolean } | null;
+  barbershop: { name: string; slug: string; address?: string; city?: string; phone?: string; monto_sena?: number; requiere_sena?: boolean; sena_comision_cliente?: boolean } | null;
   service: { name: string; price: number } | null;
   barber: { name: string } | null;
 };
@@ -145,6 +145,13 @@ export function ComprobanteReserva({
 
   const isPaid = data.estado === 'confirmed';
   const tieneSena = data.barbershop?.requiere_sena && (data.barbershop?.monto_sena ?? 0) > 0;
+  const montoSenaNeto = data.barbershop?.monto_sena ?? 0;
+  const comisionCliente = !!data.barbershop?.sena_comision_cliente;
+  const MP_PERCENT = 10.61;
+  const senaClientePago = comisionCliente && montoSenaNeto > 0
+    ? Math.ceil((montoSenaNeto / (1 - MP_PERCENT / 100)) / 50) * 50
+    : montoSenaNeto;
+  const restanteEnLocal = data.service ? data.service.price - montoSenaNeto : 0;
   const esperandoPago = tieneSena && !isPaid && data.estado === 'pending_payment';
 
   if (esperandoPago) {
@@ -258,8 +265,8 @@ export function ComprobanteReserva({
             <h2 className={styles.sectionTitle}>Pago de seña</h2>
             <dl className={styles.comprobanteList}>
               <div className={styles.comprobanteRow}>
-                <dt>Monto</dt>
-                <dd>{formatPeso(data.barbershop?.monto_sena ?? 0)}</dd>
+                <dt>Seña pagada</dt>
+                <dd>{formatPeso(senaClientePago)}</dd>
               </div>
               <div className={styles.comprobanteRow}>
                 <dt>Estado</dt>
@@ -271,12 +278,20 @@ export function ComprobanteReserva({
                   <dd className={styles.mono}>{data.mp_payment_id}</dd>
                 </div>
               )}
+              {restanteEnLocal > 0 && (
+                <div className={styles.comprobanteRow}>
+                  <dt>Restante a abonar en la barbería</dt>
+                  <dd><strong>{formatPeso(restanteEnLocal)}</strong></dd>
+                </div>
+              )}
             </dl>
           </div>
         )}
 
         <p className={styles.comprobanteNota}>
-          Llegá unos minutos antes. Si tenés que cancelar, comunicate con la barbería.
+          {tieneSena && isPaid && restanteEnLocal > 0
+            ? `Llegá unos minutos antes. Recordá que debés abonar ${formatPeso(restanteEnLocal)} en la barbería.`
+            : 'Llegá unos minutos antes. Si tenés que cancelar, comunicate con la barbería.'}
         </p>
 
         <Link href="/" className={styles.link}>

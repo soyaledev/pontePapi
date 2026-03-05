@@ -18,8 +18,8 @@ function formatPeso(n: number): string {
 export async function sendComprobanteEmail(
   appointmentId: string
 ): Promise<{ ok: boolean; error?: string }> {
-  const apiKey = process.env.ULTRAMAIL_API_KEY;
-  const templateId = process.env.ULTRAMAIL_TEMPLATE_ID;
+  const apiKey = process.env.ULTRAMAIL_API_KEY?.trim();
+  const templateId = process.env.ULTRAMAIL_TEMPLATE_ID?.trim();
 
   if (!apiKey || !templateId) {
     return { ok: false, error: 'Ultramail no configurado' };
@@ -72,11 +72,12 @@ export async function sendComprobanteEmail(
     : '-';
 
   const senaBlock = tieneSenaPagada && barbershop?.monto_sena
-    ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:20px;background:rgba(233,69,96,0.12);border:1px solid rgba(233,69,96,0.25);border-radius:12px;overflow:hidden"><tr><td style="padding:16px 20px"><p style="margin:0 0 4px;font-size:11px;font-weight:600;letter-spacing:0.06em;color:rgba(255,255,255,0.5);text-transform:uppercase">Seña abonada</p><p style="margin:0;font-size:18px;font-weight:700;color:#e94560">${formatPeso(barbershop.monto_sena)}</p></td></tr></table>`
+    ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #eee"><tr><td><p style="margin:0 0 12px;font-size:0.85rem;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:0.04em">Pago de seña</p><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td style="padding:6px 0;font-size:0.95rem"><span style="color:#888">Monto</span><br/><span style="color:#1a1a1a;font-weight:500">${formatPeso(barbershop.monto_sena)}</span></td></tr><tr><td style="padding:6px 0;font-size:0.95rem"><span style="color:#888">Estado</span><br/><span style="color:#22c55e;font-weight:600">Aprobado</span></td></tr></table></td></tr></table>`
     : '';
 
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://barbert.vercel.app';
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://pontepapi.com';
   const comprobanteUrl = `${baseUrl}/reservar/confirmado?appointmentId=${encodeURIComponent(appointmentId)}`;
+  const logoUrl = `${baseUrl}/images/logosvgPontePapi.svg`;
 
   const variables: Record<string, string> = {
     cliente_nombre: toTitleCase(appointment.cliente_nombre),
@@ -87,6 +88,7 @@ export async function sendComprobanteEmail(
     fecha: fechaStr,
     hora: horaStr,
     comprobante_url: comprobanteUrl,
+    logo_url: logoUrl,
     sena_block: senaBlock,
   };
 

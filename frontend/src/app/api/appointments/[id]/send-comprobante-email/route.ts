@@ -11,7 +11,7 @@ export async function POST(
   const result = await sendComprobanteEmail(id);
 
   if (!result.ok) {
-    if (result.error === 'EmailJS no configurado') {
+    if (result.error === 'Ultramail no configurado') {
       return NextResponse.json({ error: result.error }, { status: 500 });
     }
     if (result.error === 'Turno no encontrado') {

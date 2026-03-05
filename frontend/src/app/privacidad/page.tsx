@@ -77,7 +77,7 @@ export default function PrivacidadPage() {
           <ul>
             <li><strong>La barbería donde reservás:</strong> nombre, teléfono y correo para que gestionen tu turno.</li>
             <li><strong>Proveedores técnicos:</strong> Supabase (base de datos y autenticación), Vercel (hosting),
-              EmailJS (envío de correos), Mercado Pago (pagos) y Google (si iniciás sesión con Google).
+              Ultramail (envío de correos), Mercado Pago (pagos) y Google (si iniciás sesión con Google).
               Estos proveedores actúan como encargados del tratamiento bajo contrato.</li>
           </ul>
           <p>

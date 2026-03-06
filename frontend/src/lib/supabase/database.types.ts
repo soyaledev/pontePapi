@@ -21,6 +21,7 @@ export type Database = {
           estado: Database["public"]["Enums"]["appointment_status"] | null;
           fecha: string;
           id: string;
+          monto_sena_pagado: number | null;
           mp_payment_id: string | null;
           mp_preference_id: string | null;
           service_id: string;
@@ -38,6 +39,7 @@ export type Database = {
           estado?: Database["public"]["Enums"]["appointment_status"] | null;
           fecha: string;
           id?: string;
+          monto_sena_pagado?: number | null;
           mp_payment_id?: string | null;
           mp_preference_id?: string | null;
           service_id: string;

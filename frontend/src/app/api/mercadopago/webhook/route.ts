@@ -41,10 +41,16 @@ export async function POST(req: Request) {
       const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(appointmentId);
       let resolvedId: string | null = null;
 
+      const montoPagado = typeof payment.transaction_amount === 'number' ? payment.transaction_amount : null;
+
       if (isUuid) {
         const { data: updated } = await supabase
           .from('appointments')
-          .update({ estado: 'confirmed', mp_payment_id: String(data.id) })
+          .update({
+            estado: 'confirmed',
+            mp_payment_id: String(data.id),
+            ...(montoPagado != null && { monto_sena_pagado: montoPagado }),
+          })
           .eq('id', appointmentId)
           .select('id')
           .single();
@@ -58,7 +64,11 @@ export async function POST(req: Request) {
         if (row?.id) {
           await supabase
             .from('appointments')
-            .update({ estado: 'confirmed', mp_payment_id: String(data.id) })
+            .update({
+              estado: 'confirmed',
+              mp_payment_id: String(data.id),
+              ...(montoPagado != null && { monto_sena_pagado: montoPagado }),
+            })
             .eq('id', row.id);
           resolvedId = row.id;
         }

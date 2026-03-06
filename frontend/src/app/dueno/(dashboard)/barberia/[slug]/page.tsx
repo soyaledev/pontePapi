@@ -57,7 +57,7 @@ export default async function BarberiaDetailPage({
       .order('updated_at', { ascending: false, nullsFirst: false }),
     supabase
       .from('appointments')
-      .select('id, fecha, slot_time, cliente_nombre, mp_payment_id')
+      .select('id, fecha, slot_time, cliente_nombre, mp_payment_id, monto_sena_pagado')
       .eq('barbershop_id', barbershop.id)
       .not('mp_payment_id', 'is', null)
       .order('fecha', { ascending: false })
@@ -69,7 +69,7 @@ export default async function BarberiaDetailPage({
     fecha: a.fecha,
     slot_time: a.slot_time,
     cliente_nombre: a.cliente_nombre,
-    monto: barbershop.monto_sena ?? 0,
+    monto: (a as { monto_sena_pagado?: number | null }).monto_sena_pagado ?? barbershop.monto_sena ?? 0,
   }));
 
   const visibility = checkBarbershopVisibility({

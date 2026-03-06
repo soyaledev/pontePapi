@@ -51,9 +51,14 @@ export async function POST(
     const payment = await res.json();
 
     if (payment.status === 'approved') {
+      const montoPagado = typeof payment.transaction_amount === 'number' ? payment.transaction_amount : null;
       await supabase
         .from('appointments')
-        .update({ estado: 'confirmed', mp_payment_id: String(paymentId) })
+        .update({
+          estado: 'confirmed',
+          mp_payment_id: String(paymentId),
+          ...(montoPagado != null && { monto_sena_pagado: montoPagado }),
+        })
         .eq('id', appointmentId);
       sendComprobanteEmail(appointmentId).catch(() => {});
       return NextResponse.json({ ok: true, estado: 'confirmed' });

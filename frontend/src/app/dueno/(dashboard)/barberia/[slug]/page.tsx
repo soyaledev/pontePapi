@@ -64,13 +64,22 @@ export default async function BarberiaDetailPage({
       .limit(50),
   ]);
 
-  const pagos = (pagosRaw ?? []).map((a) => ({
-    id: a.id,
-    fecha: a.fecha,
-    slot_time: a.slot_time,
-    cliente_nombre: a.cliente_nombre,
-    monto: (a as { monto_sena_pagado?: number | null }).monto_sena_pagado ?? barbershop.monto_sena ?? 0,
-  }));
+  const MP_FEE = 1 - 10.61 / 100;
+  const comisionCliente = !!barbershop.sena_comision_cliente;
+  const montoSenaConfig = barbershop.monto_sena ?? 0;
+  const pagos = (pagosRaw ?? []).map((a) => {
+    const bruto = (a as { monto_sena_pagado?: number | null }).monto_sena_pagado;
+    const montoNeto = bruto != null
+      ? (comisionCliente ? montoSenaConfig : Math.round(bruto * MP_FEE))
+      : montoSenaConfig;
+    return {
+      id: a.id,
+      fecha: a.fecha,
+      slot_time: a.slot_time,
+      cliente_nombre: a.cliente_nombre,
+      monto: montoNeto,
+    };
+  });
 
   const visibility = checkBarbershopVisibility({
     schedulesCount: (schedules ?? []).length,

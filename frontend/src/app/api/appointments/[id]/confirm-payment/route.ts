@@ -35,13 +35,15 @@ export async function POST(
 
   const { data: barbershop, error: bsError } = await supabase
     .from('barbershops')
-    .select('mp_access_token')
+    .select('mp_access_token, monto_sena, sena_comision_cliente')
     .eq('id', appointment.barbershop_id)
     .single();
 
   if (bsError || !barbershop?.mp_access_token) {
     return NextResponse.json({ error: 'Barbería sin Mercado Pago vinculado' }, { status: 400 });
   }
+
+  const MP_FEE = 1 - 10.61 / 100;
 
   try {
     const res = await fetch(
@@ -52,12 +54,23 @@ export async function POST(
 
     if (payment.status === 'approved') {
       const montoPagado = typeof payment.transaction_amount === 'number' ? payment.transaction_amount : null;
+      const netReceived = typeof payment.transaction_details?.net_received_amount === 'number'
+        ? payment.transaction_details.net_received_amount
+        : null;
+      const montoSenaNeto =
+        montoPagado != null
+          ? barbershop.sena_comision_cliente
+            ? (barbershop.monto_sena ?? 0)
+            : (netReceived ?? Math.round(montoPagado * MP_FEE))
+          : null;
+
       await supabase
         .from('appointments')
         .update({
           estado: 'confirmed',
           mp_payment_id: String(paymentId),
           ...(montoPagado != null && { monto_sena_pagado: montoPagado }),
+          ...(montoSenaNeto != null && { monto_sena_neto: montoSenaNeto }),
         })
         .eq('id', appointmentId);
       sendComprobanteEmail(appointmentId).catch(() => {});

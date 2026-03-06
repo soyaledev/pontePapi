@@ -42,6 +42,7 @@ async function getComprobante(
     estado: appointment.estado,
     mp_payment_id: appointment.mp_payment_id,
     monto_sena_pagado: appointment.monto_sena_pagado ?? null,
+    monto_sena_neto: (appointment as { monto_sena_neto?: number | null }).monto_sena_neto ?? null,
     created_at: appointment.created_at,
     barbershop: barbershopRes.data,
     service: serviceRes.data,

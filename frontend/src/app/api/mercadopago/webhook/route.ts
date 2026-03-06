@@ -43,35 +43,37 @@ export async function POST(req: Request) {
 
       const montoPagado = typeof payment.transaction_amount === 'number' ? payment.transaction_amount : null;
 
-      if (isUuid) {
-        const { data: updated } = await supabase
-          .from('appointments')
-          .update({
-            estado: 'confirmed',
-            mp_payment_id: String(data.id),
-            ...(montoPagado != null && { monto_sena_pagado: montoPagado }),
-          })
-          .eq('id', appointmentId)
-          .select('id')
-          .single();
-        resolvedId = updated?.id ?? appointmentId;
-      } else {
-        const { data: row } = await supabase
-          .from('appointments')
-          .select('id')
-          .eq('mp_preference_id', appointmentId)
-          .single();
-        if (row?.id) {
-          await supabase
-            .from('appointments')
-            .update({
-              estado: 'confirmed',
-              mp_payment_id: String(data.id),
-              ...(montoPagado != null && { monto_sena_pagado: montoPagado }),
-            })
-            .eq('id', row.id);
-          resolvedId = row.id;
+      const { data: appRow } = isUuid
+        ? await supabase.from('appointments').select('id, barbershop_id').eq('id', appointmentId).single()
+        : await supabase.from('appointments').select('id, barbershop_id').eq('mp_preference_id', appointmentId).single();
+
+      if (appRow?.id) {
+        let montoSenaNeto: number | null = null;
+        if (montoPagado != null && appRow.barbershop_id) {
+          const { data: bs } = await supabase
+            .from('barbershops')
+            .select('monto_sena, sena_comision_cliente')
+            .eq('id', appRow.barbershop_id)
+            .single();
+          const comisionCliente = !!bs?.sena_comision_cliente;
+          const netReceived = typeof payment.transaction_details?.net_received_amount === 'number'
+            ? payment.transaction_details.net_received_amount
+            : null;
+          const MP_FEE = 1 - 10.61 / 100;
+          montoSenaNeto = comisionCliente
+            ? (bs?.monto_sena ?? 0)
+            : (netReceived ?? Math.round(montoPagado * MP_FEE));
         }
+
+        const updatePayload = {
+          estado: 'confirmed' as const,
+          mp_payment_id: String(data.id),
+          ...(montoPagado != null && { monto_sena_pagado: montoPagado }),
+          ...(montoSenaNeto != null && { monto_sena_neto: montoSenaNeto }),
+        };
+
+        await supabase.from('appointments').update(updatePayload).eq('id', appRow.id);
+        resolvedId = appRow.id;
       }
 
       if (resolvedId) {

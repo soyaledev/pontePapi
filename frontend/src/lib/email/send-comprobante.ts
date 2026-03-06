@@ -84,9 +84,12 @@ export async function sendComprobanteEmail(
     : comisionCliente && montoSenaConfig > 0
       ? Math.ceil((montoSenaConfig / MP_FEE) / 50) * 50
       : montoSenaConfig;
-  const montoNetoBarbero = montoPagadoReal != null && montoPagadoReal > 0
-    ? (comisionCliente ? montoSenaConfig : Math.round(montoPagadoReal * MP_FEE))
-    : montoSenaConfig;
+  const montoSenaNetoStored = (appointment as { monto_sena_neto?: number | null }).monto_sena_neto;
+  const montoNetoBarbero = montoSenaNetoStored != null
+    ? montoSenaNetoStored
+    : montoPagadoReal != null && montoPagadoReal > 0
+      ? (comisionCliente ? montoSenaConfig : Math.round(montoPagadoReal * MP_FEE))
+      : montoSenaConfig;
   const restanteEnLocal = (service?.price ?? 0) - montoNetoBarbero;
 
   const restanteRow = tieneSenaPagada && restanteEnLocal > 0

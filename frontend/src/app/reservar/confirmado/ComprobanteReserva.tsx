@@ -22,6 +22,7 @@ type ComprobanteData = {
   estado: string;
   mp_payment_id: string | null;
   monto_sena_pagado: number | null;
+  monto_sena_neto: number | null;
   created_at: string | null;
   barbershop: { name: string; slug: string; address?: string; city?: string; phone?: string; monto_sena?: number; requiere_sena?: boolean; sena_comision_cliente?: boolean } | null;
   service: { name: string; price: number } | null;
@@ -155,9 +156,11 @@ export function ComprobanteReserva({
     : comisionCliente && montoSenaConfig > 0
       ? Math.ceil((montoSenaConfig / MP_FEE) / 50) * 50
       : montoSenaConfig;
-  const montoNetoBarbero = data.monto_sena_pagado != null && data.monto_sena_pagado > 0
-    ? (comisionCliente ? montoSenaConfig : Math.round(data.monto_sena_pagado * MP_FEE))
-    : montoSenaConfig;
+  const montoNetoBarbero = data.monto_sena_neto ?? (
+    data.monto_sena_pagado != null && data.monto_sena_pagado > 0
+      ? (comisionCliente ? montoSenaConfig : Math.round(data.monto_sena_pagado * MP_FEE))
+      : montoSenaConfig
+  );
   const restanteEnLocal = data.service ? data.service.price - montoNetoBarbero : 0;
   const esperandoPago = tieneSena && !isPaid && data.estado === 'pending_payment';
 

@@ -5,6 +5,7 @@ import { formatPeso, toTitleCase } from '@/lib/format';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase/client';
+import { isAppointmentExpired } from '@/lib/appointments';
 import styles from './ReservarFlow.module.css';
 
 type Barber = { id: string; name: string; photo_url: string | null };
@@ -221,7 +222,7 @@ export function ReservarFlow({
 
     supabase
       .from('appointments')
-      .select('fecha, slot_time, barber_id')
+      .select('fecha, slot_time, barber_id, estado, created_at')
       .eq('barbershop_id', barbershop.id)
       .gte('fecha', startStr)
       .lte('fecha', endStr)
@@ -230,6 +231,8 @@ export function ReservarFlow({
         const byDateBarber: Record<string, Record<string, Set<string>>> = {};
         const byDateSlot: Record<string, Record<string, number>> = {};
         for (const a of data ?? []) {
+          // pending_payment expirado (>15 min) no bloquea el slot
+          if (a.estado === 'pending_payment' && isAppointmentExpired(a)) continue;
           const slot = normalizeSlot(a.slot_time);
           if (!byDateSlot[a.fecha]) byDateSlot[a.fecha] = {};
           byDateSlot[a.fecha][slot] = (byDateSlot[a.fecha][slot] ?? 0) + 1;

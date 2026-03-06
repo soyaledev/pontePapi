@@ -2,8 +2,10 @@ import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { sendComprobanteEmail } from '@/lib/email/send-comprobante';
 import { logError } from '@/lib/error-logger';
+import { verifyWebhookSignature, calculateNetAmount } from '@/lib/payments';
 
 const MP_ACCESS_TOKEN = process.env.MERCADOPAGO_ACCESS_TOKEN;
+const MP_WEBHOOK_SECRET = process.env.MERCADOPAGO_WEBHOOK_SECRET;
 
 export async function POST(req: Request) {
   if (!MP_ACCESS_TOKEN) return new NextResponse(null, { status: 200 });
@@ -15,6 +17,16 @@ export async function POST(req: Request) {
 
   if (type !== 'payment' || !data?.id) {
     return new NextResponse(null, { status: 200 });
+  }
+
+  // Verificación de firma del webhook (seguridad)
+  const xSignature = req.headers.get('x-signature');
+  const xRequestId = req.headers.get('x-request-id');
+  if (MP_WEBHOOK_SECRET) {
+    const isValid = verifyWebhookSignature(xSignature, xRequestId, data.id, MP_WEBHOOK_SECRET);
+    if (!isValid) {
+      return new NextResponse(null, { status: 401 });
+    }
   }
 
   try {
@@ -44,11 +56,36 @@ export async function POST(req: Request) {
       const montoPagado = typeof payment.transaction_amount === 'number' ? payment.transaction_amount : null;
 
       const { data: appRow } = isUuid
-        ? await supabase.from('appointments').select('id, barbershop_id').eq('id', appointmentId).single()
-        : await supabase.from('appointments').select('id, barbershop_id').eq('mp_preference_id', appointmentId).single();
+        ? await supabase.from('appointments').select('id, barbershop_id, barber_id, fecha, slot_time').eq('id', appointmentId).single()
+        : await supabase.from('appointments').select('id, barbershop_id, barber_id, fecha, slot_time').eq('mp_preference_id', appointmentId).single();
 
       if (appRow?.id) {
-        let montoSenaNeto: number | null = null;
+        // Protección final: si otro ya confirmó este slot, cancelar el actual
+        let conflictQuery = supabase
+          .from('appointments')
+          .select('id')
+          .eq('barbershop_id', appRow.barbershop_id)
+          .eq('fecha', appRow.fecha)
+          .eq('slot_time', appRow.slot_time)
+          .eq('estado', 'confirmed')
+          .neq('id', appRow.id);
+
+        if (appRow.barber_id != null) {
+          conflictQuery = conflictQuery.eq('barber_id', appRow.barber_id);
+        } else {
+          conflictQuery = conflictQuery.is('barber_id', null);
+        }
+
+        const { data: conflict } = await conflictQuery.limit(1);
+
+        if (conflict && conflict.length > 0) {
+          await supabase
+            .from('appointments')
+            .update({ estado: 'cancelled' })
+            .eq('id', appRow.id);
+          // No enviar email ni confirmar - turno ya tomado
+        } else {
+          let montoSenaNeto: number | null = null;
         if (montoPagado != null && appRow.barbershop_id) {
           const { data: bs } = await supabase
             .from('barbershops')
@@ -56,13 +93,9 @@ export async function POST(req: Request) {
             .eq('id', appRow.barbershop_id)
             .single();
           const comisionCliente = !!bs?.sena_comision_cliente;
-          const netReceived = typeof payment.transaction_details?.net_received_amount === 'number'
-            ? payment.transaction_details.net_received_amount
-            : null;
-          const MP_FEE = 1 - 10.61 / 100;
-          montoSenaNeto = comisionCliente
-            ? (bs?.monto_sena ?? 0)
-            : (netReceived ?? Math.round(montoPagado * MP_FEE));
+          // Usa calculateNetAmount: prioriza net_received_amount, fallback a estimación
+          const netFromPayment = calculateNetAmount(payment);
+          montoSenaNeto = comisionCliente ? (bs?.monto_sena ?? 0) : netFromPayment;
         }
 
         const updatePayload = {
@@ -73,7 +106,8 @@ export async function POST(req: Request) {
         };
 
         await supabase.from('appointments').update(updatePayload).eq('id', appRow.id);
-        resolvedId = appRow.id;
+          resolvedId = appRow.id;
+        }
       }
 
       if (resolvedId) {

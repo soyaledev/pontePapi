@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { sendComprobanteEmail } from '@/lib/email/send-comprobante';
 import { logError } from '@/lib/error-logger';
+import { isPaymentExpired, calculateNetAmount } from '@/lib/payments';
 
 /**
  * Confirma el pago cuando el cliente vuelve de Mercado Pago con status=approved.
@@ -21,7 +22,7 @@ export async function POST(
   const supabase = getSupabaseAdmin();
   const { data: appointment, error: appError } = await supabase
     .from('appointments')
-    .select('id, barbershop_id, estado')
+    .select('id, barbershop_id, barber_id, fecha, slot_time, estado, created_at')
     .eq('id', appointmentId)
     .single();
 
@@ -29,8 +30,21 @@ export async function POST(
     return NextResponse.json({ error: 'Turno no encontrado' }, { status: 404 });
   }
 
+  // Idempotencia: si ya está confirmado, retornar sin reprocesar (evita doble email, etc.)
   if (appointment.estado === 'confirmed') {
     return NextResponse.json({ ok: true, estado: 'confirmed' });
+  }
+
+  // Expiración: si pending_payment pasó 15 min, cancelar y liberar turno
+  if (isPaymentExpired(appointment)) {
+    await supabase
+      .from('appointments')
+      .update({ estado: 'cancelled' })
+      .eq('id', appointmentId);
+    return NextResponse.json(
+      { error: 'El tiempo para pagar la seña ha expirado. El turno fue liberado.' },
+      { status: 410 }
+    );
   }
 
   const { data: barbershop, error: bsError } = await supabase
@@ -43,8 +57,6 @@ export async function POST(
     return NextResponse.json({ error: 'Barbería sin Mercado Pago vinculado' }, { status: 400 });
   }
 
-  const MP_FEE = 1 - 10.61 / 100;
-
   try {
     const res = await fetch(
       `https://api.mercadopago.com/v1/payments/${paymentId}`,
@@ -53,15 +65,43 @@ export async function POST(
     const payment = await res.json();
 
     if (payment.status === 'approved') {
+      // Protección final: si otro ya confirmó este slot, cancelar el actual
+      let conflictQuery = supabase
+        .from('appointments')
+        .select('id')
+        .eq('barbershop_id', appointment.barbershop_id)
+        .eq('fecha', appointment.fecha)
+        .eq('slot_time', appointment.slot_time)
+        .eq('estado', 'confirmed')
+        .neq('id', appointmentId);
+
+      if (appointment.barber_id != null) {
+        conflictQuery = conflictQuery.eq('barber_id', appointment.barber_id);
+      } else {
+        conflictQuery = conflictQuery.is('barber_id', null);
+      }
+
+      const { data: conflict } = await conflictQuery.limit(1);
+
+      if (conflict && conflict.length > 0) {
+        await supabase
+          .from('appointments')
+          .update({ estado: 'cancelled' })
+          .eq('id', appointmentId);
+        return NextResponse.json(
+          { error: 'Este turno ya fue tomado por otro cliente. El turno fue liberado.' },
+          { status: 409 }
+        );
+      }
+
       const montoPagado = typeof payment.transaction_amount === 'number' ? payment.transaction_amount : null;
-      const netReceived = typeof payment.transaction_details?.net_received_amount === 'number'
-        ? payment.transaction_details.net_received_amount
-        : null;
+      // Usa calculateNetAmount: prioriza net_received_amount, fallback a estimación
+      const netFromPayment = calculateNetAmount(payment);
       const montoSenaNeto =
         montoPagado != null
           ? barbershop.sena_comision_cliente
             ? (barbershop.monto_sena ?? 0)
-            : (netReceived ?? Math.round(montoPagado * MP_FEE))
+            : netFromPayment
           : null;
 
       await supabase

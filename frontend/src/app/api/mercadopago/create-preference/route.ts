@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
+import { isPaymentExpired } from '@/lib/payments';
 
 export async function POST(req: Request) {
   const {
@@ -21,6 +22,25 @@ export async function POST(req: Request) {
   }
 
   const supabase = getSupabaseAdmin();
+
+  // Validar expiración antes de crear preferencia: si pending_payment expiró, cancelar y liberar turno
+  const { data: appointment, error: appError } = await supabase
+    .from('appointments')
+    .select('id, estado, created_at')
+    .eq('id', appointmentId)
+    .single();
+
+  if (!appError && appointment && isPaymentExpired(appointment)) {
+    await supabase
+      .from('appointments')
+      .update({ estado: 'cancelled' })
+      .eq('id', appointmentId);
+    return NextResponse.json(
+      { error: 'El tiempo para pagar la seña ha expirado. El turno fue liberado.' },
+      { status: 410 }
+    );
+  }
+
   const { data: barbershop, error: barbershopError } = await supabase
     .from('barbershops')
     .select('mp_access_token, monto_sena, requiere_sena, sena_comision_cliente')

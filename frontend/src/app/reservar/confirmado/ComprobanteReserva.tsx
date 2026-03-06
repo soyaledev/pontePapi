@@ -47,16 +47,19 @@ export function ComprobanteReserva({
   const [refreshing, setRefreshing] = useState(false);
   const [phraseIndex, setPhraseIndex] = useState(0);
 
-  const confirmPaymentIfNeeded = useCallback(async () => {
-    if (!mpPaymentId) return;
+  const confirmPaymentIfNeeded = useCallback(async (): Promise<{ conflict?: boolean; expired?: boolean } | null> => {
+    if (!mpPaymentId) return null;
     try {
-      await fetch(`/api/appointments/${appointmentId}/confirm-payment`, {
+      const res = await fetch(`/api/appointments/${appointmentId}/confirm-payment`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ payment_id: mpPaymentId }),
       });
+      if (res.status === 409) return { conflict: true };
+      if (res.status === 410) return { expired: true };
+      return null;
     } catch {
-      // ignorar
+      return null;
     }
   }, [appointmentId, mpPaymentId]);
 
@@ -81,7 +84,19 @@ export function ComprobanteReserva({
     let cancelled = false;
     async function load() {
       try {
-        await confirmPaymentIfNeeded();
+        const confirmResult = await confirmPaymentIfNeeded();
+        if (!cancelled && confirmResult?.conflict) {
+          setError('Este turno ya fue tomado por otro cliente. El turno fue liberado.');
+          setData(null);
+          setLoading(false);
+          return;
+        }
+        if (!cancelled && confirmResult?.expired) {
+          setError('El tiempo para pagar la seña ha expirado. El turno fue liberado.');
+          setData(null);
+          setLoading(false);
+          return;
+        }
         const json = await fetchComprobante();
         if (!cancelled) {
           setData(json);

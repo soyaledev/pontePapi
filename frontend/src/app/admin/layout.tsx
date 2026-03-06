@@ -31,6 +31,7 @@ export default async function AdminLayout({
     { href: '/admin/barberias', label: 'Barberías' },
     { href: '/admin/pagos', label: 'Pagos' },
     { href: '/admin/errores', label: 'Errores', badge: unresolvedCount },
+    { href: '/admin/aia', label: 'AIA' },
   ];
 
   return (

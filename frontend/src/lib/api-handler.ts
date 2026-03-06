@@ -5,15 +5,14 @@
 import { NextResponse } from 'next/server';
 import { logError } from '@/lib/error-logger';
 
-type RouteContext = { params?: Promise<Record<string, string>> };
-type Handler = (req: Request, context?: RouteContext) => Promise<Response>;
+type RouteContextBase = { params?: Promise<Record<string, string>> };
 
-export function withErrorLogging(
-  handler: Handler,
+export function withErrorLogging<C extends RouteContextBase>(
+  handler: (req: Request, context: C) => Promise<Response>,
   path: string,
   method: string
-): Handler {
-  return async (req: Request, context?: RouteContext) => {
+): (req: Request, context: C) => Promise<Response> {
+  return async (req: Request, context: C) => {
     try {
       return await handler(req, context);
     } catch (err: unknown) {

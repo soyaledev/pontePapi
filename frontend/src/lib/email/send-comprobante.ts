@@ -49,7 +49,9 @@ export async function sendComprobanteEmail(
       .select('name, monto_sena, requiere_sena, sena_comision_cliente')
       .eq('id', appointment.barbershop_id)
       .single(),
-    supabase.from('services').select('name, price').eq('id', appointment.service_id).single(),
+    appointment.service_id
+      ? supabase.from('services').select('name, price').eq('id', appointment.service_id).single()
+      : Promise.resolve({ data: null }),
     appointment.barber_id
       ? supabase.from('barbers').select('name').eq('id', appointment.barber_id).single()
       : Promise.resolve({ data: null }),
@@ -70,7 +72,7 @@ export async function sendComprobanteEmail(
 
   const serviceLabel = service?.name
     ? `${service.name}${service.price != null ? ` (${formatPeso(service.price)})` : ''}`
-    : '-';
+    : 'Servicio eliminado';
 
   const MP_PERCENT = 10.61;
   const comisionCliente = !!barbershop?.sena_comision_cliente;

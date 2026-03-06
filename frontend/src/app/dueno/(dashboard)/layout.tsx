@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { isAdmin } from '@/lib/admin';
 import Link from 'next/link';
 import Image from 'next/image';
 import { DuenoNav } from '../DuenoNav';
@@ -18,6 +19,11 @@ export default async function DashboardLayout({
     redirect('/dueno/login');
   }
 
+  const isAdminUser = await isAdmin(user.email);
+  if (isAdminUser) {
+    redirect('/admin');
+  }
+
   return (
     <div className={styles.layout}>
       <WelcomeOverlay userId={user.id} userEmail={user.email ?? ''} />
@@ -32,7 +38,7 @@ export default async function DashboardLayout({
         </Link>
       </header>
       <main className={styles.main}>{children}</main>
-      <DuenoNav userEmail={user?.email ?? ''} />
+      <DuenoNav userEmail={user?.email ?? ''} isAdmin={isAdminUser} />
     </div>
   );
 }

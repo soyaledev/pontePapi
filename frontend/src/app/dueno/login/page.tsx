@@ -1,6 +1,18 @@
 import { Suspense } from 'react';
+import { redirect } from 'next/navigation';
+import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { isAdmin } from '@/lib/admin';
 import { LoginForm } from './LoginForm';
 import styles from './Login.module.css';
+
+async function LoginGate() {
+  const supabase = await createServerSupabaseClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (user?.email && (await isAdmin(user.email))) {
+    redirect('/admin');
+  }
+  return <LoginForm />;
+}
 
 function LoginFallback() {
   return (
@@ -19,7 +31,7 @@ function LoginFallback() {
 export default function LoginPage() {
   return (
     <Suspense fallback={<LoginFallback />}>
-      <LoginForm />
+      <LoginGate />
     </Suspense>
   );
 }

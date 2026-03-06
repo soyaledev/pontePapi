@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
+import { logError } from '@/lib/error-logger';
 
 export async function POST() {
   const supabase = await createServerSupabaseClient();
@@ -44,7 +45,15 @@ export async function POST() {
   const { error: deleteError } = await admin.auth.admin.deleteUser(user.id);
 
   if (deleteError) {
-    console.error('[eliminar-cuenta]', deleteError);
+    await logError({
+      source: 'api',
+      path: '/api/dueno/eliminar-cuenta',
+      method: 'POST',
+      message: deleteError.message ?? 'Error al eliminar cuenta',
+      statusCode: 500,
+      userId: user.id,
+      userEmail: user.email ?? undefined,
+    });
     return NextResponse.json({ error: deleteError.message ?? 'Error al eliminar cuenta' }, { status: 500 });
   }
 

@@ -659,10 +659,7 @@ export function ReservarFlow({
                 <p className={styles.resumenSeña}>
                   {senaOpcional
                     ? `Seña opcional: ${formatPeso(senaClientePaga)}`
-                    : `Seña a pagar: ${formatPeso(senaClientePaga)}`}
-                  {comisionCliente && senaClientePaga !== montoSenaNeto && (
-                    <span className={styles.resumenNota}> (incluye recargo por pago online)</span>
-                  )}
+                    : `Seña: ${formatPeso(senaClientePaga)}`}
                 </p>
               )}
               {tieneSena && service && requiereSena && restanteEnLocal > 0 && (

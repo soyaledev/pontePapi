@@ -223,7 +223,11 @@ export function ComprobanteReserva({
             </div>
             <div className={styles.comprobanteRow}>
               <dt>Servicio</dt>
-              <dd>{data.service?.name ?? '-'} {data.service?.price != null && `(${formatPeso(data.service.price)})`}</dd>
+              <dd>
+                {data.service
+                  ? `${data.service.name}${data.service.price != null ? ` (${formatPeso(data.service.price)})` : ''}`
+                  : 'Servicio eliminado'}
+              </dd>
             </div>
             {data.barber && (
               <div className={styles.comprobanteRow}>
@@ -289,7 +293,7 @@ export function ComprobanteReserva({
         )}
 
         <p className={styles.comprobanteNota}>
-          {tieneSena && isPaid && restanteEnLocal > 0
+          {tieneSena && isPaid && data.mp_payment_id && restanteEnLocal > 0
             ? `Llegá unos minutos antes. Recordá que debés abonar ${formatPeso(restanteEnLocal)} en la barbería.`
             : 'Llegá unos minutos antes. Si tenés que cancelar, comunicate con la barbería.'}
         </p>

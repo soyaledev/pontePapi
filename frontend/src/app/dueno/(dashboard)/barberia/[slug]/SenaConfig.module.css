@@ -1,0 +1,470 @@
+.section {
+  margin-bottom: 2rem;
+}
+
+.sectionTitle {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  color: var(--text);
+}
+
+/* ─── Toggle on/off ─── */
+
+.toggle {
+  display: flex;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.toggleBtn {
+  flex: 1;
+  padding: 0.65rem 0.75rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: inherit;
+  border: none;
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.toggleBtn:first-child {
+  border-right: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.toggleBtnActive {
+  background: var(--accent);
+  color: var(--bg);
+}
+
+.toggleBtn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+/* ─── Hint text ─── */
+
+.hint {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.45);
+  margin: 0.5rem 0 0;
+  line-height: 1.4;
+}
+
+/* ─── Config panel ─── */
+
+.config {
+  margin-top: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.groupLabel {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0;
+}
+
+/* ─── Segmented buttons (tipo, comision) ─── */
+
+.segmented {
+  display: flex;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.segmentedBtn {
+  flex: 1;
+  padding: 0.6rem 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-family: inherit;
+  border: none;
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.segmentedBtn:first-child {
+  border-right: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.segmentedBtnActive {
+  background: var(--accent);
+  color: var(--bg);
+}
+
+/* ─── Monto input ─── */
+
+.montoWrap {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: var(--bg-input);
+  max-width: 200px;
+}
+
+.montoPrefix {
+  padding: 0.65rem 0 0.65rem 0.9rem;
+  color: var(--text-muted);
+  font-size: 1rem;
+}
+
+.montoInput {
+  flex: 1;
+  padding: 0.65rem 0.75rem 0.65rem 0.35rem;
+  background: transparent;
+  border: none;
+  color: var(--text);
+  font-size: 1rem;
+  font-family: inherit;
+  outline: none;
+  width: 100%;
+}
+
+/* ─── Preview ─── */
+
+.preview {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.6rem;
+  padding: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.previewRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+  color: var(--text);
+}
+
+.previewRow span {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.previewGreen {
+  color: #4ade80 !important;
+}
+
+.previewNote {
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.4);
+  margin: 0.25rem 0 0;
+  line-height: 1.4;
+}
+
+/* ─── Error, Save ─── */
+
+.error {
+  color: var(--accent);
+  font-size: 0.88rem;
+  margin: 0;
+}
+
+.saveBtn {
+  padding: 0.7rem 1.25rem;
+  background: var(--accent);
+  color: var(--bg);
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.35s ease, color 0.35s ease;
+}
+
+.saveBtn:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.saveBtn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.saveBtnSaved {
+  background: #22c55e !important;
+  color: #fff !important;
+}
+
+.savedMsg {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #4ade80;
+}
+
+/* ─── Mercado Pago ─── */
+
+.mpSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.mpLinked {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 0.5rem;
+  padding: 0.6rem 0.85rem;
+}
+
+.mpLogo {
+  height: 1.25rem;
+  width: auto;
+  object-fit: contain;
+  display: block;
+  opacity: 0.9;
+}
+
+.mpLinkedInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.mpLinkedLabel {
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.mpLinkedBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: rgba(74, 222, 128, 0.85);
+}
+
+.mpDot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: rgba(74, 222, 128, 0.8);
+  flex-shrink: 0;
+  animation: pulse 2.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.mpUnlinked {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.mpUnlinkedTop {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.mpLogoLg {
+  height: 2rem;
+  width: auto;
+  object-fit: contain;
+  flex-shrink: 0;
+  display: block;
+}
+
+.mpUnlinkedTitle {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0;
+}
+
+.mpUnlinkedDesc {
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.5);
+  margin: 0.15rem 0 0;
+  line-height: 1.45;
+}
+
+.mpConnectBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.7rem 1.1rem;
+  background: #009ee3;
+  color: #fff;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+  width: 100%;
+}
+
+.mpConnectBtn:hover {
+  background: #0086c7;
+}
+
+.mpConnectBtn:active {
+  transform: scale(0.98);
+}
+
+/* ─── Historial ─── */
+
+.historial {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+.historialToggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  color: var(--text);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.historialToggle:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.historialToggleText {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.historialBadge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.7);
+  padding: 0.15rem 0.5rem;
+  border-radius: 99px;
+  min-width: 1.4rem;
+  text-align: center;
+}
+
+.historialChevron {
+  width: 1.1rem;
+  height: 1.1rem;
+  transition: transform 0.2s;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.historialChevronOpen {
+  transform: rotate(180deg);
+}
+
+.historialContent {
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.historialList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.historialItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.historialItem:last-child {
+  border-bottom: none;
+}
+
+.historialItemLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.historialNombre {
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.historialMeta {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.historialMonto {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #4ade80;
+  flex-shrink: 0;
+  margin-left: 0.75rem;
+}
+
+.historialTotal {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.65rem 1rem;
+  background: rgba(255, 255, 255, 0.03);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 0.88rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.historialTotal strong {
+  color: #4ade80;
+  font-size: 0.95rem;
+}

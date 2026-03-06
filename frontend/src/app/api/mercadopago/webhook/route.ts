@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { sendComprobanteEmail } from '@/lib/email/send-comprobante';
+import { logError } from '@/lib/error-logger';
 
 const MP_ACCESS_TOKEN = process.env.MERCADOPAGO_ACCESS_TOKEN;
 
@@ -69,8 +70,15 @@ export async function POST(req: Request) {
         );
       }
     }
-  } catch {
-    // Ignorar errores de webhook
+  } catch (err: unknown) {
+    await logError({
+      source: 'webhook',
+      path: '/api/mercadopago/webhook',
+      method: 'POST',
+      message: err instanceof Error ? err.message : String(err),
+      stack: err instanceof Error ? err.stack : undefined,
+      metadata: { paymentId: data?.id },
+    });
   }
 
   return new NextResponse(null, { status: 200 });

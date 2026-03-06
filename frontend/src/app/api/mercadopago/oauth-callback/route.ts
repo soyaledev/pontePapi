@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { logError } from '@/lib/error-logger';
 
 export async function POST(req: Request) {
+  try {
   const body = await req.json();
   const { code, code_verifier, barbershopId } = body as {
     code?: string;
@@ -83,6 +85,14 @@ export async function POST(req: Request) {
     .eq('id', barbershop.id);
 
   if (error) {
+    await logError({
+      source: 'api',
+      path: '/api/mercadopago/oauth-callback',
+      method: 'POST',
+      message: error.message,
+      statusCode: 500,
+      userEmail: user.email ?? undefined,
+    });
     return NextResponse.json(
       { error: 'Error al guardar', slug: barbershop.slug },
       { status: 500 }
@@ -93,4 +103,15 @@ export async function POST(req: Request) {
     success: true,
     slug: barbershop.slug,
   });
+  } catch (err: unknown) {
+    await logError({
+      source: 'api',
+      path: '/api/mercadopago/oauth-callback',
+      method: 'POST',
+      message: err instanceof Error ? err.message : String(err),
+      stack: err instanceof Error ? err.stack : undefined,
+      statusCode: 500,
+    });
+    return NextResponse.json({ error: 'Error interno', slug: null }, { status: 500 });
+  }
 }

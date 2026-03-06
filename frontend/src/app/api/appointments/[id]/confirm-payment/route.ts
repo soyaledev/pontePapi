@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { sendComprobanteEmail } from '@/lib/email/send-comprobante';
+import { logError } from '@/lib/error-logger';
 
 /**
  * Confirma el pago cuando el cliente vuelve de Mercado Pago con status=approved.
@@ -57,7 +58,16 @@ export async function POST(
       sendComprobanteEmail(appointmentId).catch(() => {});
       return NextResponse.json({ ok: true, estado: 'confirmed' });
     }
-  } catch {
+  } catch (err: unknown) {
+    await logError({
+      source: 'api',
+      path: '/api/appointments/[id]/confirm-payment',
+      method: 'POST',
+      message: err instanceof Error ? err.message : 'Error al verificar pago',
+      stack: err instanceof Error ? err.stack : undefined,
+      statusCode: 500,
+      metadata: { appointmentId, paymentId },
+    });
     return NextResponse.json({ error: 'Error al verificar pago' }, { status: 500 });
   }
 

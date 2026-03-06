@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { logError } from '@/lib/error-logger';
 
 export async function POST() {
   const supabase = await createServerSupabaseClient();
@@ -19,7 +20,15 @@ export async function POST() {
     .eq('owner_id', user.id);
 
   if (error) {
-    console.error('[desvincular-mp]', error);
+    await logError({
+      source: 'api',
+      path: '/api/dueno/desvincular-mp',
+      method: 'POST',
+      message: error.message,
+      statusCode: 500,
+      userId: user.id,
+      userEmail: user.email ?? undefined,
+    });
     return NextResponse.json({ error: 'Error al desvincular' }, { status: 500 });
   }
 

@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
+import { withErrorLogging } from '@/lib/api-handler';
 
-export async function GET(
+async function getComprobante(
   _req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -21,7 +22,9 @@ export async function GET(
 
   const [barbershopRes, serviceRes, barberRes] = await Promise.all([
     supabase.from('barbershops').select('name, slug, address, city, phone, monto_sena, requiere_sena, sena_comision_cliente').eq('id', appointment.barbershop_id).single(),
-    supabase.from('services').select('name, price').eq('id', appointment.service_id).single(),
+    appointment.service_id
+      ? supabase.from('services').select('name, price').eq('id', appointment.service_id).single()
+      : Promise.resolve({ data: null }),
     appointment.barber_id
       ? supabase.from('barbers').select('name').eq('id', appointment.barber_id).single()
       : Promise.resolve({ data: null }),
@@ -44,3 +47,9 @@ export async function GET(
     barber: barberRes.data ? { name: barberRes.data.name } : null,
   });
 }
+
+export const GET = withErrorLogging(
+  getComprobante,
+  '/api/appointments/[id]/comprobante',
+  'GET'
+);

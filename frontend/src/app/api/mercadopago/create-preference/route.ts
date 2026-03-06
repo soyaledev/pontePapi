@@ -103,11 +103,18 @@ export async function POST(req: Request) {
       preference_id: data.id,
     });
   } catch (err: unknown) {
-    return NextResponse.json(
-      {
-        error: err instanceof Error ? err.message : 'Error al crear preferencia',
-      },
-      { status: 500 }
+    const msg = err instanceof Error ? err.message : 'Error al crear preferencia';
+    await import('@/lib/error-logger').then(({ logError }) =>
+      logError({
+        source: 'api',
+        path: '/api/mercadopago/create-preference',
+        method: 'POST',
+        message: msg,
+        stack: err instanceof Error ? err.stack : undefined,
+        statusCode: 500,
+        metadata: { appointmentId, barbershopId },
+      })
     );
+    return NextResponse.json({ error: msg }, { status: 500 });
   }
 }

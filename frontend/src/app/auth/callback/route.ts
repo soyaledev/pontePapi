@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { EmailOtpType } from '@supabase/supabase-js';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { isAdmin } from '@/lib/admin';
 
 function buildRedirectUrl(origin: string, next: string, request: Request): string {
   const forwardedHost = request.headers.get('x-forwarded-host');
@@ -29,6 +30,10 @@ export async function GET(request: Request) {
   }
 
   if (success) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user?.email && (await isAdmin(user.email))) {
+      return NextResponse.redirect(buildRedirectUrl(origin, '/admin', request));
+    }
     return NextResponse.redirect(buildRedirectUrl(origin, next, request));
   }
 

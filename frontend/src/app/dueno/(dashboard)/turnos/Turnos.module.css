@@ -268,9 +268,9 @@
 /* ── Sección turnos anteriores sin marcar ── */
 
 .pastSection {
-  margin-top: 2rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  padding-top: 1rem;
+  margin-top: 1.5rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .pastToggle {
@@ -278,22 +278,20 @@
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  padding: 0.75rem 0.85rem;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 0.6rem;
-  color: rgba(255, 255, 255, 0.75);
-  font-size: 0.95rem;
-  font-weight: 600;
+  padding: 0.5rem 0;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.82rem;
+  font-weight: 500;
   font-family: inherit;
   cursor: pointer;
-  transition: background 0.2s, border-color 0.2s;
+  transition: color 0.2s;
   -webkit-tap-highlight-color: transparent;
 }
 
 .pastToggle:hover {
-  background: rgba(255, 255, 255, 0.07);
-  border-color: rgba(255, 255, 255, 0.18);
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .pastToggle:focus-visible {
@@ -304,25 +302,28 @@
 .pastToggleText {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.4rem;
 }
 
 .pastBadge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 1.4rem;
-  height: 1.4rem;
-  padding: 0 0.4rem;
-  background: var(--accent);
-  color: var(--bg);
-  font-size: 0.75rem;
-  font-weight: 700;
+  min-width: 1.15rem;
+  height: 1.15rem;
+  padding: 0 0.3rem;
+  background: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.68rem;
+  font-weight: 600;
   border-radius: 10rem;
 }
 
 .pastChevron {
   flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  opacity: 0.5;
   transition: transform 0.25s ease;
 }
 
@@ -331,13 +332,13 @@
 }
 
 .pastContent {
-  margin-top: 0.75rem;
+  margin-top: 0.5rem;
 }
 
 .pastHint {
-  font-size: 0.82rem;
-  color: rgba(255, 255, 255, 0.45);
-  margin: 0 0 1rem;
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.4);
+  margin: 0 0 0.85rem;
   line-height: 1.4;
 }
 

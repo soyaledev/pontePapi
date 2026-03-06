@@ -30,7 +30,7 @@ function RefreshIcon({ exiting, onExitEnd }: { exiting?: boolean; onExitEnd?: ()
   );
 }
 
-export function DuenoNav({ userEmail }: { userEmail: string }) {
+export function DuenoNav({ userEmail, isAdmin }: { userEmail: string; isAdmin?: boolean }) {
   const pathname = usePathname();
   const router = useRouter();
   const isTurnosPath = pathname === '/dueno/turnos';
@@ -74,6 +74,8 @@ export function DuenoNav({ userEmail }: { userEmail: string }) {
   }, [menuOpen]);
 
   const isOnClientView = pathname === '/' || pathname.startsWith('/barberia') || pathname.startsWith('/reservar');
+  const isPanelPath =
+    pathname === '/dueno/dashboard' || pathname.startsWith('/dueno/barberia/');
 
   return (
     <nav className={styles.bottomNav}>
@@ -97,7 +99,7 @@ export function DuenoNav({ userEmail }: { userEmail: string }) {
       )}
       <Link
         href="/dueno/dashboard"
-        className={`${styles.navItem} ${pathname === '/dueno/dashboard' ? styles.navItemActive : ''}`}
+        className={`${styles.navItem} ${styles.navItemPanel} ${isPanelPath ? styles.navItemPanelActive : ''}`}
       >
         Panel
       </Link>
@@ -115,6 +117,15 @@ export function DuenoNav({ userEmail }: { userEmail: string }) {
           <div className={styles.avatarMenu}>
             {userEmail && (
               <p className={styles.avatarEmail}>{userEmail}</p>
+            )}
+            {isAdmin && (
+              <Link
+                href="/admin"
+                className={styles.avatarMenuItem}
+                onClick={() => setMenuOpen(false)}
+              >
+                Admin
+              </Link>
             )}
             <Link
               href="/dueno/configuracion"

@@ -1,11 +1,18 @@
+/* Diseño unificado con Servicios y Turnos */
 .section {
-  margin-bottom: 2rem;
+  margin-bottom: 1.75rem;
+  padding: 1.25rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.75rem;
 }
 
 .section h2 {
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   font-weight: 600;
-  margin-bottom: 0.75rem;
+  margin: 0 0 1rem;
+  letter-spacing: 0.02em;
+  color: var(--text);
 }
 
 .list {
@@ -19,10 +26,11 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 0.5rem;
-  padding: 0.6rem 0.75rem;
-  background: var(--bg-input);
-  border-radius: 0.4rem;
-  margin-bottom: 0.4rem;
+  padding: 0.65rem 0.85rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0.5rem;
+  margin-bottom: 0.5rem;
 }
 
 .day {
@@ -38,16 +46,22 @@
 
 .editBtn,
 .saveBtn {
-  padding: 0.35rem 0.65rem;
-  font-size: 0.8rem;
-  border-radius: 0.35rem;
+  padding: 0.4rem 0.75rem;
+  font-size: 0.82rem;
+  font-weight: 500;
+  border-radius: 0.45rem;
   border: none;
   cursor: pointer;
+  transition: opacity 0.2s;
 }
 
 .editBtn {
-  background: var(--bg-input-hover);
+  background: rgba(255, 255, 255, 0.1);
   color: var(--text);
+}
+
+.editBtn:hover {
+  background: rgba(255, 255, 255, 0.14);
 }
 
 .saveBtn {
@@ -55,11 +69,16 @@
   color: #fff;
 }
 
+.saveBtn:hover {
+  opacity: 0.95;
+}
+
 .cerradoBtn {
-  padding: 0.35rem 0.65rem;
-  font-size: 0.8rem;
-  border-radius: 0.35rem;
-  border: 1px solid var(--border);
+  padding: 0.4rem 0.75rem;
+  font-size: 0.82rem;
+  font-weight: 500;
+  border-radius: 0.45rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
   background: transparent;
   color: var(--text-muted);
   cursor: pointer;

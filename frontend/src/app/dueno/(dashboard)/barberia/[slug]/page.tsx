@@ -6,8 +6,7 @@ import { checkBarbershopVisibility } from '@/lib/barbershop-visibility';
 import { ServiciosSection } from './ServiciosSection';
 import { HorariosSection } from './HorariosSection';
 import { TurnosHistorialSection } from './TurnosHistorialSection';
-import { PagosSection } from './PagosSection';
-import { SenaSection } from './SenaSection';
+import { SenaConfigCollapsible } from './SenaConfigCollapsible';
 import { VisibilityNotice } from './VisibilityNotice';
 import styles from './BarberiaDetail.module.css';
 
@@ -69,7 +68,7 @@ export default async function BarberiaDetailPage({
     id: a.id,
     fecha: a.fecha,
     slot_time: a.slot_time,
-    cliente_nombre: a.cliente_nombre ?? 'Cliente',
+    cliente_nombre: a.cliente_nombre,
     monto: barbershop.monto_sena ?? 0,
   }));
 
@@ -147,19 +146,14 @@ export default async function BarberiaDetailPage({
           )}
         </dl>
       </div>
-      <SenaSection
+      <SenaConfigCollapsible
         barbershopId={barbershop.id}
         initialRequiereSena={!!barbershop.requiere_sena}
         initialSenaOpcional={!!barbershop.sena_opcional}
         initialMontoSena={barbershop.monto_sena ?? 0}
         initialComisionCliente={!!barbershop.sena_comision_cliente}
-      />
-      <PagosSection
-        barbershopId={barbershop.id}
-        requiereSena={!!barbershop.requiere_sena}
-        mpLinked={!!barbershop.mp_access_token}
+        initialMpLinked={!!barbershop.mp_access_token}
         pagos={pagos}
-        montoSena={barbershop.monto_sena ?? 0}
       />
       <ServiciosSection barbershopId={barbershop.id} services={services ?? []} />
       <HorariosSection barbershopId={barbershop.id} schedules={schedules ?? []} />

@@ -19,11 +19,6 @@ function calcOwnerRecibe(montoBruto: number): number {
   return montoBruto * (1 - MP_FEE_PERCENT / 100);
 }
 
-function formatFechaPago(fecha: string): string {
-  const d = new Date(fecha + 'T12:00:00');
-  return d.toLocaleDateString('es-AR', { day: 'numeric', month: 'short' });
-}
-
 function generateCodeVerifier(): string {
   const array = new Uint8Array(64);
   crypto.getRandomValues(array);
@@ -42,14 +37,6 @@ async function sha256Base64Url(verifier: string): Promise<string> {
     .replace(/=+$/, '');
 }
 
-type PagoItem = {
-  id: string;
-  fecha: string;
-  slot_time: string;
-  cliente_nombre: string;
-  monto: number;
-};
-
 export function SenaConfig({
   barbershopId,
   initialRequiereSena,
@@ -57,7 +44,6 @@ export function SenaConfig({
   initialMontoSena,
   initialComisionCliente,
   initialMpLinked,
-  pagos = [],
 }: {
   barbershopId: string;
   initialRequiereSena: boolean;
@@ -65,7 +51,6 @@ export function SenaConfig({
   initialMontoSena: number;
   initialComisionCliente: boolean;
   initialMpLinked: boolean;
-  pagos?: PagoItem[];
 }) {
   const [requiereSena, setRequiereSena] = useState(initialRequiereSena);
   const [senaOpcional, setSenaOpcional] = useState(initialSenaOpcional);
@@ -77,7 +62,6 @@ export function SenaConfig({
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState('');
-  const [historialOpen, setHistorialOpen] = useState(false);
 
   const monto = parseInt(montoRaw.replace(/\D/g, ''), 10) || 0;
   const clientePaga = comisionCliente ? calcClientePaga(monto) : monto;
@@ -267,7 +251,7 @@ export function SenaConfig({
               <p className={styles.previewNote}>
                 {comisionCliente
                   ? 'El costo de Mercado Pago se suma al monto que paga el cliente. Será informado antes de pagar.'
-                  : 'Mercado Pago cobra el costo por uso de su sistema. El monto real que recibís estará en el historial de señas.'}
+                  : 'Mercado Pago cobra el costo por uso de su sistema. El monto real lo verás en tu cuenta de Mercado Pago.'}
               </p>
             </div>
           )}
@@ -335,60 +319,6 @@ export function SenaConfig({
               </div>
             )}
           </div>
-
-          {/* ── Historial ── */}
-          {pagos.length > 0 && (
-            <div className={styles.historial}>
-              <button
-                type="button"
-                className={styles.historialToggle}
-                onClick={() => setHistorialOpen((o) => !o)}
-                aria-expanded={historialOpen}
-              >
-                <span className={styles.historialToggleText}>
-                  Historial de señas
-                  <span className={styles.historialBadge}>{pagos.length}</span>
-                </span>
-                <svg
-                  className={`${styles.historialChevron} ${historialOpen ? styles.historialChevronOpen : ''}`}
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                >
-                  <path d="M6 9l6 6 6-6" />
-                </svg>
-              </button>
-              {historialOpen && (
-                <div className={styles.historialContent}>
-                  <ul className={styles.historialList}>
-                    {pagos.map((p) => (
-                      <li key={p.id} className={styles.historialItem}>
-                        <div className={styles.historialItemLeft}>
-                          <span className={styles.historialNombre}>
-                            {p.cliente_nombre}
-                          </span>
-                          <span className={styles.historialMeta}>
-                            {formatFechaPago(p.fecha)} · {p.slot_time.slice(0, 5)}
-                          </span>
-                        </div>
-                        <span className={styles.historialMonto}>
-                          {formatPeso(p.monto)}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                  <div className={styles.historialTotal}>
-                    <span>Total recibido</span>
-                    <strong>
-                      {formatPeso(pagos.reduce((s, p) => s + p.monto, 0))}
-                    </strong>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
         </div>
       )}
     </section>

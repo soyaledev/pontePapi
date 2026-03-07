@@ -5,14 +5,6 @@ import { formatPeso } from '@/lib/format';
 import { SenaConfig } from './SenaConfig';
 import styles from './SenaConfigCollapsible.module.css';
 
-type PagoItem = {
-  id: string;
-  fecha: string;
-  slot_time: string;
-  cliente_nombre: string;
-  monto: number;
-};
-
 type Props = {
   barbershopId: string;
   initialRequiereSena: boolean;
@@ -20,7 +12,6 @@ type Props = {
   initialMontoSena: number;
   initialComisionCliente: boolean;
   initialMpLinked: boolean;
-  pagos?: PagoItem[];
 };
 
 export function SenaConfigCollapsible(props: Props) {

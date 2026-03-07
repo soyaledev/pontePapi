@@ -253,8 +253,6 @@ export function AIAClient() {
             <li>Si sena_comision_cliente: monto_sena_neto = monto_sena (el barbero recibe exactamente lo configurado).</li>
             <li>Si no: monto_sena_neto = payment.transaction_details.net_received_amount si existe (API MP); si no, round(transaction_amount * 0.8939) como estimación.</li>
           </ul>
-          <h3>Historial de señas</h3>
-          <p><strong>Archivo:</strong> <code>app/dueno/(dashboard)/barberia/[slug]/page.tsx</code>. Select incluye monto_sena_neto. Muestra lo depositado al barbero por cada pago (neto real de MP). Fallback para registros sin monto_sena_neto: comisionCliente ? monto_sena : round(monto_sena_pagado * 0.8939). <strong>Nota:</strong> El preview "Vos recibís" en SenaConfig usa estimación ~10.61%; el historial muestra net_received_amount real de MP (puede variar por método de pago, cuotas, etc.).</p>
           <h3>Comprobante y restante</h3>
           <p><strong>Archivos:</strong> ComprobanteReserva.tsx, send-comprobante.ts, comprobante/route.ts. Seña pagada (lo que ve el cliente) = monto_sena_pagado. <strong>Restante a abonar en barbería = precio_servicio - monto_sena_servicio</strong> (NO monto_sena_neto). monto_sena_servicio es el crédito de la seña hacia el servicio, guardado al confirmar (barbershop.monto_sena). Ejemplo: servicio 10.000, monto_sena_servicio 1.000 → restante = 9.000. Esto aplica tanto si el cliente paga comisión (paga más, barbero recibe exacto) como si el barbero absorbe (cliente paga monto_sena, barbero recibe menos por MP).</p>
           </div>
@@ -313,7 +311,7 @@ export function AIAClient() {
             <li>/dueno/login, /dueno/registro</li>
             <li>/dueno (redirect a /dueno/turnos si no admin)</li>
             <li>/dueno/turnos: listado de turnos por barbería</li>
-            <li>/dueno/barberia/[slug]: detalle barbería, servicios, horarios, seña, historial señas</li>
+            <li>/dueno/barberia/[slug]: detalle barbería, servicios, horarios, seña</li>
             <li>/dueno/barberia/[slug]/editar: editar datos barbería</li>
             <li>/dueno/barberia/[slug]/finanzas: finanzas (si existe)</li>
             <li>/dueno/configuracion: configuración cuenta</li>
@@ -333,7 +331,7 @@ export function AIAClient() {
           <h3>Barbería</h3>
           <p>Nombre, slug, dirección, ciudad, teléfono, foto. slot_minutes (duración por turno).</p>
           <h3>Seña (SenaConfig)</h3>
-          <p>requiere_sena, sena_opcional, monto_sena, sena_comision_cliente. Preview: cliente paga X, barbero recibe ~Y (estimación 10.61%; el historial muestra el neto real de MP).</p>
+          <p>requiere_sena, sena_opcional, monto_sena, sena_comision_cliente. Preview: cliente paga X, barbero recibe ~Y (estimación; el monto real lo verás en tu cuenta de Mercado Pago).</p>
           <h3>Servicios</h3>
           <p>CRUD en ServiciosSection. name, price, duracion_min.</p>
           <h3>Horarios</h3>

@@ -48,41 +48,12 @@ export default async function BarberiaDetailPage({
     .eq('barbershop_id', barbershop.id)
     .order('order', { ascending: true });
 
-  const [{ data: historialAppointments }, { data: pagosRaw }] = await Promise.all([
-    supabase
-      .from('appointments')
-      .select('id, fecha, slot_time, cliente_nombre, cliente_telefono, estado, updated_at')
-      .eq('barbershop_id', barbershop.id)
-      .in('estado', ['completed', 'cancelled'])
-      .order('updated_at', { ascending: false, nullsFirst: false }),
-    supabase
-      .from('appointments')
-      .select('id, fecha, slot_time, cliente_nombre, mp_payment_id, monto_sena_pagado, monto_sena_neto')
-      .eq('barbershop_id', barbershop.id)
-      .not('mp_payment_id', 'is', null)
-      .order('fecha', { ascending: false })
-      .limit(50),
-  ]);
-
-  const MP_FEE = 1 - 10.61 / 100;
-  const comisionCliente = !!barbershop.sena_comision_cliente;
-  const montoSenaConfig = barbershop.monto_sena ?? 0;
-  const pagos = (pagosRaw ?? []).map((a) => {
-    const stored = (a as { monto_sena_neto?: number | null }).monto_sena_neto;
-    const bruto = (a as { monto_sena_pagado?: number | null }).monto_sena_pagado;
-    const montoNeto = stored != null
-      ? stored
-      : bruto != null
-        ? (comisionCliente ? montoSenaConfig : Math.round(bruto * MP_FEE))
-        : montoSenaConfig;
-    return {
-      id: a.id,
-      fecha: a.fecha,
-      slot_time: a.slot_time,
-      cliente_nombre: a.cliente_nombre,
-      monto: montoNeto,
-    };
-  });
+  const { data: historialAppointments } = await supabase
+    .from('appointments')
+    .select('id, fecha, slot_time, cliente_nombre, cliente_telefono, estado, updated_at')
+    .eq('barbershop_id', barbershop.id)
+    .in('estado', ['completed', 'cancelled'])
+    .order('updated_at', { ascending: false, nullsFirst: false });
 
   const visibility = checkBarbershopVisibility({
     schedulesCount: (schedules ?? []).length,
@@ -165,7 +136,6 @@ export default async function BarberiaDetailPage({
         initialMontoSena={barbershop.monto_sena ?? 0}
         initialComisionCliente={!!barbershop.sena_comision_cliente}
         initialMpLinked={!!barbershop.mp_access_token}
-        pagos={pagos}
       />
       <ServiciosSection barbershopId={barbershop.id} services={services ?? []} />
       <HorariosSection barbershopId={barbershop.id} schedules={schedules ?? []} />

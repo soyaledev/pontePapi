@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { ScrollToTop } from '@/components/ScrollToTop/ScrollToTop';
 
 const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://barbert.vercel.app';
 
@@ -46,6 +47,7 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body>
+        <ScrollToTop />
         <ErrorBoundary>{children}</ErrorBoundary>
       </body>
     </html>

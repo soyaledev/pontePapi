@@ -274,6 +274,11 @@ export function ReservarFlow({
     }
   }, [step, fecha]);
 
+  // Scroll al inicio cuando cambia el paso del flujo
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [step]);
+
   const calendarDays = getCalendarDays(calendarMonth.year, calendarMonth.month, schedules);
 
   function getSlotsForModalDate(dateStr: string): { slots: string[]; barberId: string | null } {

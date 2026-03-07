@@ -86,23 +86,28 @@
 
 .row {
   display: flex;
-  gap: 0.5rem;
+  flex-direction: column;
+  gap: 0.15rem;
   font-size: 0.85rem;
   line-height: 1.4;
 }
 
 .row dt {
-  margin: 0;
+  display: block;
+  margin: 0 0 0.15rem;
   color: rgba(255, 255, 255, 0.55);
   font-weight: 500;
-  flex-shrink: 0;
-  min-width: 4.5em;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .row dd {
+  display: block;
   margin: 0;
   color: var(--text);
-  word-break: break-word;
+  overflow-wrap: break-word;
+  word-break: normal;
 }
 
 .row dd.mono {

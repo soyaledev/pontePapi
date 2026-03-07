@@ -197,10 +197,10 @@ export function ReservarFlow({
   const tieneSena = barbershop.requiere_sena && (barbershop.monto_sena ?? 0) > 0;
   const senaOpcional = !!(barbershop.sena_opcional && tieneSena);
   const requiereSena = tieneSena && (!senaOpcional || clientePagaSena);
-  const montoSenaNeto = barbershop.monto_sena ?? 0;
+  const montoSena = barbershop.monto_sena ?? 0;
   const comisionCliente = !!barbershop.sena_comision_cliente;
-  const senaClientePaga = calcClientePaga(montoSenaNeto, comisionCliente);
-  const restanteEnLocal = service ? service.price - montoSenaNeto : 0;
+  const senaClientePaga = calcClientePaga(montoSena, comisionCliente);
+  const restanteEnLocal = service ? service.price - montoSena : 0;
 
   const stepBarbero = 2;
   const stepFecha = 3;

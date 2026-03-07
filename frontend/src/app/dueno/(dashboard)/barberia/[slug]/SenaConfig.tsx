@@ -259,15 +259,15 @@ export function SenaConfig({
                 <strong>{formatPeso(clientePaga)}</strong>
               </div>
               <div className={styles.previewRow}>
-                <span>Vos recibís</span>
+                <span>Vos recibís un aproximado a</span>
                 <strong className={styles.previewGreen}>
-                  ~{formatPeso(ownerRecibe)}
+                  {formatPeso(ownerRecibe)}
                 </strong>
               </div>
               <p className={styles.previewNote}>
                 {comisionCliente
-                  ? `Se redondea a $${ROUND_STEP} para un monto limpio.`
-                  : `Mercado Pago descuenta ~${MP_FEE_PERCENT}% del cobro.`}
+                  ? 'El costo de Mercado Pago se suma al monto que paga el cliente. Será informado antes de pagar.'
+                  : 'Mercado Pago cobra el costo por uso de su sistema. El monto real que recibís estará en el historial de señas.'}
               </p>
             </div>
           )}

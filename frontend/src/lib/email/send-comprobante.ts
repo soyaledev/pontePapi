@@ -74,23 +74,13 @@ export async function sendComprobanteEmail(
     ? `${service.name}${service.price != null ? ` (${formatPeso(service.price)})` : ''}`
     : 'Servicio eliminado';
 
-  const MP_PERCENT = 10.61;
-  const MP_FEE = 1 - MP_PERCENT / 100;
-  const comisionCliente = !!barbershop?.sena_comision_cliente;
   const montoSenaConfig = barbershop?.monto_sena ?? 0;
+  const montoSenaServicio = (appointment as { monto_sena_servicio?: number | null }).monto_sena_servicio ?? montoSenaConfig;
   const montoPagadoReal = (appointment as { monto_sena_pagado?: number | null }).monto_sena_pagado;
   const senaCobrada = montoPagadoReal != null && montoPagadoReal > 0
     ? montoPagadoReal
-    : comisionCliente && montoSenaConfig > 0
-      ? Math.ceil((montoSenaConfig / MP_FEE) / 50) * 50
-      : montoSenaConfig;
-  const montoSenaNetoStored = (appointment as { monto_sena_neto?: number | null }).monto_sena_neto;
-  const montoNetoBarbero = montoSenaNetoStored != null
-    ? montoSenaNetoStored
-    : montoPagadoReal != null && montoPagadoReal > 0
-      ? (comisionCliente ? montoSenaConfig : Math.round(montoPagadoReal * MP_FEE))
-      : montoSenaConfig;
-  const restanteEnLocal = (service?.price ?? 0) - montoNetoBarbero;
+    : montoSenaServicio;
+  const restanteEnLocal = (service?.price ?? 0) - montoSenaServicio;
 
   const restanteRow = tieneSenaPagada && restanteEnLocal > 0
     ? `<tr><td style="padding:6px 0;font-size:0.95rem"><span style="color:#888">Restante a abonar en la barbería</span><br/><span style="color:#1a1a1a;font-weight:700">${formatPeso(restanteEnLocal)}</span></td></tr>`

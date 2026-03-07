@@ -95,7 +95,6 @@ export async function POST(
       }
 
       const montoPagado = typeof payment.transaction_amount === 'number' ? payment.transaction_amount : null;
-      // Usa calculateNetAmount: prioriza net_received_amount, fallback a estimación
       const netFromPayment = calculateNetAmount(payment);
       const montoSenaNeto =
         montoPagado != null
@@ -103,6 +102,7 @@ export async function POST(
             ? (barbershop.monto_sena ?? 0)
             : netFromPayment
           : null;
+      const montoSenaServicio = barbershop.monto_sena ?? 0;
 
       await supabase
         .from('appointments')
@@ -111,6 +111,7 @@ export async function POST(
           mp_payment_id: String(paymentId),
           ...(montoPagado != null && { monto_sena_pagado: montoPagado }),
           ...(montoSenaNeto != null && { monto_sena_neto: montoSenaNeto }),
+          monto_sena_servicio: montoSenaServicio,
         })
         .eq('id', appointmentId);
       sendComprobanteEmail(appointmentId).catch(() => {});

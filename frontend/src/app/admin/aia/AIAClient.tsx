@@ -137,20 +137,20 @@ export function AIAClient() {
           </ul>
           <h3>Estructura de carpetas clave (frontend/src/)</h3>
           <ul>
-            <li><code>app/</code> — Rutas Next.js (page.tsx, layout.tsx)</li>
+            <li><code>app/</code> — Rutas Next.js (page.tsx, layout.tsx). ScrollToTop en layout raíz para scroll al inicio en navegación.</li>
             <li><code>app/api/</code> — API Routes: create-preference, webhook, confirm-payment, comprobante, send-comprobante-email, cancel, oauth-callback, admin/log-error, admin/resolve-error</li>
             <li><code>app/dueno/</code> — Panel dueño: login, registro, turnos, barbería/[slug], configuracion, mercadopago/callback</li>
             <li><code>app/reservar/</code> — Flujo reserva cliente: [slug]/ReservarFlow, confirmado/ComprobanteReserva</li>
             <li><code>app/barberia/</code> — Página pública barbería [slug]</li>
             <li><code>app/admin/</code> — Panel admin: usuarios, barberias, pagos, errores, aia</li>
-            <li><code>lib/</code> — supabase (client, server, admin), format, error-logger, barbershop-visibility, admin, email/send-comprobante</li>
+            <li><code>lib/</code> — supabase (client, server, admin), format, error-logger, barbershop-visibility, admin, email/send-comprobante, appointments (isAppointmentExpired), payments (isPaymentExpired, calculateNetAmount, verifyWebhookSignature)</li>
           </ul>
           <h3>Variables de entorno relevantes</h3>
           <p>Archivo: <code>.env.local</code> o <code>.env.local.example</code></p>
           <ul>
             <li><code>NEXT_PUBLIC_SUPABASE_URL</code>, <code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code>, <code>SUPABASE_SERVICE_ROLE_KEY</code></li>
             <li><code>NEXT_PUBLIC_MP_CLIENT_ID</code>, <code>MP_CLIENT_SECRET</code>, <code>NEXT_PUBLIC_MP_REDIRECT_URI</code> (OAuth MP)</li>
-            <li><code>MERCADOPAGO_ACCESS_TOKEN</code> (plataforma, para webhook)</li>
+            <li><code>MERCADOPAGO_ACCESS_TOKEN</code> (plataforma, para webhook), <code>MERCADOPAGO_WEBHOOK_SECRET</code> (verificación firma)</li>
             <li><code>NEXT_PUBLIC_APP_URL</code> o <code>VERCEL_URL</code> (URL base para redirects)</li>
             <li><code>ULTRAMAIL_API_KEY</code>, <code>ULTRAMAIL_TEMPLATE_ID</code> (emails)</li>
           </ul>
@@ -176,6 +176,7 @@ export function AIAClient() {
             <li><code>MP_CLIENT_SECRET</code> — Client secret (OAuth)</li>
             <li><code>NEXT_PUBLIC_MP_REDIRECT_URI</code> — URL de callback OAuth. Producción: https://barbert.vercel.app/dueno/mercadopago/callback. Local: http://localhost:3000/dueno/mercadopago/callback</li>
             <li><code>MERCADOPAGO_ACCESS_TOKEN</code> — Token de plataforma (solo para webhook). Si no está, el webhook responde 200 sin procesar.</li>
+            <li><code>MERCADOPAGO_WEBHOOK_SECRET</code> — Secret para verificar firma x-signature del webhook MP. Si no está, no se valida la firma.</li>
           </ul>
           <h3>URLs base</h3>
           <ul>
@@ -210,7 +211,7 @@ export function AIAClient() {
             <dt>schedules</dt>
             <dd>barbershop_id, day_of_week (0=domingo, 6=sábado), open_time, close_time (formato HH:MM:SS). Un registro por día abierto.</dd>
             <dt>appointments</dt>
-            <dd>barbershop_id, service_id, barber_id (nullable), fecha (YYYY-MM-DD), slot_time (HH:MM:SS), cliente_nombre, cliente_telefono, cliente_email, cliente_instagram, estado, mp_payment_id, mp_preference_id, monto_sena_pagado (transaction_amount, bruto), monto_sena_neto (depositado al barbero).</dd>
+            <dd>barbershop_id, service_id, barber_id (nullable), fecha (YYYY-MM-DD), slot_time (HH:MM:SS), cliente_nombre, cliente_telefono, cliente_email, cliente_instagram, estado, mp_payment_id, mp_preference_id, monto_sena_pagado (transaction_amount, bruto), monto_sena_neto (depositado al barbero), monto_sena_servicio (crédito de seña hacia el servicio, guardado al confirmar; usado para restante = precio_servicio - monto_sena_servicio).</dd>
             <dt>owner_profiles</dt>
             <dd>id = auth.uid, email. Perfil extendido del dueño.</dd>
             <dt>admin_emails</dt>
@@ -218,6 +219,12 @@ export function AIAClient() {
             <dt>error_logs</dt>
             <dd>source (api|client|webhook), path, method, message, stack, statusCode, metadata (JSON), resolved (boolean).</dd>
           </dl>
+          <h3>Índices de seguridad (appointments)</h3>
+          <p>Índices únicos parciales evitan doble reserva confirmada en el mismo horario:</p>
+          <ul>
+            <li><code>idx_appointments_unique_confirmed_with_barber</code>: (barbershop_id, barber_id, fecha, slot_time) WHERE estado='confirmed' AND barber_id IS NOT NULL</li>
+            <li><code>idx_appointments_unique_confirmed_no_barber</code>: (barbershop_id, fecha, slot_time) WHERE estado='confirmed' AND barber_id IS NULL</li>
+          </ul>
           </div>
         </section>
 
@@ -237,19 +244,19 @@ export function AIAClient() {
           </ul>
           <h3>Creación de preferencia MP</h3>
           <p><strong>Archivo:</strong> <code>app/api/mercadopago/create-preference/route.ts</code>. POST. Body: appointmentId, barbershopId, description.</p>
-          <p><strong>Proceso:</strong> Obtiene barbershop (mp_access_token, monto_sena, sena_comision_cliente). Si sena_comision_cliente: amount = ceil(monto_sena / 0.8939 / 50) * 50 (redondeo a 50). marketplace_fee = round(amount * 0.03 + surplus). Si no: amount = monto_sena, marketplace_fee = round(amount * 0.03). Crea preferencia en MP con external_reference = appointmentId. Guarda mp_preference_id en appointment.</p>
+          <p><strong>Proceso:</strong> Valida expiración (isPaymentExpired): si pending_payment &gt; 15 min, cancela appointment y responde 410. Obtiene barbershop (mp_access_token, monto_sena, sena_comision_cliente). Si sena_comision_cliente: amount = ceil(monto_sena / 0.8939 / 50) * 50 (redondeo a 50). marketplace_fee = round(amount * 0.03 + surplus). Si no: amount = monto_sena, marketplace_fee = round(amount * 0.03). Crea preferencia en MP con external_reference = appointmentId. Guarda mp_preference_id en appointment.</p>
           <h3>Confirmación de pago</h3>
-          <p><strong>confirm-payment:</strong> <code>app/api/appointments/{'[id]'}/confirm-payment/route.ts</code>. POST. Body: payment_id. Usa token de la barbería (mp_access_token). Llama GET /v1/payments/{'{id}'} a MP. Si status=approved: guarda monto_sena_pagado (transaction_amount), monto_sena_neto (calculado), estado=confirmed. Envía email comprobante.</p>
-          <p><strong>webhook:</strong> <code>app/api/mercadopago/webhook/route.ts</code>. POST. Usa MERCADOPAGO_ACCESS_TOKEN (plataforma). Recibe type=payment, data.id. Obtiene appointment por external_reference o mp_preference_id. Obtiene barbershop para calcular monto_sena_neto. Misma lógica de guardado. Envía email.</p>
+          <p><strong>confirm-payment:</strong> <code>app/api/appointments/{'[id]'}/confirm-payment/route.ts</code>. POST. Body: payment_id. Idempotente: si ya confirmed retorna ok. Si isPaymentExpired (pending_payment &gt; 15 min): cancela y responde 410. Protección conflicto: antes de confirmar busca otro appointment confirmado en mismo (barbershop_id, barber_id, fecha, slot_time); si existe, cancela el actual y responde 409. Usa token de la barbería (mp_access_token). Llama GET /v1/payments/{'{id}'} a MP. Si status=approved: guarda monto_sena_pagado, monto_sena_neto (calculateNetAmount), monto_sena_servicio (barbershop.monto_sena), estado=confirmed. Envía email comprobante.</p>
+          <p><strong>webhook:</strong> <code>app/api/mercadopago/webhook/route.ts</code>. POST. Verifica firma x-signature si MERCADOPAGO_WEBHOOK_SECRET está configurado. Usa MERCADOPAGO_ACCESS_TOKEN (plataforma). Recibe type=payment, data.id. Obtiene appointment por external_reference o mp_preference_id. <strong>Idempotencia:</strong> si el appointment ya está confirmed, no sobreescribe (evita que valores correctos de confirm-payment, que usa token del vendedor, sean reemplazados por datos del token plataforma). Misma protección de conflicto que confirm-payment. Si no confirmado: guarda monto_sena_pagado, monto_sena_neto, monto_sena_servicio, estado=confirmed. Envía email.</p>
           <h3>Cálculo monto_sena_neto (lo que recibe el barbero)</h3>
           <ul>
             <li>Si sena_comision_cliente: monto_sena_neto = monto_sena (el barbero recibe exactamente lo configurado).</li>
             <li>Si no: monto_sena_neto = payment.transaction_details.net_received_amount si existe (API MP); si no, round(transaction_amount * 0.8939) como estimación.</li>
           </ul>
           <h3>Historial de señas</h3>
-          <p><strong>Archivo:</strong> <code>app/dueno/(dashboard)/barberia/[slug]/page.tsx</code>. Select incluye monto_sena_neto. Muestra lo depositado al barbero por cada pago. Fallback para registros sin monto_sena_neto: comisionCliente ? monto_sena : round(monto_sena_pagado * 0.8939).</p>
+          <p><strong>Archivo:</strong> <code>app/dueno/(dashboard)/barberia/[slug]/page.tsx</code>. Select incluye monto_sena_neto. Muestra lo depositado al barbero por cada pago (neto real de MP). Fallback para registros sin monto_sena_neto: comisionCliente ? monto_sena : round(monto_sena_pagado * 0.8939). <strong>Nota:</strong> El preview "Vos recibís" en SenaConfig usa estimación ~10.61%; el historial muestra net_received_amount real de MP (puede variar por método de pago, cuotas, etc.).</p>
           <h3>Comprobante y restante</h3>
-          <p><strong>Archivos:</strong> ComprobanteReserva.tsx, send-comprobante.ts, comprobante/route.ts. Seña pagada (lo que ve el cliente) = monto_sena_pagado. Restante a abonar en barbería = precio_servicio - monto_sena_neto. Ejemplo: servicio 10.000, seña pagada 250, barbero recibe 200 → restante = 9.800.</p>
+          <p><strong>Archivos:</strong> ComprobanteReserva.tsx, send-comprobante.ts, comprobante/route.ts. Seña pagada (lo que ve el cliente) = monto_sena_pagado. <strong>Restante a abonar en barbería = precio_servicio - monto_sena_servicio</strong> (NO monto_sena_neto). monto_sena_servicio es el crédito de la seña hacia el servicio, guardado al confirmar (barbershop.monto_sena). Ejemplo: servicio 10.000, monto_sena_servicio 1.000 → restante = 9.000. Esto aplica tanto si el cliente paga comisión (paga más, barbero recibe exacto) como si el barbero absorbe (cliente paga monto_sena, barbero recibe menos por MP).</p>
           </div>
         </section>
 
@@ -263,7 +270,7 @@ export function AIAClient() {
           <ol>
             <li><strong>/</strong> (page.tsx) o <strong>/buscar</strong>: listado de barberías. Usa checkBarbershopVisibility. Archivo: app/page.tsx, app/buscar/page.tsx.</li>
             <li><strong>/barberia/[slug]</strong>: ficha pública. Muestra servicios, barberos, horarios. Link a reservar. app/barberia/[slug]/page.tsx.</li>
-            <li><strong>/reservar/[slug]</strong>: ReservarFlow.tsx. Pasos: 1) elegir servicio, 2) barbero (si hay más de uno), 3) calendario (getCalendarDays, MAX_DAYS_AHEAD=30), 4) slot (getSlotsForBarber excluye ocupados), 5) datos cliente (nombre, teléfono, email, instagram). Inserta appointment. Si requiere_sena: estado=pending_payment, llama create-preference, redirige a init_point MP.</li>
+            <li><strong>/reservar/[slug]</strong>: ReservarFlow.tsx. Pasos: 1) elegir servicio, 2) barbero (si hay más de uno), 3) calendario (getCalendarDays, MAX_DAYS_AHEAD=30), 4) slot (getSlotsForBarber excluye ocupados: confirmed + pending_payment con &lt;15 min; los pending_payment expirados no bloquean), 5) datos cliente (nombre, teléfono, email, instagram). Scroll al inicio en cada cambio de paso. Inserta appointment. Si requiere_sena: estado=pending_payment, llama create-preference, redirige a init_point MP. restanteEnLocal = precio_servicio - montoSena (barbershop.monto_sena).</li>
             <li>MP procesa pago. Redirect a /reservar/confirmado?appointmentId=...&payment_id=...&status=approved (o pending).</li>
             <li><strong>/reservar/confirmado</strong>: ComprobanteReserva. Llama confirm-payment si hay payment_id. Poll cada 2s hasta estado=confirmed. Muestra comprobante con seña pagada, restante, datos turno.</li>
           </ol>
@@ -287,7 +294,11 @@ export function AIAClient() {
             <li><strong>completed:</strong> Turno realizado</li>
           </ul>
           <h3>Slots</h3>
-          <p>Se generan desde schedules (open_time, close_time) y slot_minutes de la barbería. Se excluyen appointments existentes para la fecha y barbería.</p>
+          <p>Se generan desde schedules (open_time, close_time) y slot_minutes de la barbería. Se excluyen: appointments confirmed; appointments pending_payment creados hace menos de 15 minutos (bloqueo temporal). Los pending_payment con más de 15 min (isAppointmentExpired en lib/appointments) no bloquean el slot.</p>
+          <h3>Consistencia y doble reserva</h3>
+          <p><strong>lib/appointments:</strong> isAppointmentExpired(appointment) — true si estado=pending_payment y created_at &gt; 15 min.</p>
+          <p><strong>Protección al confirmar:</strong> confirm-payment y webhook verifican conflicto antes de confirmar. Si ya existe un appointment confirmed en el mismo (barbershop_id, barber_id, fecha, slot_time), cancelan el actual y responden 409 (confirm-payment) o no confirman (webhook).</p>
+          <p><strong>Índice único:</strong> Supabase tiene índices parciales que impiden dos appointments confirmed en el mismo horario.</p>
           </div>
         </section>
 
@@ -322,7 +333,7 @@ export function AIAClient() {
           <h3>Barbería</h3>
           <p>Nombre, slug, dirección, ciudad, teléfono, foto. slot_minutes (duración por turno).</p>
           <h3>Seña (SenaConfig)</h3>
-          <p>requiere_sena, sena_opcional, monto_sena, sena_comision_cliente. Preview: cliente paga X, barbero recibe Y.</p>
+          <p>requiere_sena, sena_opcional, monto_sena, sena_comision_cliente. Preview: cliente paga X, barbero recibe ~Y (estimación 10.61%; el historial muestra el neto real de MP).</p>
           <h3>Servicios</h3>
           <p>CRUD en ServiciosSection. name, price, duracion_min.</p>
           <h3>Horarios</h3>
@@ -344,9 +355,9 @@ export function AIAClient() {
             <dt>POST /api/mercadopago/webhook</dt>
             <dd>Webhook MP. type=payment, data.id.</dd>
             <dt>POST /api/appointments/{'[id]'}/confirm-payment</dt>
-            <dd>Confirmar pago. payment_id.</dd>
+            <dd>Confirmar pago. payment_id. Respuestas: 409 si slot ya tomado; 410 si pending_payment expiró (&gt;15 min).</dd>
             <dt>GET /api/appointments/{'[id]'}/comprobante</dt>
-            <dd>Datos comprobante (appointment + barbershop + service + barber).</dd>
+            <dd>Datos comprobante (appointment + barbershop + service + barber). Incluye monto_sena_servicio para cálculo de restante.</dd>
             <dt>POST /api/appointments/{'[id]'}/send-comprobante-email</dt>
             <dd>Reenviar email comprobante.</dd>
             <dt>POST /api/appointments/cancel</dt>
@@ -369,7 +380,7 @@ export function AIAClient() {
             <button type="button" onClick={() => copySection('admin')} className={`${styles.copySectionBtn} ${copySectionId === 'admin' ? styles.copied : ''}`} title="Copiar este tema">{copySectionId === 'admin' ? '✓ Copiado' : 'Copiar'}</button>
           </div>
           <div className={styles.sectionContent} data-aia-section-body>
-          <p>Acceso: email en admin_emails. Redirect desde /dueno si isAdmin.</p>
+          <p>Acceso: email en admin_emails. Redirect desde /dueno si isAdmin. Sidebar fijo (position: fixed) sin scroll.</p>
           <h3>Rutas</h3>
           <ul>
             <li>/admin: dashboard (usuarios, barberías, turnos, señas, errores 24h)</li>
@@ -390,11 +401,11 @@ export function AIAClient() {
           <div className={styles.sectionContent} data-aia-section-body>
           <h3>Reserva con seña (los paga el cliente)</h3>
           <ol>
-            <li>Cliente elige slot → appointment creado pending_payment</li>
-            <li>create-preference: amount=250 (ej), monto_sena=200</li>
+            <li>Cliente elige slot → appointment creado pending_payment (slot bloqueado 15 min)</li>
+            <li>create-preference: valida expiración; amount=250 (ej), monto_sena=200</li>
             <li>Cliente paga 250 en MP</li>
-            <li>Webhook o confirm-payment: monto_sena_pagado=250, monto_sena_neto=200, estado=confirmed</li>
-            <li>Email comprobante. Restante = precio_servicio - 200</li>
+            <li>confirm-payment (o webhook si llega primero): verifica conflicto (slot ya tomado → cancelar, 409); verifica expiración (410); monto_sena_pagado=250, monto_sena_neto=200, monto_sena_servicio=200, estado=confirmed. Webhook idempotente: si ya confirmed, no sobreescribe.</li>
+            <li>Email comprobante. Restante = precio_servicio - monto_sena_servicio (200)</li>
           </ol>
           <h3>Reserva sin seña</h3>
           <p>Appointment creado confirmed directamente. No MP.</p>

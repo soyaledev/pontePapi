@@ -56,57 +56,61 @@ export async function POST(req: Request) {
       const montoPagado = typeof payment.transaction_amount === 'number' ? payment.transaction_amount : null;
 
       const { data: appRow } = isUuid
-        ? await supabase.from('appointments').select('id, barbershop_id, barber_id, fecha, slot_time').eq('id', appointmentId).single()
-        : await supabase.from('appointments').select('id, barbershop_id, barber_id, fecha, slot_time').eq('mp_preference_id', appointmentId).single();
+        ? await supabase.from('appointments').select('id, barbershop_id, barber_id, fecha, slot_time, estado').eq('id', appointmentId).single()
+        : await supabase.from('appointments').select('id, barbershop_id, barber_id, fecha, slot_time, estado').eq('mp_preference_id', appointmentId).single();
 
       if (appRow?.id) {
-        // Protección final: si otro ya confirmó este slot, cancelar el actual
-        let conflictQuery = supabase
-          .from('appointments')
-          .select('id')
-          .eq('barbershop_id', appRow.barbershop_id)
-          .eq('fecha', appRow.fecha)
-          .eq('slot_time', appRow.slot_time)
-          .eq('estado', 'confirmed')
-          .neq('id', appRow.id);
-
-        if (appRow.barber_id != null) {
-          conflictQuery = conflictQuery.eq('barber_id', appRow.barber_id);
-        } else {
-          conflictQuery = conflictQuery.is('barber_id', null);
-        }
-
-        const { data: conflict } = await conflictQuery.limit(1);
-
-        if (conflict && conflict.length > 0) {
-          await supabase
-            .from('appointments')
-            .update({ estado: 'cancelled' })
-            .eq('id', appRow.id);
-          // No enviar email ni confirmar - turno ya tomado
-        } else {
-          let montoSenaNeto: number | null = null;
-        if (montoPagado != null && appRow.barbershop_id) {
-          const { data: bs } = await supabase
-            .from('barbershops')
-            .select('monto_sena, sena_comision_cliente')
-            .eq('id', appRow.barbershop_id)
-            .single();
-          const comisionCliente = !!bs?.sena_comision_cliente;
-          // Usa calculateNetAmount: prioriza net_received_amount, fallback a estimación
-          const netFromPayment = calculateNetAmount(payment);
-          montoSenaNeto = comisionCliente ? (bs?.monto_sena ?? 0) : netFromPayment;
-        }
-
-        const updatePayload = {
-          estado: 'confirmed' as const,
-          mp_payment_id: String(data.id),
-          ...(montoPagado != null && { monto_sena_pagado: montoPagado }),
-          ...(montoSenaNeto != null && { monto_sena_neto: montoSenaNeto }),
-        };
-
-        await supabase.from('appointments').update(updatePayload).eq('id', appRow.id);
+        if (appRow.estado === 'confirmed') {
           resolvedId = appRow.id;
+        } else {
+          let conflictQuery = supabase
+            .from('appointments')
+            .select('id')
+            .eq('barbershop_id', appRow.barbershop_id)
+            .eq('fecha', appRow.fecha)
+            .eq('slot_time', appRow.slot_time)
+            .eq('estado', 'confirmed')
+            .neq('id', appRow.id);
+
+          if (appRow.barber_id != null) {
+            conflictQuery = conflictQuery.eq('barber_id', appRow.barber_id);
+          } else {
+            conflictQuery = conflictQuery.is('barber_id', null);
+          }
+
+          const { data: conflict } = await conflictQuery.limit(1);
+
+          if (conflict && conflict.length > 0) {
+            await supabase
+              .from('appointments')
+              .update({ estado: 'cancelled' })
+              .eq('id', appRow.id);
+          } else {
+            let montoSenaNeto: number | null = null;
+            let montoSenaServicio: number | null = null;
+            if (montoPagado != null && appRow.barbershop_id) {
+              const { data: bs } = await supabase
+                .from('barbershops')
+                .select('monto_sena, sena_comision_cliente')
+                .eq('id', appRow.barbershop_id)
+                .single();
+              const comisionCliente = !!bs?.sena_comision_cliente;
+              const netFromPayment = calculateNetAmount(payment);
+              montoSenaNeto = comisionCliente ? (bs?.monto_sena ?? 0) : netFromPayment;
+              montoSenaServicio = bs?.monto_sena ?? 0;
+            }
+
+            const updatePayload = {
+              estado: 'confirmed' as const,
+              mp_payment_id: String(data.id),
+              ...(montoPagado != null && { monto_sena_pagado: montoPagado }),
+              ...(montoSenaNeto != null && { monto_sena_neto: montoSenaNeto }),
+              ...(montoSenaServicio != null && { monto_sena_servicio: montoSenaServicio }),
+            };
+
+            await supabase.from('appointments').update(updatePayload).eq('id', appRow.id);
+            resolvedId = appRow.id;
+          }
         }
       }
 

@@ -82,12 +82,17 @@ export async function sendComprobanteEmail(
     : montoSenaServicio;
   const restanteEnLocal = (service?.price ?? 0) - montoSenaServicio;
 
+  const notaText =
+    tieneSenaPagada && restanteEnLocal > 0
+      ? `Abonar ${formatPeso(restanteEnLocal)} en la barbería.`
+      : 'Llegá unos minutos antes.';
+
   const restanteRow = tieneSenaPagada && restanteEnLocal > 0
-    ? `<tr><td style="padding:6px 0;font-size:0.95rem"><span style="color:#888">Restante a abonar en la barbería</span><br/><span style="color:#1a1a1a;font-weight:700">${formatPeso(restanteEnLocal)}</span></td></tr>`
+    ? `<tr><td style="padding:4px 0;font-size:14px"><span style="color:rgba(255,255,255,0.7)">Restante</span> <strong style="color:#e94560">${formatPeso(restanteEnLocal)}</strong></td></tr>`
     : '';
 
   const senaBlock = tieneSenaPagada && senaCobrada > 0
-    ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #eee"><tr><td><p style="margin:0 0 12px;font-size:0.85rem;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:0.04em">Pago de seña</p><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td style="padding:6px 0;font-size:0.95rem"><span style="color:#888">Seña pagada</span><br/><span style="color:#1a1a1a;font-weight:500">${formatPeso(senaCobrada)}</span></td></tr><tr><td style="padding:6px 0;font-size:0.95rem"><span style="color:#888">Estado</span><br/><span style="color:#22c55e;font-weight:600">Aprobado</span></td></tr>${restanteRow}</table></td></tr></table>`
+    ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 16px;padding:14px 20px;background:rgba(255,255,255,0.03);border-top:1px solid rgba(255,255,255,0.08);border-bottom:1px solid rgba(255,255,255,0.08)"><tr><td><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td style="padding:2px 0;font-size:15px;color:rgba(255,255,255,0.85)">Seña ${formatPeso(senaCobrada)}</td></tr>${restanteRow}<tr><td style="padding-top:8px"><span style="display:inline-block;padding:4px 10px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#22c55e;background:rgba(34,197,94,0.15);border-radius:6px">Aprobado</span></td></tr></table></td></tr></table>`
     : '';
 
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://pontepapi.com';
@@ -97,6 +102,7 @@ export async function sendComprobanteEmail(
   const variables: Record<string, string> = {
     cliente_nombre: toTitleCase(appointment.cliente_nombre),
     cliente_telefono: appointment.cliente_telefono || '-',
+    cliente_email_display: appointment.cliente_email?.trim() || '-',
     barbershop_name: barbershop?.name ?? '-',
     service_name: serviceLabel,
     barber_name: barber ? toTitleCase(barber.name) : 'Se le asignará un barbero',
@@ -105,6 +111,8 @@ export async function sendComprobanteEmail(
     comprobante_url: comprobanteUrl,
     logo_url: logoUrl,
     sena_block: senaBlock,
+    nota_text: notaText,
+    reserva_id: appointmentId.slice(0, 8),
   };
 
   try {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import styles from './AIA.module.css';
 
 const SECTIONS = [
@@ -22,6 +22,25 @@ export function AIAClient() {
   const [search, setSearch] = useState('');
   const [copyAllState, setCopyAllState] = useState(false);
   const [copySectionId, setCopySectionId] = useState<string | null>(null);
+  const [activeSectionId, setActiveSectionId] = useState<string>(SECTIONS[0].id);
+
+  useEffect(() => {
+    const sections = SECTIONS.map((s) => document.getElementById(s.id)).filter(Boolean);
+    if (sections.length === 0) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            setActiveSectionId(entry.target.id);
+            break;
+          }
+        }
+      },
+      { rootMargin: '-20% 0px -70% 0px', threshold: 0 }
+    );
+    sections.forEach((el) => el && observer.observe(el));
+    return () => observer.disconnect();
+  }, [search]);
 
   const filteredSections = useMemo(() => {
     if (!search.trim()) return SECTIONS;
@@ -90,7 +109,11 @@ export function AIAClient() {
         </button>
         <nav className={styles.tocNav} aria-label="Temas">
           {filteredSections.map((s) => (
-            <a key={s.id} href={`#${s.id}`} className={styles.tocLink}>
+            <a
+              key={s.id}
+              href={`#${s.id}`}
+              className={`${styles.tocLink} ${s.id === activeSectionId ? styles.tocLinkActive : ''}`}
+            >
               {s.title}
             </a>
           ))}

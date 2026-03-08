@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useLayoutEffect } from 'react';
-import Link from 'next/link';
 import styles from './AdminMobileNotice.module.css';
 
 const DESKTOP_MIN_WIDTH = 1024;
@@ -24,9 +23,11 @@ export function AdminMobileNotice({ children }: { children: React.ReactNode }) {
         <p className={styles.message}>
           El panel de administración está optimizado para computadoras y notebooks. Para usarlo, accedé desde un dispositivo con pantalla de al menos 1024px de ancho.
         </p>
-        <Link href="/" className={styles.link}>
-          Volver al inicio
-        </Link>
+        <form action="/dueno/logout" method="post">
+          <button type="submit" className={styles.link}>
+            Cerrar sesión
+          </button>
+        </form>
       </div>
     </div>
   );

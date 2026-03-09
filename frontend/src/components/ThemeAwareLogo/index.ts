@@ -1,0 +1,1 @@
+export { ThemeAwareLogo } from './ThemeAwareLogo';

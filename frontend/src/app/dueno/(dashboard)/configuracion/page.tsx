@@ -19,6 +19,10 @@ export default async function ConfiguracionPage() {
 
   const mpLinkedCount = barbershops?.filter((b) => !!b.mp_access_token).length ?? 0;
 
+  const metadata = user.app_metadata as { provider?: string; providers?: string[] };
+  const authProvider = metadata?.provider ?? 'email';
+  const isGoogleAccount = authProvider === 'google';
+
   return (
     <div className={styles.page}>
       <Link href="/dueno/dashboard" className={styles.back}>
@@ -28,6 +32,7 @@ export default async function ConfiguracionPage() {
       <ConfiguracionClient
         userEmail={user.email ?? ''}
         hasMpLinked={mpLinkedCount > 0}
+        isGoogleAccount={isGoogleAccount}
       />
     </div>
   );

@@ -1,9 +1,8 @@
 import { redirect } from 'next/navigation';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { isAdmin } from '@/lib/admin';
-import Link from 'next/link';
-import Image from 'next/image';
 import { DuenoNav } from '../DuenoNav';
+import { ThemeAwareLogo } from '@/components/ThemeAwareLogo';
 import { WelcomeOverlay } from './WelcomeOverlay/WelcomeOverlay';
 import styles from '../DuenoLayout.module.css';
 
@@ -28,14 +27,12 @@ export default async function DashboardLayout({
     <div className={styles.layout}>
       <WelcomeOverlay userId={user.id} userEmail={user.email ?? ''} />
       <header className={styles.header}>
-        <Link href="/dueno/turnos" className={styles.logo}>
-          <Image
-            src="/images/logosvgPontePapi.svg"
-            alt="PontePapi"
-            width={140}
-            height={40}
-          />
-        </Link>
+        <ThemeAwareLogo
+          href="/dueno/turnos"
+          className={styles.logo}
+          width={127}
+          height={35}
+        />
       </header>
       <main className={styles.main}>{children}</main>
       <DuenoNav userEmail={user?.email ?? ''} isAdmin={isAdminUser} />

@@ -11,5 +11,7 @@ export function FooterWrapper() {
     (pathname.startsWith('/dueno') && !pathname.startsWith('/dueno/turnos'));
 
   if (!showFooter) return null;
-  return <Footer />;
+  const withBottomNav =
+    pathname.startsWith('/dueno') && !pathname.startsWith('/dueno/turnos');
+  return <Footer withBottomNav={withBottomNav} />;
 }

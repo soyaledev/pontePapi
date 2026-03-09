@@ -5,12 +5,16 @@ import Image from 'next/image';
 import { ThemeToggle, useTheme } from '@/components/ThemeProvider';
 import styles from './Footer.module.css';
 
-export function Footer() {
+type FooterProps = { withBottomNav?: boolean };
+
+export function Footer({ withBottomNav }: FooterProps) {
   const { theme } = useTheme();
   const logoSrc = theme === 'dark' ? '/images/LogoFooter.webp' : '/images/LogoFooterDM.webp';
 
   return (
-    <footer className={styles.footer}>
+    <footer
+      className={`${styles.footer} ${withBottomNav ? styles.footerWithBottomNav : ''}`}
+    >
       <div className={styles.themeRow}>
         <ThemeToggle />
       </div>

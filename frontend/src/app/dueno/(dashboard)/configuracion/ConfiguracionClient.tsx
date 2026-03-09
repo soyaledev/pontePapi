@@ -21,9 +21,11 @@ function EyeIcon({ show }: { show: boolean }) {
 export function ConfiguracionClient({
   userEmail,
   hasMpLinked,
+  isGoogleAccount,
 }: {
   userEmail: string;
   hasMpLinked: boolean;
+  isGoogleAccount: boolean;
 }) {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -105,6 +107,7 @@ export function ConfiguracionClient({
         </div>
       </section>
 
+      {!isGoogleAccount && (
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>Cambiar contraseña</h2>
         <form onSubmit={handleChangePassword}>
@@ -169,6 +172,7 @@ export function ConfiguracionClient({
           </button>
         </form>
       </section>
+      )}
 
       {hasMpLinked && (
         <section className={styles.section}>

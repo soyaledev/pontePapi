@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Image from 'next/image';
+import { ThemeAwareLogo } from '@/components/ThemeAwareLogo';
 import styles from './WelcomeOverlay.module.css';
 
 const STORAGE_PREFIX = 'pontepapi_welcome_v1';
@@ -36,13 +36,11 @@ export function WelcomeOverlay({ userId, userEmail: _userEmail }: { userId: stri
     >
       <div className={styles.content}>
         <div className={styles.logoWrap}>
-          <Image
-            src="/images/logosvgPontePapi.svg"
-            alt="PontePapi"
-            width={160}
-            height={48}
+          <ThemeAwareLogo
+            width={120}
+            height={36}
             priority
-            className={styles.logo}
+            imageClassName={styles.logo}
           />
         </div>
         <h1 className={styles.greeting}>Bienvenido/a</h1>

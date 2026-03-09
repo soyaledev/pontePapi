@@ -174,7 +174,7 @@
   border-radius: 0.5rem;
   border: 1px solid var(--border);
   background: var(--bg-elevated);
-  color: #333;
+  color: var(--text);
   font-size: 0.95rem;
   font-weight: 500;
   cursor: pointer;
@@ -183,7 +183,7 @@
 }
 
 .googleButton:hover {
-  background: #f8f8f8;
+  background: var(--bg-input-hover);
 }
 
 .googleButton:disabled {
@@ -194,7 +194,7 @@
 .googleSpinner {
   width: 20px;
   height: 20px;
-  border: 2px solid #e0e0e0;
+  border: 2px solid var(--border);
   border-top-color: #4285f4;
   border-radius: 50%;
   animation: googleSpin 0.7s linear infinite;

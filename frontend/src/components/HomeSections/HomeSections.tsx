@@ -1,7 +1,8 @@
 'use client';
 
-import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
+import { HowStep } from './HowStep';
+import { clientSteps } from './steps/clientSteps';
 import styles from './HomeSections.module.css';
 
 export function HomeSections() {
@@ -30,22 +31,15 @@ export function HomeSections() {
         <p className={styles.lead}>
           PontePapi conecta a quienes buscan turno con barberías reales. Sin apps extras, sin llamadas.
         </p>
-        <div className={styles.split}>
-          <div className={styles.card}>
-            <h3 className={styles.cardTitle}>Buscás turno</h3>
-            <p className={styles.cardText}>
-              Encontrá barberías por nombre o zona. Elegí barbero, fecha y horario. Reservá al toque — con o sin seña según la barbería.
-            </p>
-          </div>
-          <div className={styles.card}>
-            <h3 className={styles.cardTitle}>Tenés barbería</h3>
-            <p className={styles.cardText}>
-              Registrá tu local en minutos. Recibí reservas 24/7 sin atender el teléfono. Cobrá señas con Mercado Pago y reducí inasistencias.
-            </p>
-            <Link href="/dueno/login" className={styles.cta}>
-              Sumá tu barbería
-            </Link>
-          </div>
+        <div className={styles.timeline}>
+          {clientSteps.map((step, index) => (
+            <HowStep
+              key={step.id}
+              step={step}
+              isLast={index === clientSteps.length - 1}
+              index={index}
+            />
+          ))}
         </div>
       </div>
     </section>

@@ -5,6 +5,7 @@ import styles from './AIA.module.css';
 
 const SECTIONS = [
   { id: 'overview', title: 'Visión general' },
+  { id: 'ui-tema', title: 'UI y tema' },
   { id: 'env', title: 'Variables de entorno' },
   { id: 'database', title: 'Base de datos' },
   { id: 'pagos', title: 'Pagos y seña' },
@@ -161,12 +162,13 @@ export function AIAClient() {
           <h3>Estructura de carpetas clave (frontend/src/)</h3>
           <ul>
             <li><code>app/</code> — Rutas Next.js (page.tsx, layout.tsx). ScrollToTop en layout raíz para scroll al inicio en navegación.</li>
-            <li><code>app/api/</code> — API Routes: create-preference, webhook, confirm-payment, comprobante, send-comprobante-email, cancel, oauth-callback, admin/log-error, admin/resolve-error</li>
+            <li><code>app/api/</code> — API Routes: create-preference, webhook, confirm-payment, comprobante, send-comprobante-email, cancel, oauth-callback, dueno/desvincular-mp, dueno/eliminar-cuenta, admin/log-error, admin/resolve-error</li>
             <li><code>app/dueno/</code> — Panel dueño: login, registro, turnos, barbería/[slug], configuracion, mercadopago/callback</li>
             <li><code>app/reservar/</code> — Flujo reserva cliente: [slug]/ReservarFlow, confirmado/ComprobanteReserva</li>
             <li><code>app/barberia/</code> — Página pública barbería [slug]</li>
             <li><code>app/admin/</code> — Panel admin: usuarios, barberias, pagos, errores, aia</li>
-            <li><code>lib/</code> — supabase (client, server, admin), format, error-logger, barbershop-visibility, admin, email/send-comprobante, appointments (isAppointmentExpired), payments (isPaymentExpired, calculateNetAmount, verifyWebhookSignature)</li>
+            <li><code>lib/</code> — supabase (client, server, admin), format, error-logger, barbershop-visibility, admin, theme, email/send-comprobante, appointments (isAppointmentExpired), payments (isPaymentExpired, calculateNetAmount, verifyWebhookSignature)</li>
+            <li><code>components/</code> — ThemeProvider, ThemeToggle, ThemeAwareLogo (logos según tema), Footer, FooterWrapper (muestra footer en /, /admin/*, /dueno/* salvo /dueno/turnos; conBottomNav en dueno para espacio de barra inferior)</li>
           </ul>
           <h3>Variables de entorno relevantes</h3>
           <p>Archivo: <code>.env.local</code> o <code>.env.local.example</code></p>
@@ -180,9 +182,36 @@ export function AIAClient() {
           </div>
         </section>
 
+        <section id="ui-tema" className={sectionClass('ui-tema')} data-aia-section>
+          <div className={styles.sectionHeader}>
+            <h2 className={styles.sectionTitle}>2. UI y tema (modo oscuro/claro)</h2>
+            <button type="button" onClick={() => copySection('ui-tema')} className={`${styles.copySectionBtn} ${copySectionId === 'ui-tema' ? styles.copied : ''}`} title="Copiar este tema">{copySectionId === 'ui-tema' ? '✓ Copiado' : 'Copiar'}</button>
+          </div>
+          <div className={styles.sectionContent} data-aia-section-body>
+          <h3>Paleta de colores</h3>
+          <p>Archivo: <code>frontend/src/app/globals.css</code>. Paleta: <code>#e94560</code> (acento), <code>#16213e</code> (navy), <code>#0f3460</code> (azul oscuro), <code>#e9ecef</code> (gris claro).</p>
+          <h3>Tema oscuro / claro</h3>
+          <ul>
+            <li><strong>ThemeProvider</strong> (components/ThemeProvider): contexto para theme (dark|light). Script en &lt;head&gt; del layout raíz evita parpadeo al cargar (leer localStorage antes de paint).</li>
+            <li><strong>ThemeToggle</strong>: switch en Footer (sol/luna). Almacén: localStorage <code>pontepapi-theme</code>.</li>
+            <li><strong>Variables CSS:</strong> <code>:root</code> = tema oscuro (default). <code>[data-theme='light']</code> sobrescribe. Usar siempre variables: --bg-primary, --bg-secondary, --text, --text-muted, --text-faint, --border, --accent, --bg-input, --bg-input-hover, --bg-elevated, etc.</li>
+            <li>Evitar colores hardcodeados (#333, #f8f8f8). Botones, inputs y textos deben usar variables para respetar ambos temas.</li>
+          </ul>
+          <h3>Footer (FooterWrapper)</h3>
+          <ul>
+            <li>Se muestra en: <code>/</code>, <code>/admin/*</code>, <code>/dueno/*</code> excepto <code>/dueno/turnos</code>.</li>
+            <li>En rutas dueno (panel, configuración): <code>Footer</code> recibe <code>withBottomNav=true</code>. Clase <code>footerWithBottomNav</code> añade padding-bottom extra para no superponerse con DuenoNav (barra fija inferior).</li>
+          </ul>
+          <h3>ThemeAwareLogo</h3>
+          <p>Componente (components/ThemeAwareLogo): muestra LogoFooter.webp en tema oscuro, LogoFooterDM.webp en claro. Usado en Footer, header cuenta dueño (dashboard layout), WelcomeOverlay. Alturas: Footer 52px, cuenta dueño 35px.</p>
+          <h3>Login / Registro</h3>
+          <p>Botón &quot;Continuar con Google&quot;: usa <code>color: var(--text)</code>, <code>background: var(--bg-elevated)</code>, <code>hover: var(--bg-input-hover)</code>. Spinner: <code>border: var(--border)</code>, <code>border-top-color: #4285f4</code>. Ícono Google mantiene colores oficiales.</p>
+          </div>
+        </section>
+
         <section id="env" className={sectionClass('env')} data-aia-section>
           <div className={styles.sectionHeader}>
-            <h2 className={styles.sectionTitle}>2. Variables de entorno</h2>
+            <h2 className={styles.sectionTitle}>3. Variables de entorno</h2>
             <button type="button" onClick={() => copySection('env')} className={`${styles.copySectionBtn} ${copySectionId === 'env' ? styles.copied : ''}`} title="Copiar este tema">{copySectionId === 'env' ? '✓ Copiado' : 'Copiar'}</button>
           </div>
           <div className={styles.sectionContent} data-aia-section-body>
@@ -218,7 +247,7 @@ export function AIAClient() {
 
         <section id="database" className={sectionClass('database')} data-aia-section>
           <div className={styles.sectionHeader}>
-            <h2 className={styles.sectionTitle}>3. Base de datos (Supabase)</h2>
+            <h2 className={styles.sectionTitle}>4. Base de datos (Supabase)</h2>
             <button type="button" onClick={() => copySection('database')} className={`${styles.copySectionBtn} ${copySectionId === 'database' ? styles.copied : ''}`} title="Copiar este tema">{copySectionId === 'database' ? '✓ Copiado' : 'Copiar'}</button>
           </div>
           <div className={styles.sectionContent} data-aia-section-body>
@@ -253,7 +282,7 @@ export function AIAClient() {
 
         <section id="pagos" className={sectionClass('pagos')} data-aia-section>
           <div className={styles.sectionHeader}>
-            <h2 className={styles.sectionTitle}>4. Pagos y seña</h2>
+            <h2 className={styles.sectionTitle}>5. Pagos y seña</h2>
             <button type="button" onClick={() => copySection('pagos')} className={`${styles.copySectionBtn} ${copySectionId === 'pagos' ? styles.copied : ''}`} title="Copiar este tema">{copySectionId === 'pagos' ? '✓ Copiado' : 'Copiar'}</button>
           </div>
           <div className={styles.sectionContent} data-aia-section-body>
@@ -283,7 +312,7 @@ export function AIAClient() {
 
         <section id="reservas" className={sectionClass('reservas')} data-aia-section>
           <div className={styles.sectionHeader}>
-            <h2 className={styles.sectionTitle}>5. Reservas</h2>
+            <h2 className={styles.sectionTitle}>6. Reservas</h2>
             <button type="button" onClick={() => copySection('reservas')} className={`${styles.copySectionBtn} ${copySectionId === 'reservas' ? styles.copied : ''}`} title="Copiar este tema">{copySectionId === 'reservas' ? '✓ Copiado' : 'Copiar'}</button>
           </div>
           <div className={styles.sectionContent} data-aia-section-body>
@@ -302,7 +331,7 @@ export function AIAClient() {
 
         <section id="turnos" className={sectionClass('turnos')} data-aia-section>
           <div className={styles.sectionHeader}>
-            <h2 className={styles.sectionTitle}>6. Turnos y citas</h2>
+            <h2 className={styles.sectionTitle}>7. Turnos y citas</h2>
             <button type="button" onClick={() => copySection('turnos')} className={`${styles.copySectionBtn} ${copySectionId === 'turnos' ? styles.copied : ''}`} title="Copiar este tema">{copySectionId === 'turnos' ? '✓ Copiado' : 'Copiar'}</button>
           </div>
           <div className={styles.sectionContent} data-aia-section-body>
@@ -325,7 +354,7 @@ export function AIAClient() {
 
         <section id="panel-dueno" className={sectionClass('panel-dueno')} data-aia-section>
           <div className={styles.sectionHeader}>
-            <h2 className={styles.sectionTitle}>7. Panel dueño</h2>
+            <h2 className={styles.sectionTitle}>8. Panel dueño</h2>
             <button type="button" onClick={() => copySection('panel-dueno')} className={`${styles.copySectionBtn} ${copySectionId === 'panel-dueno' ? styles.copied : ''}`} title="Copiar este tema">{copySectionId === 'panel-dueno' ? '✓ Copiado' : 'Copiar'}</button>
           </div>
           <div className={styles.sectionContent} data-aia-section-body>
@@ -347,10 +376,12 @@ export function AIAClient() {
 
         <section id="configuracion" className={sectionClass('configuracion')} data-aia-section>
           <div className={styles.sectionHeader}>
-            <h2 className={styles.sectionTitle}>8. Configuración</h2>
+            <h2 className={styles.sectionTitle}>9. Configuración</h2>
             <button type="button" onClick={() => copySection('configuracion')} className={`${styles.copySectionBtn} ${copySectionId === 'configuracion' ? styles.copied : ''}`} title="Copiar este tema">{copySectionId === 'configuracion' ? '✓ Copiado' : 'Copiar'}</button>
           </div>
           <div className={styles.sectionContent} data-aia-section-body>
+          <h3>Cuenta dueño (/dueno/configuracion)</h3>
+          <p>Correo, MP vinculado, eliminar cuenta. <strong>Cambiar contraseña:</strong> solo si <code>user.app_metadata.provider !== 'google'</code>. Si el usuario ingresó con Google (provider=google), la sección «Cambiar contraseña» no se muestra. Si registró con email/password, sí se muestra el formulario.</p>
           <h3>Barbería</h3>
           <p>Nombre, slug, dirección, ciudad, teléfono, foto. slot_minutes (duración por turno).</p>
           <h3>Seña (SenaConfig)</h3>
@@ -366,7 +397,7 @@ export function AIAClient() {
 
         <section id="apis" className={sectionClass('apis')} data-aia-section>
           <div className={styles.sectionHeader}>
-            <h2 className={styles.sectionTitle}>9. APIs y rutas</h2>
+            <h2 className={styles.sectionTitle}>10. APIs y rutas</h2>
             <button type="button" onClick={() => copySection('apis')} className={`${styles.copySectionBtn} ${copySectionId === 'apis' ? styles.copied : ''}`} title="Copiar este tema">{copySectionId === 'apis' ? '✓ Copiado' : 'Copiar'}</button>
           </div>
           <div className={styles.sectionContent} data-aia-section-body>
@@ -385,6 +416,8 @@ export function AIAClient() {
             <dd>Cancelar turno.</dd>
             <dt>POST /api/dueno/desvincular-mp</dt>
             <dd>Desvincular MP de barbería.</dd>
+            <dt>POST /api/dueno/eliminar-cuenta</dt>
+            <dd>Eliminar cuenta dueño: borra barberías, barberos, servicios, schedules, appointments del owner; borra owner_profiles; elimina usuario de auth.</dd>
             <dt>GET/POST /api/mercadopago/oauth-callback</dt>
             <dd>OAuth MP.</dd>
             <dt>POST /api/admin/resolve-error</dt>
@@ -397,7 +430,7 @@ export function AIAClient() {
 
         <section id="admin" className={sectionClass('admin')} data-aia-section>
           <div className={styles.sectionHeader}>
-            <h2 className={styles.sectionTitle}>10. Panel admin</h2>
+            <h2 className={styles.sectionTitle}>11. Panel admin</h2>
             <button type="button" onClick={() => copySection('admin')} className={`${styles.copySectionBtn} ${copySectionId === 'admin' ? styles.copied : ''}`} title="Copiar este tema">{copySectionId === 'admin' ? '✓ Copiado' : 'Copiar'}</button>
           </div>
           <div className={styles.sectionContent} data-aia-section-body>
@@ -416,7 +449,7 @@ export function AIAClient() {
 
         <section id="flujos" className={sectionClass('flujos')} data-aia-section>
           <div className={styles.sectionHeader}>
-            <h2 className={styles.sectionTitle}>11. Flujos completos</h2>
+            <h2 className={styles.sectionTitle}>12. Flujos completos</h2>
             <button type="button" onClick={() => copySection('flujos')} className={`${styles.copySectionBtn} ${copySectionId === 'flujos' ? styles.copied : ''}`} title="Copiar este tema">{copySectionId === 'flujos' ? '✓ Copiado' : 'Copiar'}</button>
           </div>
           <div className={styles.sectionContent} data-aia-section-body>
@@ -435,7 +468,7 @@ export function AIAClient() {
 
         <section id="errores" className={sectionClass('errores')} data-aia-section>
           <div className={styles.sectionHeader}>
-            <h2 className={styles.sectionTitle}>12. Errores y logs</h2>
+            <h2 className={styles.sectionTitle}>13. Errores y logs</h2>
             <button type="button" onClick={() => copySection('errores')} className={`${styles.copySectionBtn} ${copySectionId === 'errores' ? styles.copied : ''}`} title="Copiar este tema">{copySectionId === 'errores' ? '✓ Copiado' : 'Copiar'}</button>
           </div>
           <div className={styles.sectionContent} data-aia-section-body>

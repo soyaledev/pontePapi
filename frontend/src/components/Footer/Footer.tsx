@@ -1,16 +1,25 @@
+'use client';
+
 import Link from 'next/link';
 import Image from 'next/image';
+import { ThemeToggle, useTheme } from '@/components/ThemeProvider';
 import styles from './Footer.module.css';
 
 export function Footer() {
+  const { theme } = useTheme();
+  const logoSrc = theme === 'dark' ? '/images/LogoFooter.webp' : '/images/LogoFooterDM.webp';
+
   return (
     <footer className={styles.footer}>
+      <div className={styles.themeRow}>
+        <ThemeToggle />
+      </div>
       <Link href="/" className={styles.logo} aria-label="PontePapi - Inicio">
         <Image
-          src="/images/logosvgPontePapi.svg"
-          alt=""
-          width={100}
-          height={30}
+          src={logoSrc}
+          alt="PontePapi"
+          width={160}
+          height={48}
         />
       </Link>
       <a

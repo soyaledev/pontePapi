@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { ScrollToTop } from '@/components/ScrollToTop/ScrollToTop';
+import { ThemeProvider } from '@/components/ThemeProvider';
+import { FooterWrapper } from '@/components/Footer/FooterWrapper';
 
 const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://barbert.vercel.app';
 
@@ -45,10 +47,20 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="es">
+    <html lang="es" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){var t=localStorage.getItem('pontepapi-theme');if(t!=='light'&&t!=='dark'){t=window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';}document.documentElement.setAttribute('data-theme',t);})();`,
+          }}
+        />
+      </head>
       <body>
-        <ScrollToTop />
-        <ErrorBoundary>{children}</ErrorBoundary>
+        <ThemeProvider>
+          <ScrollToTop />
+          <ErrorBoundary>{children}</ErrorBoundary>
+          <FooterWrapper />
+        </ThemeProvider>
       </body>
     </html>
   );

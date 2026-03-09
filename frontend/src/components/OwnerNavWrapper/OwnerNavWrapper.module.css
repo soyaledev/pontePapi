@@ -1,6 +1,6 @@
 .wrapper {
   min-height: 100vh;
   min-height: 100dvh;
-  background-color: var(--bg-dark);
+  background-color: var(--bg-primary);
   padding-bottom: 6rem;
 }

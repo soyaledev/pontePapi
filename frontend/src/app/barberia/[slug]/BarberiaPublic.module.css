@@ -1,6 +1,6 @@
 .page {
   min-height: 100vh;
-  background: var(--bg-dark);
+  background: var(--bg-primary);
   color: var(--text);
 }
 
@@ -13,7 +13,7 @@
   right: 0;
   z-index: 10;
   padding: 0.75rem 1.5rem;
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0) 100%);
+  background: var(--header-gradient-over-media);
 }
 
 .headerInner {
@@ -22,13 +22,13 @@
 }
 
 .back {
-  color: var(--text-muted);
+  color: var(--text-over-media-muted);
   text-decoration: none;
   font-size: 0.95rem;
 }
 
 .back:hover {
-  color: var(--text);
+  color: var(--text-over-media);
 }
 
 .cover {
@@ -91,6 +91,7 @@
   font-size: 1.75rem;
   font-weight: 700;
   margin-bottom: 1rem;
+  color: var(--text-over-media);
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
 }
 
@@ -185,7 +186,7 @@
 }
 
 .infoSep {
-  color: rgba(255, 255, 255, 0.35);
+  color: var(--text-faint);
   font-weight: 600;
   user-select: none;
 }

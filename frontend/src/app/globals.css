@@ -1,33 +1,121 @@
 @import url('https://fonts.googleapis.com/css2?family=Sansation:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap');
 
+/* ============================================
+   PALETA: #e94560, #16213e, #0f3460, #e9ecef
+   ============================================ */
+
 :root {
   --font-sansation: 'Sansation', sans-serif;
 
-  /* Fondos */
-  --bg-dark: #0a0a0a;
+  /* Colores base de la paleta */
+  --color-accent: #e94560;
+  --color-navy: #16213e;
+  --color-navy-dark: #0f3460;
+  --color-light: #e9ecef;
+
+  /* Tema oscuro (default) */
+  --bg-primary: #16213e;
+  --bg-dark: var(--bg-primary); /* alias para compatibilidad */
+  --bg-secondary: #0f3460;
   --bg-card: rgba(255, 255, 255, 0.05);
   --bg-input: rgba(255, 255, 255, 0.05);
   --bg-input-hover: rgba(255, 255, 255, 0.08);
+  --bg-elevated: rgba(15, 52, 96, 0.6);
 
-  /* Acento */
-  --accent: #e94560;
-  --accent-hover: rgba(233, 69, 96, 0.95);
+  --accent: var(--color-accent);
+  --accent-hover: rgba(233, 69, 96, 0.9);
+  --text-on-accent: #fff;
+  --accent-muted: rgba(233, 69, 96, 0.2);
 
-  /* Texto */
   --text: #fff;
-  --text-muted: rgba(255, 255, 255, 0.7);
+  --text-muted: rgba(255, 255, 255, 0.75);
   --text-faint: rgba(255, 255, 255, 0.5);
+  --text-fainter: rgba(255, 255, 255, 0.4);
 
-  /* Bordes */
+  --surface-subtle: rgba(255, 255, 255, 0.03);
+  --surface-muted: rgba(255, 255, 255, 0.05);
+  --surface-hover: rgba(255, 255, 255, 0.1);
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --border-muted: rgba(255, 255, 255, 0.08);
+
   --border: rgba(255, 255, 255, 0.12);
   --border-focus: var(--accent);
 
-  /* Header gradient */
+  --success: #4ade80;
+  --success-muted: rgba(74, 222, 128, 0.2);
+  --error: #ef4444;
+  --error-muted: rgba(239, 68, 68, 0.2);
+
   --header-gradient: linear-gradient(
     180deg,
-    rgba(10, 10, 10, 1) 0%,
-    rgba(10, 10, 10, 0) 100%
+    rgba(22, 33, 62, 1) 0%,
+    rgba(22, 33, 62, 0) 100%
   );
+  --header-gradient-over-media: linear-gradient(
+    180deg,
+    rgba(22, 33, 62, 1) 0%,
+    rgba(22, 33, 62, 0) 100%
+  );
+  --overlay-dark: rgba(0, 0, 0, 0.4);
+  --text-over-media: #fff;
+  --text-over-media-muted: rgba(255, 255, 255, 0.85);
+  --bg-over-media: rgba(255, 255, 255, 0.15);
+  --bg-over-media-hover: rgba(255, 255, 255, 0.2);
+  --border-over-media: rgba(255, 255, 255, 0.25);
+  --bg-dropdown-over-media: rgba(22, 33, 62, 0.98);
+}
+
+[data-theme='light'] {
+  --bg-primary: #e9ecef;
+  --bg-dark: var(--bg-primary);
+  --bg-secondary: #f8f9fa;
+  --bg-card: rgba(255, 255, 255, 0.95);
+  --bg-input: rgba(22, 33, 62, 0.06);
+  --bg-input-hover: rgba(22, 33, 62, 0.1);
+  --bg-elevated: #fff;
+
+  --accent: var(--color-accent);
+  --accent-hover: #d63a52;
+  --text-on-accent: #fff;
+  --accent-muted: rgba(233, 69, 96, 0.15);
+
+  --text: #16213e;
+  --text-muted: rgba(22, 33, 62, 0.7);
+  --text-faint: rgba(22, 33, 62, 0.5);
+  --text-fainter: rgba(22, 33, 62, 0.4);
+
+  --surface-subtle: rgba(22, 33, 62, 0.03);
+  --surface-muted: rgba(22, 33, 62, 0.06);
+  --surface-hover: rgba(22, 33, 62, 0.1);
+  --border-subtle: rgba(22, 33, 62, 0.08);
+  --border-muted: rgba(22, 33, 62, 0.1);
+
+  --border: rgba(22, 33, 62, 0.15);
+  --border-focus: var(--accent);
+
+  --success: #22c55e;
+  --success-muted: rgba(34, 197, 94, 0.2);
+  --error: #dc2626;
+  --error-muted: rgba(220, 38, 38, 0.15);
+
+  --header-gradient: linear-gradient(
+    180deg,
+    var(--bg-secondary) 0%,
+    var(--bg-primary) 100%
+  );
+  --header-gradient-over-media: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.5) 0%,
+    rgba(0, 0, 0, 0.3) 60%,
+    transparent 100%
+  );
+  --overlay-dark: rgba(0, 0, 0, 0.35);
+  --text-over-media: #fff;
+  --text-over-media-muted: rgba(255, 255, 255, 0.85);
+  --bg-over-media: rgba(255, 255, 255, 0.15);
+  --bg-over-media-hover: rgba(255, 255, 255, 0.2);
+  --border-over-media: rgba(255, 255, 255, 0.25);
+  --bg-dropdown-over-media: rgba(22, 33, 62, 0.98);
 }
 
 * {
@@ -38,7 +126,7 @@
 
 html {
   min-height: 100%;
-  background-color: var(--bg-dark);
+  background-color: var(--bg-primary);
 }
 
 body {
@@ -47,7 +135,7 @@ body {
   max-width: 100vw;
   overflow-x: hidden;
   font-family: var(--font-sansation), system-ui, -apple-system, sans-serif;
-  background-color: var(--bg-dark);
+  background-color: var(--bg-primary);
   color: var(--text);
 }
 

@@ -15,7 +15,7 @@
   display: flex;
   border-radius: 0.5rem;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid var(--border);
 }
 
 .toggleBtn {
@@ -25,15 +25,15 @@
   font-weight: 600;
   font-family: inherit;
   border: none;
-  background: rgba(255, 255, 255, 0.05);
-  color: rgba(255, 255, 255, 0.5);
+  background: var(--surface-muted);
+  color: var(--text-faint);
   cursor: pointer;
   transition: background 0.2s, color 0.2s;
   -webkit-tap-highlight-color: transparent;
 }
 
 .toggleBtn:first-child {
-  border-right: 1px solid rgba(255, 255, 255, 0.15);
+  border-right: 1px solid var(--border);
 }
 
 .toggleBtnActive {
@@ -50,7 +50,7 @@
 
 .hint {
   font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.45);
+  color: var(--text-faint);
   margin: 0.5rem 0 0;
   line-height: 1.4;
 }
@@ -83,7 +83,7 @@
   display: flex;
   border-radius: 0.5rem;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid var(--border);
 }
 
 .segmentedBtn {
@@ -93,15 +93,15 @@
   font-weight: 600;
   font-family: inherit;
   border: none;
-  background: rgba(255, 255, 255, 0.05);
-  color: rgba(255, 255, 255, 0.5);
+  background: var(--surface-muted);
+  color: var(--text-faint);
   cursor: pointer;
   transition: background 0.2s, color 0.2s;
   -webkit-tap-highlight-color: transparent;
 }
 
 .segmentedBtn:first-child {
-  border-right: 1px solid rgba(255, 255, 255, 0.15);
+  border-right: 1px solid var(--border);
 }
 
 .segmentedBtnActive {
@@ -141,8 +141,8 @@
 /* ─── Preview ─── */
 
 .preview {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--surface-subtle);
+  border: 1px solid var(--border);
   border-radius: 0.6rem;
   padding: 0.85rem;
   display: flex;
@@ -159,7 +159,7 @@
 }
 
 .previewRow span {
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--text-muted);
 }
 
 .previewGreen {
@@ -168,7 +168,7 @@
 
 .previewNote {
   font-size: 0.78rem;
-  color: rgba(255, 255, 255, 0.4);
+  color: var(--text-faint);
   margin: 0.25rem 0 0;
   line-height: 1.4;
 }
@@ -205,7 +205,7 @@
 
 .saveBtnSaved {
   background: #22c55e !important;
-  color: #fff !important;
+  color: var(--text) !important;
 }
 
 .savedMsg {
@@ -226,8 +226,8 @@
   display: flex;
   align-items: center;
   gap: 0.6rem;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-muted);
+  background: var(--surface-subtle);
   border-radius: 0.5rem;
   padding: 0.6rem 0.85rem;
 }
@@ -249,7 +249,7 @@
 .mpLinkedLabel {
   font-size: 0.88rem;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.85);
+  color: var(--text);
 }
 
 .mpLinkedBadge {
@@ -281,8 +281,8 @@
 }
 
 .mpUnlinked {
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border);
+  background: var(--surface-subtle);
   border-radius: 0.75rem;
   padding: 1rem;
   display: flex;
@@ -313,7 +313,7 @@
 
 .mpUnlinkedDesc {
   font-size: 0.82rem;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--text-faint);
   margin: 0.15rem 0 0;
   line-height: 1.45;
 }
@@ -325,7 +325,7 @@
   gap: 0.5rem;
   padding: 0.7rem 1.1rem;
   background: #009ee3;
-  color: #fff;
+  color: var(--text);
   border: none;
   border-radius: 0.5rem;
   font-size: 0.95rem;

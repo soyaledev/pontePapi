@@ -3,8 +3,14 @@
   padding: 2rem 1.5rem 2.5rem;
   padding-bottom: calc(2.5rem + env(safe-area-inset-bottom, 0));
   text-align: center;
-  background: var(--bg-dark);
+  background: var(--bg-primary);
   border-top: 1px solid var(--border);
+}
+
+.themeRow {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.25rem;
 }
 
 .logo {
@@ -13,7 +19,7 @@
 }
 
 .logo img {
-  height: 28px;
+  height: 52px;
   width: auto;
   opacity: 0.9;
 }

@@ -5,7 +5,7 @@
   right: 0;
   z-index: 10;
   padding: 1.5rem 1.5rem 0.75rem;
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.4) 60%, rgba(0, 0, 0, 0) 100%);
+  background: var(--header-gradient-over-media);
 }
 
 .headerInner {
@@ -37,12 +37,12 @@
 
 .ownerLink {
   font-size: 0.9rem;
-  color: var(--text-muted);
+  color: var(--text-over-media-muted);
   text-decoration: none;
 }
 
 .ownerLink:hover {
-  color: var(--text);
+  color: var(--text-over-media);
 }
 
 .cover {
@@ -73,7 +73,7 @@
   inset: 0;
   background: linear-gradient(
     180deg,
-    rgba(0, 0, 0, 0.3) 0%,
+    var(--overlay-dark) 0%,
     rgba(0, 0, 0, 0.5) 50%,
     rgba(0, 0, 0, 0.7) 100%
   );
@@ -92,7 +92,7 @@
 .searchLabel {
   font-size: 1.85rem;
   font-weight: 600;
-  color: var(--text);
+  color: var(--text-over-media);
   margin-bottom: 1rem;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
 }
@@ -107,21 +107,21 @@
   width: 100%;
   padding: 0.95rem 1.25rem;
   border-radius: 2rem;
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  background: rgba(255, 255, 255, 0.15);
-  color: var(--text);
+  border: 1px solid var(--border-over-media);
+  background: var(--bg-over-media);
+  color: var(--text-over-media);
   font-size: 1rem;
   backdrop-filter: blur(8px);
 }
 
 .searchInput::placeholder {
-  color: var(--text-faint);
+  color: var(--text-over-media-muted);
 }
 
 .searchInput:focus {
   outline: none;
-  border-color: rgba(255, 255, 255, 0.4);
-  background: rgba(255, 255, 255, 0.2);
+  border-color: var(--accent);
+  background: var(--bg-over-media-hover);
 }
 
 .resultsList {
@@ -132,11 +132,12 @@
   margin: 0.35rem 0 0;
   padding: 0.5rem 0;
   list-style: none;
-  background: rgba(10, 10, 10, 0.95);
+  background: var(--bg-dropdown-over-media);
   border-radius: 1rem;
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-over-media);
   max-height: 280px;
   overflow-y: auto;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
 }
 
 .resultItem {
@@ -147,7 +148,7 @@
   padding: 0.75rem 1rem;
   background: none;
   border: none;
-  color: var(--text);
+  color: var(--text-over-media);
   font-size: 1rem;
   text-align: left;
   cursor: pointer;
@@ -155,7 +156,7 @@
 }
 
 .resultItem:hover {
-  background: var(--bg-input-hover);
+  background: var(--bg-over-media-hover);
 }
 
 .resultName {
@@ -164,6 +165,6 @@
 
 .resultCity {
   font-size: 0.85rem;
-  color: var(--text-muted);
+  color: var(--text-over-media-muted);
   margin-left: 0.5rem;
 }

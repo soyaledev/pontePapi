@@ -84,7 +84,7 @@
 
 .serviceBtn:hover {
   background: var(--bg-input-hover);
-  border-color: rgba(255, 255, 255, 0.2);
+  border-color: var(--border);
 }
 
 .price {
@@ -167,11 +167,11 @@
 }
 
 .calendarDay:hover:not(.calendarDayDisabled) {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--surface-hover);
 }
 
 .calendarDayOther {
-  color: rgba(255, 255, 255, 0.4);
+  color: var(--text-fainter);
   font-weight: 400;
 }
 
@@ -199,9 +199,10 @@
 }
 
 .calendarDayDisabled {
-  color: rgba(255, 255, 255, 0.2);
+  color: var(--text-fainter);
   font-weight: 400;
   cursor: not-allowed;
+  opacity: 0.6;
 }
 
 .slotGrid {
@@ -240,8 +241,8 @@
   text-transform: capitalize;
   color: var(--accent);
   font-weight: 600;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: var(--bg-input);
+  border: 1px solid var(--border);
   border-radius: 0.5rem;
   text-align: center;
   letter-spacing: 0.02em;
@@ -279,7 +280,7 @@
 }
 
 .barberBtn:hover {
-  border-bottom-color: rgba(255, 255, 255, 0.3);
+  border-bottom-color: var(--border);
 }
 
 .barberBtnSelected {
@@ -380,8 +381,8 @@
 
 .resumenBlock {
   padding: 1.25rem 1.5rem;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: var(--surface-hover);
+  border: 1px solid var(--border);
   border-radius: 0.75rem;
   margin-bottom: 1.5rem;
 }
@@ -398,7 +399,7 @@
 .resumenLinea {
   font-size: 1.05rem;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--text);
   margin: 0 0 0.4rem;
 }
 
@@ -408,28 +409,28 @@
   color: var(--accent);
   margin: 0.5rem 0 0;
   padding-top: 0.5rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  border-top: 1px solid var(--border);
 }
 
 .resumenRestante {
   font-size: 0.95rem;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--text-muted);
   margin: 0.35rem 0 0;
 }
 
 .senaOpcionChoice {
   margin-bottom: 1.25rem;
   padding: 1rem;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--surface-muted);
   border-radius: 0.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid var(--border);
 }
 
 .senaOpcionChoiceInline {
   margin-top: 0.75rem;
   padding-top: 0.75rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  border-top: 1px solid var(--border);
 }
 
 .senaOpcionLabel {
@@ -451,18 +452,18 @@
   padding: 0.65rem 1rem;
   font-size: 0.9rem;
   font-weight: 500;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: var(--surface-hover);
+  border: 1px solid var(--border);
   border-radius: 0.5rem;
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--text);
   cursor: pointer;
   font-family: inherit;
   transition: background 0.2s, border-color 0.2s;
 }
 
 .senaOpcionBtn:hover {
-  background: rgba(255, 255, 255, 0.12);
-  border-color: rgba(255, 255, 255, 0.3);
+  background: var(--bg-input-hover);
+  border-color: var(--border-focus);
 }
 
 .senaOpcionBtnActive {
@@ -639,8 +640,8 @@
 }
 
 .modal {
-  background: rgba(255, 255, 255, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
   border-radius: 1rem;
   padding: 1.5rem;
   max-width: 360px;
@@ -674,7 +675,7 @@
 
 .modalClose:hover {
   color: var(--text);
-  border-color: rgba(255, 255, 255, 0.2);
+  border-color: var(--border);
 }
 
 .confirmBtnWrap {

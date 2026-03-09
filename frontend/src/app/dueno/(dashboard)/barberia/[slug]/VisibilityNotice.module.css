@@ -2,7 +2,7 @@
   margin-top: 2rem;
   text-align: center;
   font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.85);
+  color: var(--text);
   line-height: 1.5;
 }
 

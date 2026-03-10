@@ -94,6 +94,7 @@ export function ComprobanteCard({ data, showLink = true, compact = false, subtit
             <span><strong>Restante {formatPeso(restanteEnLocal)}</strong></span>
           )}
           <span className={styles.aprobado}>Aprobado</span>
+          <span className={styles.transaccion}>Nº transacción: {data.mp_payment_id}</span>
         </div>
       )}
 

@@ -139,6 +139,14 @@
   font-weight: 600;
 }
 
+.transaccion {
+  flex-basis: 100%;
+  font-size: 0.75rem;
+  font-family: ui-monospace, monospace;
+  color: var(--text-faint);
+  word-break: break-all;
+}
+
 .aprobado {
   margin-left: auto;
   padding: 0.25rem 0.65rem;

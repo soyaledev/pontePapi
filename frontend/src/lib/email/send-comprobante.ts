@@ -91,8 +91,11 @@ export async function sendComprobanteEmail(
     ? `<tr><td style="padding:4px 0;font-size:14px"><span style="color:rgba(255,255,255,0.7)">Restante</span> <strong style="color:#e94560">${formatPeso(restanteEnLocal)}</strong></td></tr>`
     : '';
 
+  const transaccionRow = tieneSenaPagada && appointment.mp_payment_id
+    ? `<tr><td style="padding:4px 0;font-size:12px;color:rgba(255,255,255,0.6)">Nº transacción: <span style="font-family:monospace;word-break:break-all">${String(appointment.mp_payment_id)}</span></td></tr>`
+    : '';
   const senaBlock = tieneSenaPagada && senaCobrada > 0
-    ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 16px;padding:14px 20px;background:rgba(255,255,255,0.03);border-top:1px solid rgba(255,255,255,0.08);border-bottom:1px solid rgba(255,255,255,0.08)"><tr><td><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td style="padding:2px 0;font-size:15px;color:rgba(255,255,255,0.85)">Seña ${formatPeso(senaCobrada)}</td></tr>${restanteRow}<tr><td style="padding-top:8px"><span style="display:inline-block;padding:4px 10px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#22c55e;background:rgba(34,197,94,0.15);border-radius:6px">Aprobado</span></td></tr></table></td></tr></table>`
+    ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 16px;padding:14px 20px;background:rgba(255,255,255,0.03);border-top:1px solid rgba(255,255,255,0.08);border-bottom:1px solid rgba(255,255,255,0.08)"><tr><td><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td style="padding:2px 0;font-size:15px;color:rgba(255,255,255,0.85)">Seña ${formatPeso(senaCobrada)}</td></tr>${restanteRow}${transaccionRow}<tr><td style="padding-top:8px"><span style="display:inline-block;padding:4px 10px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#22c55e;background:rgba(34,197,94,0.15);border-radius:6px">Aprobado</span></td></tr></table></td></tr></table>`
     : '';
 
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://pontepapi.com';

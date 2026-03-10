@@ -129,6 +129,13 @@ html {
   background-color: var(--bg-primary);
 }
 
+body.app-body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
 body {
   min-height: 100vh;
   min-height: 100dvh;
@@ -137,6 +144,12 @@ body {
   font-family: var(--font-sansation), system-ui, -apple-system, sans-serif;
   background-color: var(--bg-primary);
   color: var(--text);
+}
+
+.app-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Sansation - clases utilitarias */

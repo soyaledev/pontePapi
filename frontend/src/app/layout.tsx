@@ -55,10 +55,12 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body>
+      <body className="app-body">
         <ThemeProvider>
           <ScrollToTop />
-          <ErrorBoundary>{children}</ErrorBoundary>
+          <main className="app-main">
+            <ErrorBoundary>{children}</ErrorBoundary>
+          </main>
           <FooterWrapper />
         </ThemeProvider>
       </body>

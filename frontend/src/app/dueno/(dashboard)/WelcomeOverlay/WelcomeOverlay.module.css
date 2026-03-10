@@ -31,6 +31,8 @@
   text-align: center;
   max-width: 360px;
   width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
 }
 
 .logoWrap {
@@ -91,6 +93,75 @@
   transform: scale(0.98);
 }
 
+.verInstrucciones {
+  margin-top: 1rem;
+  padding: 0;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  animation: fadeBlurIn 0.6s ease 0.85s both;
+}
+
+.verInstrucciones:hover {
+  color: var(--text);
+}
+
+.instrucciones {
+  width: 100%;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-subtle);
+  text-align: left;
+}
+
+.instrucciones .stepItem {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.5rem 0.75rem;
+  padding: 0.75rem 0;
+  align-items: baseline;
+}
+
+.instrucciones .stepItem::after {
+  content: '';
+  grid-column: 1 / -1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--border) 0%, transparent 100%);
+}
+
+.instrucciones .stepItem:last-child::after {
+  display: none;
+}
+
+.instrucciones .stepBadge {
+  font-family: var(--font-sansation), sans-serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.08em;
+}
+
+.instrucciones .stepTitle {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0;
+  line-height: 1.3;
+}
+
+.instrucciones .stepDescription {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin: 0;
+}
+
 /* Reduce motion para accesibilidad */
 @media (prefers-reduced-motion: reduce) {
   .overlay {
@@ -100,7 +171,8 @@
   .logoWrap,
   .greeting,
   .tagline,
-  .cta {
+  .cta,
+  .verInstrucciones {
     animation: fadeIn 0.3s ease both;
   }
 
@@ -108,6 +180,7 @@
   .greeting { animation-delay: 0.05s; }
   .tagline { animation-delay: 0.1s; }
   .cta { animation-delay: 0.15s; }
+  .verInstrucciones { animation-delay: 0.2s; }
 }
 
 @keyframes fadeIn {

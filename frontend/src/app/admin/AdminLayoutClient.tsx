@@ -27,18 +27,23 @@ export function AdminLayoutClient({
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
 
+  const sidebarWidth = collapsed ? SIDEBAR_COLLAPSED : SIDEBAR_EXPANDED;
+
   useEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored !== null) setCollapsed(stored === 'true');
   }, []);
+
+  useEffect(() => {
+    document.documentElement.style.setProperty('--admin-sidebar-width', `${sidebarWidth}px`);
+    return () => document.documentElement.style.removeProperty('--admin-sidebar-width');
+  }, [sidebarWidth]);
 
   const toggle = () => {
     const next = !collapsed;
     setCollapsed(next);
     localStorage.setItem(STORAGE_KEY, String(next));
   };
-
-  const sidebarWidth = collapsed ? SIDEBAR_COLLAPSED : SIDEBAR_EXPANDED;
 
   return (
     <div

@@ -1,0 +1,5 @@
+/* Footer alineado a la derecha del sidebar (admin), no debajo del sidebar */
+.wrapSidebar {
+  margin-left: var(--admin-sidebar-width, 240px);
+  flex-shrink: 0;
+}

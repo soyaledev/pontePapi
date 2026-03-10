@@ -3,11 +3,8 @@ import { ErrorPageClient } from './ErrorPageClient';
 export default async function ErrorPage({
   searchParams,
 }: {
-  searchParams: Promise<{ appointmentId?: string; slug?: string; [k: string]: string | undefined }>;
+  searchParams: Promise<{ appointmentId?: string; slug?: string }>;
 }) {
-  const params = await searchParams;
-  const appointmentId = params.appointmentId;
-  const slug = params.slug;
-  const searchParamsObj = Object.keys(params).length ? (params as Record<string, string>) : undefined;
-  return <ErrorPageClient appointmentId={appointmentId} slug={slug} searchParams={searchParamsObj} />;
+  const { appointmentId, slug } = await searchParams;
+  return <ErrorPageClient appointmentId={appointmentId} slug={slug} />;
 }

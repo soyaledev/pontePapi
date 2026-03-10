@@ -36,7 +36,9 @@ export function AdminLayoutClient({
 
   useEffect(() => {
     document.documentElement.style.setProperty('--admin-sidebar-width', `${sidebarWidth}px`);
-    return () => document.documentElement.style.removeProperty('--admin-sidebar-width');
+    return () => {
+      document.documentElement.style.removeProperty('--admin-sidebar-width');
+    };
   }, [sidebarWidth]);
 
   const toggle = () => {

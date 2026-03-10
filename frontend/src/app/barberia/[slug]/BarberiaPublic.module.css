@@ -222,10 +222,44 @@
   color: var(--text);
 }
 
+.barberGridWrap {
+  /* Wrapper simple cuando hay ≤2 barberos */
+}
+
 .barberGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
   gap: 0.75rem;
+}
+
+/* Móvil: scroll horizontal cuando hay más de 2 barberos */
+@media (max-width: 768px) {
+  .barberGridScrollWrap {
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    margin-left: -1.5rem;
+    margin-right: -1.5rem;
+    padding: 0 1.5rem;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .barberGridScrollWrap::-webkit-scrollbar {
+    display: none;
+  }
+
+  .barberGridScrollWrap .barberGrid {
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(90px, 1fr);
+    grid-template-columns: unset;
+    width: max-content;
+    padding-right: 0.5rem;
+  }
+
+  .barberGridScrollWrap .barberGrid .barberCard {
+    min-width: 90px;
+  }
 }
 
 .barberCard {
@@ -239,15 +273,16 @@
 }
 
 .barberAvatar {
-  width: 64px;
-  height: 64px;
+  width: 80px;
+  height: 104px;
   border-radius: 0.5rem;
   object-fit: cover;
+  object-position: top;
 }
 
 .barberAvatarPlaceholder {
-  width: 64px;
-  height: 64px;
+  width: 80px;
+  height: 104px;
   border-radius: 0.5rem;
   background: var(--bg-input);
   border: 1px solid var(--border);

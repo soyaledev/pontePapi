@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useLayoutEffect } from 'react';
 import { formatPeso, toTitleCase } from '@/lib/format';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -275,8 +275,8 @@ export function ReservarFlow({
     }
   }, [step, fecha]);
 
-  // Scroll al inicio cuando cambia el paso del flujo
-  useEffect(() => {
+  // Scroll al inicio cuando cambia el paso del flujo (useLayoutEffect para que ocurra antes del paint)
+  useLayoutEffect(() => {
     window.scrollTo(0, 0);
   }, [step]);
 
@@ -520,6 +520,7 @@ export function ReservarFlow({
         {step === stepBarbero && hasBarberStep && (
           <div className={styles.step}>
             <h2>Elegí barbero</h2>
+            <div className={barbers.length > 2 ? styles.barberGridScrollWrap : styles.barberGridWrap}>
             <div className={styles.barberGrid}>
               {barbers.map((b) => (
                 <button
@@ -539,6 +540,7 @@ export function ReservarFlow({
                   <span className={styles.barberName}>{toTitleCase(b.name)}</span>
                 </button>
               ))}
+            </div>
             </div>
             <button
               type="button"

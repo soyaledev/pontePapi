@@ -113,6 +113,7 @@ export default async function BarberiaPublicPage({
           {barbers && barbers.length > 0 && (
             <div className={styles.barbersSection}>
               <strong>Barberos</strong>
+              <div className={barbers.length > 2 ? styles.barberGridScrollWrap : styles.barberGridWrap}>
               <div className={styles.barberGrid}>
                 {barbers.map((b) => (
                   <div key={b.id} className={styles.barberCard}>
@@ -124,6 +125,7 @@ export default async function BarberiaPublicPage({
                     <span>{toTitleCase(b.name)}</span>
                   </div>
                 ))}
+              </div>
               </div>
             </div>
           )}

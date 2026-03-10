@@ -98,7 +98,7 @@ export async function POST(req: Request) {
               currency_id: 'ARS',
             },
           ],
-          // marketplace_fee omitido: requiere app configurada como Split de Pagos en MP; enviarlo sin eso causa CPT01
+          marketplace_fee: marketplaceFee,
           back_urls: {
             success:
               backUrlSuccess ?? `${baseUrl}/reservar/confirmado`,

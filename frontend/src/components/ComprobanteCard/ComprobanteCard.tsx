@@ -27,14 +27,17 @@ type Props = {
 };
 
 export function ComprobanteCard({ data, showLink = true, compact = false, subtitle }: Props) {
-  const tieneSena = data.barbershop?.requiere_sena && (data.barbershop?.monto_sena ?? 0) > 0;
   const isPaid = data.estado === 'confirmed';
+  const senaPagada = isPaid && !!data.mp_payment_id;
   const montoSenaConfig = data.barbershop?.monto_sena ?? 0;
   const montoSenaServicio = data.monto_sena_servicio ?? montoSenaConfig;
   const senaClientePago = data.monto_sena_pagado != null && data.monto_sena_pagado > 0
     ? data.monto_sena_pagado
     : montoSenaServicio;
-  const restanteEnLocal = data.service ? data.service.price - montoSenaServicio : 0;
+  // Si NO pagó seña: abonar el total del servicio; si pagó seña: restante = precio - crédito
+  const montoAPagarEnLocal = data.service
+    ? (senaPagada ? data.service.price - montoSenaServicio : data.service.price)
+    : 0;
 
   const fechaFormateada = new Date(data.fecha + 'T12:00:00').toLocaleDateString('es-AR', {
     weekday: 'short',
@@ -87,11 +90,11 @@ export function ComprobanteCard({ data, showLink = true, compact = false, subtit
         </div>
       </div>
 
-      {tieneSena && isPaid && data.mp_payment_id && (
+      {senaPagada && (
         <div className={styles.pago}>
           <span>Seña {formatPeso(senaClientePago)}</span>
-          {restanteEnLocal > 0 && (
-            <span><strong>Restante {formatPeso(restanteEnLocal)}</strong></span>
+          {montoAPagarEnLocal > 0 && (
+            <span><strong>Restante {formatPeso(montoAPagarEnLocal)}</strong></span>
           )}
           <span className={styles.aprobado}>Aprobado</span>
           <span className={styles.transaccion}>Nº transacción: {data.mp_payment_id}</span>
@@ -99,8 +102,8 @@ export function ComprobanteCard({ data, showLink = true, compact = false, subtit
       )}
 
       <p className={styles.nota}>
-        {tieneSena && isPaid && restanteEnLocal > 0
-          ? `Abonar ${formatPeso(restanteEnLocal)} en la barbería.`
+        {montoAPagarEnLocal > 0
+          ? `Abonar ${formatPeso(montoAPagarEnLocal)} en la barbería.`
           : 'Llegá unos minutos antes.'}
       </p>
 

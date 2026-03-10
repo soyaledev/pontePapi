@@ -63,6 +63,13 @@ export async function sendComprobanteEmail(
     appointment.estado === 'confirmed' &&
     !!appointment.mp_payment_id;
 
+  // Si NO pagó seña: abonar el total del servicio; si pagó seña: restante = precio - crédito
+  const montoSenaConfig = barbershop?.monto_sena ?? 0;
+  const montoSenaServicio = (appointment as { monto_sena_servicio?: number | null }).monto_sena_servicio ?? montoSenaConfig;
+  const montoAPagarEnLocal = tieneSenaPagada
+    ? (service?.price ?? 0) - montoSenaServicio
+    : (service?.price ?? 0);
+
   const fechaStr = new Date(appointment.fecha + 'T12:00:00').toLocaleDateString('es-AR', {
     weekday: 'long',
     day: 'numeric',
@@ -74,21 +81,18 @@ export async function sendComprobanteEmail(
     ? `${service.name}${service.price != null ? ` (${formatPeso(service.price)})` : ''}`
     : 'Servicio eliminado';
 
-  const montoSenaConfig = barbershop?.monto_sena ?? 0;
-  const montoSenaServicio = (appointment as { monto_sena_servicio?: number | null }).monto_sena_servicio ?? montoSenaConfig;
   const montoPagadoReal = (appointment as { monto_sena_pagado?: number | null }).monto_sena_pagado;
   const senaCobrada = montoPagadoReal != null && montoPagadoReal > 0
     ? montoPagadoReal
     : montoSenaServicio;
-  const restanteEnLocal = (service?.price ?? 0) - montoSenaServicio;
 
   const notaText =
-    tieneSenaPagada && restanteEnLocal > 0
-      ? `Abonar ${formatPeso(restanteEnLocal)} en la barbería.`
+    montoAPagarEnLocal > 0
+      ? `Abonar ${formatPeso(montoAPagarEnLocal)} en la barbería.`
       : 'Llegá unos minutos antes.';
 
-  const restanteRow = tieneSenaPagada && restanteEnLocal > 0
-    ? `<tr><td style="padding:4px 0;font-size:14px"><span style="color:rgba(255,255,255,0.7)">Restante</span> <strong style="color:#e94560">${formatPeso(restanteEnLocal)}</strong></td></tr>`
+  const restanteRow = tieneSenaPagada && montoAPagarEnLocal > 0
+    ? `<tr><td style="padding:4px 0;font-size:14px"><span style="color:rgba(255,255,255,0.7)">Restante</span> <strong style="color:#e94560">${formatPeso(montoAPagarEnLocal)}</strong></td></tr>`
     : '';
 
   const transaccionRow = tieneSenaPagada && appointment.mp_payment_id

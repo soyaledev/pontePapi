@@ -13,6 +13,8 @@ type Service = {
   duracion_min: number;
 };
 
+type ModalMode = 'add' | Service;
+
 export function ServiciosSection({
   barbershopId,
   services: initialServices,
@@ -21,75 +23,72 @@ export function ServiciosSection({
   services: Service[];
 }) {
   const [services, setServices] = useState(initialServices);
-  const [showForm, setShowForm] = useState(false);
+  const [modalService, setModalService] = useState<ModalMode | null>(null);
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({ name: '', price: '', duracion_min: '' });
-  const [editingService, setEditingService] = useState<Service | null>(null);
-  const [editForm, setEditForm] = useState({ name: '', price: '', duracion_min: '' });
-  const [editLoading, setEditLoading] = useState(false);
+
+  const isEdit = modalService !== null && modalService !== 'add';
+  const isAdd = modalService === 'add';
 
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
-      if (e.key === 'Escape') setEditingService(null);
+      if (e.key === 'Escape') setModalService(null);
     }
-    if (editingService) {
+    if (modalService) {
       document.addEventListener('keydown', onKeyDown);
       return () => document.removeEventListener('keydown', onKeyDown);
     }
-  }, [editingService]);
+  }, [modalService]);
+
+  function openAddModal() {
+    setModalService('add');
+    setForm({ name: '', price: '', duracion_min: '30' });
+  }
 
   function openEditModal(s: Service) {
-    setEditingService(s);
-    setEditForm({
+    setModalService(s);
+    setForm({
       name: s.name,
       price: s.price.toString(),
       duracion_min: s.duracion_min.toString(),
     });
   }
 
-  async function handleUpdate(e: React.FormEvent) {
-    if (!editingService) return;
-    e.preventDefault();
-    setEditLoading(true);
-    try {
-      const { data, error } = await supabase
-        .from('services')
-        .update({
-          name: formatServiceName(editForm.name),
-          price: parsePesoInput(editForm.price),
-          duracion_min: Math.min(120, Math.max(5, parseInt(editForm.duracion_min, 10) || 30)),
-        })
-        .eq('id', editingService.id)
-        .select()
-        .single();
-      if (error) throw error;
-      setServices((s) => s.map((x) => (x.id === data.id ? data : x)));
-      setEditingService(null);
-      dispatchPanelVisibilityUpdate();
-    } catch {
-      // Error al actualizar
-    } finally {
-      setEditLoading(false);
-    }
+  function closeModal() {
+    if (!loading) setModalService(null);
   }
 
-  async function handleAdd(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     try {
-      const { data, error } = await supabase.from('services').insert({
-        barbershop_id: barbershopId,
+      const payload = {
         name: formatServiceName(form.name),
         price: parsePesoInput(form.price),
         duracion_min: Math.min(120, Math.max(5, parseInt(form.duracion_min, 10) || 30)),
-      }).select().single();
-      if (error) throw error;
-      setServices((s) => [...s, data]);
-      setForm({ name: '', price: '', duracion_min: '' });
-      setShowForm(false);
+      };
+      if (isAdd) {
+        const { data, error } = await supabase
+          .from('services')
+          .insert({ barbershop_id: barbershopId, ...payload })
+          .select()
+          .single();
+        if (error) throw error;
+        setServices((s) => [...s, data]);
+      } else if (isEdit) {
+        const { data, error } = await supabase
+          .from('services')
+          .update(payload)
+          .eq('id', modalService.id)
+          .select()
+          .single();
+        if (error) throw error;
+        setServices((s) => s.map((x) => (x.id === data.id ? data : x)));
+      }
+      setModalService(null);
       dispatchPanelVisibilityUpdate();
     } catch {
-      // Error al agregar servicio
+      // Error
     } finally {
       setLoading(false);
     }
@@ -139,105 +138,61 @@ export function ServiciosSection({
           </li>
         ))}
       </ul>
-      {showForm ? (
-        <form onSubmit={handleAdd} className={styles.form}>
-          <input
-            type="text"
-            placeholder="Nombre (máx 50 caracteres)"
-            value={form.name}
-            onChange={(e) => setForm((f) => ({ ...f, name: e.target.value.slice(0, 50) }))}
-            className={styles.input}
-            maxLength={50}
-            required
-          />
-          <input
-            type="text"
-            inputMode="numeric"
-            placeholder="Precio (ej: 13.000 o $5000)"
-            value={form.price}
-            onChange={(e) => setForm((f) => ({ ...f, price: e.target.value }))}
-            className={styles.input}
-            required
-          />
-          <input
-            type="number"
-            placeholder="Duración (5-120 min)"
-            value={form.duracion_min}
-            onChange={(e) => setForm((f) => ({ ...f, duracion_min: e.target.value }))}
-            className={styles.input}
-            min={5}
-            max={120}
-            required
-          />
-          <div className={styles.formActions}>
-            <button type="submit" disabled={loading}>
-              {loading ? '...' : 'Agregar'}
-            </button>
-            <button type="button" onClick={() => setShowForm(false)}>
-              Cancelar
-            </button>
-          </div>
-        </form>
-      ) : (
-        <button onClick={() => setShowForm(true)} className={styles.addBtn}>
-          + Agregar servicio
-        </button>
-      )}
+      <button onClick={openAddModal} className={styles.addBtn}>
+        + Agregar servicio
+      </button>
 
-      {editingService && (
-        <div
-          className={styles.modalOverlay}
-          onClick={() => !editLoading && setEditingService(null)}
-        >
+      {modalService && (
+        <div className={styles.modalOverlay} onClick={closeModal}>
           <div
             className={styles.modal}
             role="dialog"
             aria-modal="true"
-            aria-labelledby="edit-servicio-title"
+            aria-labelledby="servicio-modal-title"
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 id="edit-servicio-title" className={styles.modalTitle}>
-              Editar servicio
+            <h3 id="servicio-modal-title" className={styles.modalTitle}>
+              {isAdd ? 'Agregar servicio' : 'Editar servicio'}
             </h3>
-            <form onSubmit={handleUpdate} className={styles.modalForm}>
-              <label htmlFor="edit-name" className={styles.modalLabel}>
+            <form onSubmit={handleSubmit} className={styles.modalForm}>
+              <label htmlFor="servicio-name" className={styles.modalLabel}>
                 Nombre
               </label>
               <input
-                id="edit-name"
+                id="servicio-name"
                 type="text"
-                value={editForm.name}
+                value={form.name}
                 onChange={(e) =>
-                  setEditForm((f) => ({ ...f, name: e.target.value.slice(0, 50) }))
+                  setForm((f) => ({ ...f, name: e.target.value.slice(0, 50) }))
                 }
                 className={styles.input}
                 maxLength={50}
                 required
               />
-              <label htmlFor="edit-price" className={styles.modalLabel}>
+              <label htmlFor="servicio-price" className={styles.modalLabel}>
                 Precio
               </label>
               <input
-                id="edit-price"
+                id="servicio-price"
                 type="text"
                 inputMode="numeric"
-                value={editForm.price}
+                value={form.price}
                 onChange={(e) =>
-                  setEditForm((f) => ({ ...f, price: e.target.value }))
+                  setForm((f) => ({ ...f, price: e.target.value }))
                 }
                 className={styles.input}
                 placeholder="ej: 13.000 o $5000"
                 required
               />
-              <label htmlFor="edit-duracion" className={styles.modalLabel}>
+              <label htmlFor="servicio-duracion" className={styles.modalLabel}>
                 Duración (5-120 min)
               </label>
               <input
-                id="edit-duracion"
+                id="servicio-duracion"
                 type="number"
-                value={editForm.duracion_min}
+                value={form.duracion_min}
                 onChange={(e) =>
-                  setEditForm((f) => ({ ...f, duracion_min: e.target.value }))
+                  setForm((f) => ({ ...f, duracion_min: e.target.value }))
                 }
                 className={styles.input}
                 min={5}
@@ -245,13 +200,14 @@ export function ServiciosSection({
                 required
               />
               <div className={styles.formActions}>
-                <button type="submit" disabled={editLoading}>
-                  {editLoading ? 'Guardando...' : 'Guardar'}
+                <button type="submit" disabled={loading}>
+                  {loading
+                    ? 'Guardando...'
+                    : isAdd
+                      ? 'Agregar'
+                      : 'Guardar'}
                 </button>
-                <button
-                  type="button"
-                  onClick={() => !editLoading && setEditingService(null)}
-                >
+                <button type="button" onClick={closeModal} disabled={loading}>
                   Cancelar
                 </button>
               </div>

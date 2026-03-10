@@ -159,6 +159,7 @@ export function ReservarFlow({
   const [telefono, setTelefono] = useState('');
   const [email, setEmail] = useState('');
   const [clientePagaSena, setClientePagaSena] = useState(true);
+  const [showDetallesSena, setShowDetallesSena] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
@@ -664,11 +665,36 @@ export function ReservarFlow({
                 </p>
               )}
               {tieneSena && (
-                <p className={styles.resumenSeña}>
-                  {senaOpcional
-                    ? `Seña opcional: ${formatPeso(senaClientePaga)}`
-                    : `Seña: ${formatPeso(senaClientePaga)}`}
-                </p>
+                <div className={styles.resumenSeñaWrap}>
+                  <p className={styles.resumenSeña}>
+                    {senaOpcional
+                      ? `Seña opcional: ${formatPeso(senaClientePaga)}`
+                      : `Seña: ${formatPeso(senaClientePaga)}`}
+                  </p>
+                  <button
+                    type="button"
+                    className={styles.detallesBtn}
+                    onClick={() => setShowDetallesSena((s) => !s)}
+                    aria-expanded={showDetallesSena}
+                  >
+                    detalles
+                  </button>
+                  {showDetallesSena && (
+                    <p className={styles.detallesTexto}>
+                      {comisionCliente && senaClientePaga > montoSena ? (
+                        <>
+                          De los {formatPeso(senaClientePaga)}: {formatPeso(montoSena)} se abonan al servicio y se
+                          descuentan del total. Los {formatPeso(senaClientePaga - montoSena)} restantes cubren el costo
+                          del pago con tarjeta.
+                        </>
+                      ) : (
+                        <>
+                          Los {formatPeso(montoSena)} se descuentan del total del servicio al llegar a la barbería.
+                        </>
+                      )}
+                    </p>
+                  )}
+                </div>
               )}
               {tieneSena && service && requiereSena && restanteEnLocal > 0 && (
                 <p className={styles.resumenRestante}>

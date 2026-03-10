@@ -403,13 +403,40 @@
   margin: 0 0 0.4rem;
 }
 
+.resumenSeñaWrap {
+  margin: 0.5rem 0 0;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border);
+}
+
 .resumenSeña {
   font-size: 1.15rem;
   font-weight: 600;
   color: var(--accent);
+  margin: 0 0 0.25rem;
+}
+
+.detallesBtn {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-family: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.detallesBtn:hover {
+  color: var(--text);
+}
+
+.detallesTexto {
   margin: 0.5rem 0 0;
-  padding-top: 0.5rem;
-  border-top: 1px solid var(--border);
+  font-size: 0.85rem;
+  line-height: 1.45;
+  color: var(--text-muted);
 }
 
 .resumenRestante {

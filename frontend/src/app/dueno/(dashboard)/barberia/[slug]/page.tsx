@@ -142,6 +142,7 @@ export default async function BarberiaDetailPage({
       <TurnosHistorialSection appointments={historialAppointments ?? []} />
       <VisibilityNotice
         barbershopId={barbershop.id}
+        slug={slug}
         initialVisibility={visibility}
         requiereSena={!!barbershop.requiere_sena}
       />

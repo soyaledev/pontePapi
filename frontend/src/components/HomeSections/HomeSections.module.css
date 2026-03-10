@@ -106,6 +106,17 @@
   order: 1;
 }
 
+/* Mobile: siempre título arriba de la imagen en todos los pasos */
+@media (max-width: 599px) {
+  .stepHeader .stepText {
+    order: 1;
+  }
+
+  .stepHeader .stepImagePlaceholder {
+    order: 2;
+  }
+}
+
 .stepText {
   display: flex;
   flex-direction: column;

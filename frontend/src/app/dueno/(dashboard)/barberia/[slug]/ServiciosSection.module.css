@@ -49,7 +49,7 @@
 }
 
 .itemContent:focus-visible {
-  outline: 2px solid var(--accent, #e94560);
+  outline: 2px solid var(--accent);
   outline-offset: -2px;
 }
 
@@ -60,7 +60,7 @@
 
 .itemPrice {
   font-weight: 700;
-  color: #e94560;
+  color: var(--accent);
 }
 
 .itemDur {
@@ -81,7 +81,7 @@
 }
 
 .delete:hover {
-  color: #e94560;
+  color: var(--accent);
 }
 
 .modalOverlay {
@@ -98,13 +98,13 @@
 }
 
 .modal {
-  background: var(--surface-hover);
+  background: var(--bg-secondary);
   border: 1px solid var(--border);
   border-radius: 1rem;
   padding: 1.5rem;
   max-width: 340px;
   width: 100%;
-  backdrop-filter: blur(12px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
 .modalTitle {
@@ -162,8 +162,8 @@
 }
 
 .formActions button:first-child {
-  background: #e94560;
-  color: var(--text);
+  background: var(--accent);
+  color: var(--text-on-accent);
 }
 
 .formActions button:last-child {

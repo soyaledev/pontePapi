@@ -8,7 +8,9 @@ export function FooterWrapper() {
   const showFooter =
     pathname === '/' ||
     pathname.startsWith('/admin') ||
-    (pathname.startsWith('/dueno') && !pathname.startsWith('/dueno/turnos'));
+    (pathname.startsWith('/dueno') &&
+      !pathname.startsWith('/dueno/turnos') &&
+      !pathname.includes('/editar'));
 
   if (!showFooter) return null;
   const withBottomNav =

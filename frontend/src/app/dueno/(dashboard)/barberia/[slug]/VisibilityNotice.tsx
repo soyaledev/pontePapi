@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import { checkBarbershopVisibility, type VisibilityCheck } from '@/lib/barbershop-visibility';
@@ -9,10 +10,12 @@ const PANEL_UPDATE_EVENT = 'panel-visibility-update';
 
 export function VisibilityNotice({
   barbershopId,
+  slug,
   initialVisibility,
   requiereSena,
 }: {
   barbershopId: string;
+  slug: string;
   initialVisibility: VisibilityCheck;
   requiereSena: boolean;
 }) {
@@ -48,18 +51,30 @@ export function VisibilityNotice({
     return () => window.removeEventListener(PANEL_UPDATE_EVENT, onPanelUpdate);
   }, [fetchVisibility]);
 
-  if (visibility.isVisible) return null;
-
-  const items: string[] = [];
-  if (!visibility.hasHorarios) items.push('horarios (al menos 1 día abierto)');
-  if (requiereSena && !visibility.hasPagos) items.push('pagos (cuenta Mercado Pago vinculada)');
-  if (!visibility.hasServicios) items.push('servicios (al menos 1 servicio)');
-
   const total = requiereSena ? 3 : 2;
   const completed = requiereSena
     ? [visibility.hasHorarios, visibility.hasServicios, visibility.hasPagos].filter(Boolean).length
     : [visibility.hasHorarios, visibility.hasServicios].filter(Boolean).length;
   const percent = Math.round((completed / total) * 100);
+
+  if (visibility.isVisible) {
+    return (
+      <div className={`${styles.wrap} ${styles.wrapSuccess}`}>
+        <p className={styles.percent}>{percent}%</p>
+        <p className={styles.text}>
+          Tu barbería ya es visible para todo el público. Podés ver cómo la ven los clientes en el menú principal.
+        </p>
+        <Link href="/" className={styles.verMenuBtn}>
+          Ver menú cliente
+        </Link>
+      </div>
+    );
+  }
+
+  const items: string[] = [];
+  if (!visibility.hasHorarios) items.push('horarios (al menos 1 día abierto)');
+  if (requiereSena && !visibility.hasPagos) items.push('pagos (cuenta Mercado Pago vinculada)');
+  if (!visibility.hasServicios) items.push('servicios (al menos 1 servicio)');
 
   const text =
     items.length > 0

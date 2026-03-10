@@ -73,6 +73,10 @@ export async function POST(req: Request) {
     marketplaceFee = Math.round(amount * 0.03);
   }
 
+  // #region agent log
+  fetch('http://127.0.0.1:7939/ingest/ce6f701b-fd9f-484e-a36c-bf6777e06b66',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'871633'},body:JSON.stringify({sessionId:'871633',location:'create-preference/route.ts:preference-params',message:'Params antes de crear preferencia MP',data:{barbershopId,appointmentId,amount,marketplaceFee,sena_comision_cliente:!!barbershop.sena_comision_cliente,montoNeto},hypothesisId:'H1,H2,H3',timestamp:Date.now()})}).catch(()=>{});
+  // #endregion
+
   const baseUrl =
     process.env.VERCEL_URL
       ? `https://${process.env.VERCEL_URL}`
@@ -111,6 +115,9 @@ export async function POST(req: Request) {
       }
     );
     const data = await response.json();
+    // #region agent log
+    fetch('http://127.0.0.1:7939/ingest/ce6f701b-fd9f-484e-a36c-bf6777e06b66',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'871633'},body:JSON.stringify({sessionId:'871633',location:'create-preference/route.ts:mp-response',message:'Respuesta API MP create preference',data:{mpStatus:response.status,mpError:data.error,mpMessage:data.message,hasInitPoint:!!data.init_point,preferenceId:data.id,backUrlSuccess:backUrlSuccess??undefined,baseUrl},hypothesisId:'H2,H4,H5',timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
     if (data.error) throw new Error(data.message ?? 'Error MP');
 
     await supabase

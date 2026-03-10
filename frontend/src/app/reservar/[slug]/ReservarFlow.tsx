@@ -403,6 +403,9 @@ export function ReservarFlow({
         });
 
         const json = await res.json();
+        // #region agent log
+        fetch('http://127.0.0.1:7939/ingest/ce6f701b-fd9f-484e-a36c-bf6777e06b66',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'871633'},body:JSON.stringify({sessionId:'871633',location:'ReservarFlow.tsx:create-preference-client',message:'Respuesta create-preference en cliente',data:{status:res.status,ok:res.ok,hasInitPoint:!!json.init_point,error:json.error},hypothesisId:'H5',timestamp:Date.now()})}).catch(()=>{});
+        // #endregion
         if (!res.ok) {
           if (res.status === 400 && json.error?.includes('vinculada')) {
             throw new Error('Esta barbería aún no configuró los pagos. Contactá a la barbería.');

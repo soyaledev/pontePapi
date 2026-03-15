@@ -132,6 +132,18 @@
   line-height: 1.5;
 }
 
+.successBanner {
+  width: 100%;
+  max-width: 360px;
+  padding: 1rem 1.25rem;
+  margin-bottom: .5rem;
+  color: #16a34a;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.4;
+  text-align: center;
+}
+
 .footer {
   margin-top: 1.5rem;
   text-align: center;

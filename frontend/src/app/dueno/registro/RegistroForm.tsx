@@ -2,8 +2,9 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { supabase } from '@/lib/supabase/client';
+import { useRouter } from 'next/navigation';
 import { authErrorToSpanish } from '@/lib/auth/error-messages';
+import { PasswordInput } from '@/components/PasswordInput/PasswordInput';
 import styles from '../login/Login.module.css';
 
 export function RegistroForm() {
@@ -12,7 +13,7 @@ export function RegistroForm() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [done, setDone] = useState(false);
+  const router = useRouter();
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -27,37 +28,25 @@ export function RegistroForm() {
     }
     setLoading(true);
     try {
-      const { error: err } = await supabase.auth.signUp({
-        email: email.trim().toLowerCase(),
-        password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback?next=/dueno/turnos`,
-        },
+      const res = await fetch('/api/dueno/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: email.trim().toLowerCase(),
+          password,
+        }),
       });
-      if (err) throw err;
-      setDone(true);
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(data.error ?? 'Error al registrarse');
+      }
+      router.replace(`/dueno/verificar-correo?email=${encodeURIComponent(email.trim().toLowerCase())}`);
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Error al registrarse';
       setError(authErrorToSpanish(msg, 'signup'));
     } finally {
       setLoading(false);
     }
-  }
-
-  if (done) {
-    return (
-      <div className={styles.form}>
-        <p className={styles.success}>
-          Revisá tu correo. Te enviamos un enlace para confirmar tu cuenta.
-        </p>
-        <p className={styles.subtitle} style={{ fontSize: '0.9rem', marginTop: '0.5rem' }}>
-          Si no aparece, revisá la carpeta de spam.
-        </p>
-        <Link href="/dueno/login" className={styles.button} style={{ display: 'inline-block', textAlign: 'center', marginTop: '1rem' }}>
-          Ir al login
-        </Link>
-      </div>
-    );
   }
 
   return (
@@ -72,8 +61,7 @@ export function RegistroForm() {
         autoComplete="email"
         required
       />
-      <input
-        type="password"
+      <PasswordInput
         placeholder="Contraseña (mín. 6)"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
@@ -82,8 +70,7 @@ export function RegistroForm() {
         required
         minLength={6}
       />
-      <input
-        type="password"
+      <PasswordInput
         placeholder="Confirmar contraseña"
         value={confirmPassword}
         onChange={(e) => setConfirmPassword(e.target.value)}

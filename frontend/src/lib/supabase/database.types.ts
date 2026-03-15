@@ -129,6 +129,32 @@ export type Database = {
         };
         Update: Partial<Database["public"]["Tables"]["owner_profiles"]["Insert"]>;
       };
+      email_verification_tokens: {
+        Row: {
+          user_id: string;
+          token: string;
+          expires_at: string;
+          created_at: string;
+        };
+        Insert: {
+          user_id: string;
+          token: string;
+          expires_at: string;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["email_verification_tokens"]["Insert"]>;
+      };
+      owner_email_verified: {
+        Row: {
+          user_id: string;
+          verified_at: string;
+        };
+        Insert: {
+          user_id: string;
+          verified_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["owner_email_verified"]["Insert"]>;
+      };
       schedules: {
         Row: {
           barbershop_id: string;

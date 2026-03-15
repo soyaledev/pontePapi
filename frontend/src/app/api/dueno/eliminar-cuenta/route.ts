@@ -41,6 +41,10 @@ export async function POST() {
   // Eliminar owner_profiles si existe
   await admin.from('owner_profiles').delete().eq('id', user.id);
 
+  // Eliminar tokens y registro de verificación
+  await admin.from('email_verification_tokens').delete().eq('user_id', user.id);
+  await admin.from('owner_email_verified').delete().eq('user_id', user.id);
+
   // Eliminar usuario de auth
   const { error: deleteError } = await admin.auth.admin.deleteUser(user.id);
 

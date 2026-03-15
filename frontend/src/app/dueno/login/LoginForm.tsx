@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase/client';
 import { authErrorToSpanish } from '@/lib/auth/error-messages';
+import { PasswordInput } from '@/components/PasswordInput/PasswordInput';
 import styles from './Login.module.css';
 
 export function LoginForm() {
@@ -16,10 +17,13 @@ export function LoginForm() {
   const [password, setPassword] = useState('');
 
   useEffect(() => {
-    if (searchParams.get('error') === 'auth') {
-      setError('Hubo un error al iniciar sesión. Intentá de nuevo.');
-    }
+    const err = searchParams.get('error');
+    if (err === 'auth') setError('Hubo un error al iniciar sesión. Intentá de nuevo.');
+    else if (err === 'verification_expired') setError('El enlace de verificación venció. Solicitá uno nuevo desde el panel.');
+    else if (err === 'verification_missing') setError('Faltó el enlace de verificación.');
   }, [searchParams]);
+
+  const verifiedSuccess = searchParams.get('verified') === '1';
 
   async function handleEmailLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -59,6 +63,11 @@ export function LoginForm() {
   return (
     <div className={styles.page}>
       <div className={styles.body}>
+        {verifiedSuccess && (
+          <div className={styles.successBanner} role="alert">
+            Correo verificado. Ya podés iniciar sesión.
+          </div>
+        )}
         <div className={styles.card}>
           <h1 className={styles.title}>Ingresar</h1>
           <p className={styles.subtitle}>Panel de dueños de barbería</p>
@@ -73,8 +82,7 @@ export function LoginForm() {
               autoComplete="email"
               required
             />
-            <input
-              type="password"
+            <PasswordInput
               placeholder="Contraseña"
               value={password}
               onChange={(e) => setPassword(e.target.value)}

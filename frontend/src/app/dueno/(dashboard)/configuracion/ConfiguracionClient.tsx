@@ -2,21 +2,8 @@
 
 import { useState } from 'react';
 import { supabase } from '@/lib/supabase/client';
+import { PasswordInput } from '@/components/PasswordInput/PasswordInput';
 import styles from './Configuracion.module.css';
-
-function EyeIcon({ show }: { show: boolean }) {
-  return show ? (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-      <circle cx="12" cy="12" r="3" />
-    </svg>
-  ) : (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
-      <line x1="1" y1="1" x2="23" y2="23" />
-    </svg>
-  );
-}
 
 export function ConfiguracionClient({
   userEmail,
@@ -29,8 +16,6 @@ export function ConfiguracionClient({
 }) {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [showNewPass, setShowNewPass] = useState(false);
-  const [showConfirmPass, setShowConfirmPass] = useState(false);
   const [passwordLoading, setPasswordLoading] = useState(false);
   const [passwordError, setPasswordError] = useState('');
   const [passwordSuccess, setPasswordSuccess] = useState('');
@@ -115,51 +100,29 @@ export function ConfiguracionClient({
             <label className={styles.fieldLabel} htmlFor="new-password">
               Nueva contraseña
             </label>
-            <div className={styles.inputWrap}>
-              <input
-                id="new-password"
-                type={showNewPass ? 'text' : 'password'}
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                className={styles.input}
-                placeholder="Mínimo 6 caracteres"
-                minLength={6}
-                autoComplete="new-password"
-              />
-              <button
-                type="button"
-                className={styles.eyeBtn}
-                onClick={() => setShowNewPass((s) => !s)}
-                aria-label={showNewPass ? 'Ocultar contraseña' : 'Mostrar contraseña'}
-              >
-                <EyeIcon show={!showNewPass} />
-              </button>
-            </div>
+            <PasswordInput
+              id="new-password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              className={styles.input}
+              placeholder="Mínimo 6 caracteres"
+              minLength={6}
+              autoComplete="new-password"
+            />
           </div>
           <div className={styles.field}>
             <label className={styles.fieldLabel} htmlFor="confirm-password">
               Confirmar contraseña
             </label>
-            <div className={styles.inputWrap}>
-              <input
-                id="confirm-password"
-                type={showConfirmPass ? 'text' : 'password'}
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className={styles.input}
-                placeholder="Repetí la contraseña"
-                minLength={6}
-                autoComplete="new-password"
-              />
-              <button
-                type="button"
-                className={styles.eyeBtn}
-                onClick={() => setShowConfirmPass((s) => !s)}
-                aria-label={showConfirmPass ? 'Ocultar contraseña' : 'Mostrar contraseña'}
-              >
-                <EyeIcon show={!showConfirmPass} />
-              </button>
-            </div>
+            <PasswordInput
+              id="confirm-password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              className={styles.input}
+              placeholder="Repetí la contraseña"
+              minLength={6}
+              autoComplete="new-password"
+            />
           </div>
           {passwordError && <p className={styles.error}>{passwordError}</p>}
           {passwordSuccess && <p className={styles.success}>{passwordSuccess}</p>}

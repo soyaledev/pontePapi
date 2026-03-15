@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { isAdmin } from '@/lib/admin';
+import { isEmailVerified } from '@/lib/auth/is-email-verified';
 import { DuenoNav } from '../DuenoNav';
 import { ThemeAwareLogo } from '@/components/ThemeAwareLogo';
 import { WelcomeOverlay } from './WelcomeOverlay/WelcomeOverlay';
@@ -19,6 +20,12 @@ export default async function DashboardLayout({
   }
 
   const isAdminUser = await isAdmin(user.email);
+  const metadata = user.app_metadata as { provider?: string };
+  const emailVerified = await isEmailVerified(user.id, metadata?.provider);
+
+  if (!isAdminUser && !emailVerified) {
+    redirect('/dueno/verificar-correo');
+  }
   if (isAdminUser) {
     redirect('/admin');
   }

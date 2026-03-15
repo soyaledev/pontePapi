@@ -13,6 +13,7 @@ export function FooterWrapper() {
       !pathname.startsWith('/dueno/turnos') &&
       !pathname.startsWith('/dueno/login') &&
       !pathname.startsWith('/dueno/registro') &&
+      !pathname.startsWith('/dueno/verificar-correo') &&
       !pathname.includes('/editar'));
 
   if (!showFooter) return null;

@@ -1,4 +1,4 @@
-/* Mobile-first welcome overlay */
+/* Mobile-first welcome overlay - respeta tema dark/light */
 .overlay {
   position: fixed;
   inset: 0;
@@ -10,10 +10,11 @@
   padding-bottom: calc(1.5rem + env(safe-area-inset-bottom, 0));
   background: linear-gradient(
     180deg,
-    #0a0a0a 0%,
-    #0f0f0f 40%,
-    #0a0a0a 100%
+    var(--bg-primary) 0%,
+    var(--bg-secondary) 40%,
+    var(--bg-primary) 100%
   );
+  color: var(--text);
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.5s ease, visibility 0.5s ease;
@@ -41,7 +42,7 @@
 }
 
 .logo {
-  filter: drop-shadow(0 2px 12px rgba(233, 69, 96, 0.15));
+  filter: drop-shadow(0 2px 12px rgba(233, 69, 96, 0.2));
 }
 
 .greeting {
@@ -49,14 +50,7 @@
   font-weight: 700;
   letter-spacing: -0.03em;
   margin: 0 0 1rem;
-  background: linear-gradient(
-    135deg,
-    #fff 0%,
-    rgba(255, 255, 255, 0.9) 100%
-  );
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--text);
   animation: fadeBlurIn 0.7s ease 0.35s both;
 }
 
@@ -86,7 +80,7 @@
 .cta:hover {
   background: var(--accent-hover);
   transform: scale(1.02);
-  box-shadow: 0 4px 20px rgba(233, 69, 96, 0.35);
+  box-shadow: 0 4px 20px rgba(233, 69, 96, 0.3);
 }
 
 .cta:active {

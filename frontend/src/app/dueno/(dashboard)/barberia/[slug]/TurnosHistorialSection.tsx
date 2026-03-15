@@ -14,20 +14,30 @@ type Appointment = {
 };
 
 const INITIAL_COUNT = 3;
+const LOAD_MORE_COUNT = 10;
 
 export function TurnosHistorialSection({
   appointments,
 }: {
   appointments: Appointment[];
 }) {
-  const [expanded, setExpanded] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(INITIAL_COUNT);
 
   if (appointments.length === 0) {
     return null;
   }
 
-  const displayed = expanded ? appointments : appointments.slice(0, INITIAL_COUNT);
-  const hasMore = appointments.length > INITIAL_COUNT;
+  const displayed = appointments.slice(0, visibleCount);
+  const hasMore = appointments.length > visibleCount;
+  const remaining = appointments.length - visibleCount;
+
+  function handleVerMas() {
+    setVisibleCount((prev) => Math.min(prev + LOAD_MORE_COUNT, appointments.length));
+  }
+
+  function handleVerMenos() {
+    setVisibleCount(INITIAL_COUNT);
+  }
 
   return (
     <section className={styles.section}>
@@ -53,15 +63,23 @@ export function TurnosHistorialSection({
           </li>
         ))}
       </ul>
-      {hasMore && (
+      {hasMore ? (
         <button
           type="button"
           className={styles.verMas}
-          onClick={() => setExpanded((e) => !e)}
+          onClick={handleVerMas}
         >
-          {expanded ? 'Ver menos' : `Ver más (${appointments.length - INITIAL_COUNT} más)`}
+          Ver más (+{Math.min(remaining, LOAD_MORE_COUNT)})
         </button>
-      )}
+      ) : visibleCount > INITIAL_COUNT ? (
+        <button
+          type="button"
+          className={styles.verMas}
+          onClick={handleVerMenos}
+        >
+          Ver menos
+        </button>
+      ) : null}
     </section>
   );
 }

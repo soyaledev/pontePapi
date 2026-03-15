@@ -109,44 +109,46 @@ export default async function BarberiaPublicPage({
             )}
           </div>
         )}
-        <div className={styles.info}>
-          {barbers && barbers.length > 0 && (
-            <div className={styles.barbersSection}>
-              <strong>Barberos</strong>
-              <div className={barbers.length > 2 ? styles.barberGridScrollWrap : styles.barberGridWrap}>
-              <div className={styles.barberGrid}>
-                {barbers.map((b) => (
-                  <div key={b.id} className={styles.barberCard}>
-                    {b.photo_url ? (
-                      <img src={b.photo_url} alt={toTitleCase(b.name)} className={styles.barberAvatar} loading="lazy" />
-                    ) : (
-                      <div className={styles.barberAvatarPlaceholder}>{toTitleCase(b.name).charAt(0)}</div>
-                    )}
-                    <span>{toTitleCase(b.name)}</span>
-                  </div>
-                ))}
+        <div className={styles.bodyMain}>
+          <div className={styles.info}>
+            {barbers && barbers.length > 0 && (
+              <div className={styles.barbersSection}>
+                <strong>Barberos</strong>
+                <div className={barbers.length > 2 ? styles.barberGridScrollWrap : styles.barberGridWrap}>
+                <div className={styles.barberGrid}>
+                  {barbers.map((b) => (
+                    <div key={b.id} className={styles.barberCard}>
+                      {b.photo_url ? (
+                        <img src={b.photo_url} alt={toTitleCase(b.name)} className={styles.barberAvatar} loading="lazy" />
+                      ) : (
+                        <div className={styles.barberAvatarPlaceholder}>{toTitleCase(b.name).charAt(0)}</div>
+                      )}
+                      <span>{toTitleCase(b.name)}</span>
+                    </div>
+                  ))}
+                </div>
+                </div>
               </div>
-              </div>
-            </div>
-          )}
+            )}
+          </div>
+          <section className={styles.services}>
+            <h2 className={styles.servicesTitle}>Servicios</h2>
+            <ul className={styles.serviceList}>
+              {(services ?? []).map((s) => (
+                <li key={s.id} className={styles.serviceItem}>
+                  <span>{s.name}</span>
+                  <span className={styles.price}>{formatPeso(s.price)}</span>
+                </li>
+              ))}
+            </ul>
+            <Link
+              href={`/reservar/${barbershop.slug}`}
+              className={styles.reservarBtnSecondary}
+            >
+              Sacar turno
+            </Link>
+          </section>
         </div>
-        <section className={styles.services}>
-          <h2 className={styles.servicesTitle}>Servicios</h2>
-          <ul className={styles.serviceList}>
-            {(services ?? []).map((s) => (
-              <li key={s.id} className={styles.serviceItem}>
-                <span>{s.name}</span>
-                <span className={styles.price}>{formatPeso(s.price)}</span>
-              </li>
-            ))}
-          </ul>
-          <Link
-            href={`/reservar/${barbershop.slug}`}
-            className={styles.reservarBtnSecondary}
-          >
-            Sacar turno
-          </Link>
-        </section>
       </aside>
     </div>
   );

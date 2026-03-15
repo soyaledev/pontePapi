@@ -455,6 +455,13 @@ export function ReservarFlow({
     return 'Se le asignará un barbero';
   };
 
+  const steps = hasBarberStep
+    ? ['Servicio', 'Barbero', 'Fecha y horario', 'Confirmar']
+    : ['Servicio', 'Fecha y horario', 'Confirmar'];
+  const currentStepIndex = hasBarberStep
+    ? (step === 1 ? 0 : step === stepBarbero ? 1 : step === stepFecha ? 2 : 3)
+    : (step === 1 ? 0 : step === stepFecha ? 1 : 2);
+
   return (
     <div className={styles.page}>
       <header className={styles.header}>
@@ -462,8 +469,38 @@ export function ReservarFlow({
           Volver
         </Link>
       </header>
-      <div className={styles.body}>
-        <h1 className={styles.title}>Reservar en {barbershop.name}</h1>
+      <div className={styles.layout}>
+        <aside className={styles.sidebar}>
+          <Link href={`/barberia/${barbershop.slug}`} className={styles.sidebarBack}>
+            ← {barbershop.name}
+          </Link>
+          <h1 className={styles.title}>Reservar</h1>
+          <nav className={styles.stepNav} aria-label="Progreso de reserva">
+            {steps.map((label, i) => (
+              <span
+                key={label}
+                className={`${styles.stepNavItem} ${i <= currentStepIndex ? styles.stepNavItemActive : ''} ${i === currentStepIndex ? styles.stepNavItemCurrent : ''}`}
+              >
+                <span className={styles.stepNavNum}>{i + 1}</span>
+                {label}
+              </span>
+            ))}
+          </nav>
+          {service && fecha && slot && (
+            <div className={styles.sidebarResumen}>
+              <span className={styles.sidebarResumenLabel}>Tu reserva</span>
+              <p className={styles.sidebarResumenText}>
+                {service.name}
+                {' · '}
+                {new Date(fecha + 'T12:00:00').toLocaleDateString('es-AR', { weekday: 'short', day: 'numeric', month: 'short' })}
+                {' · '}
+                {slot.slice(0, 5)}
+              </p>
+            </div>
+          )}
+        </aside>
+        <div className={styles.body}>
+        <h1 className={styles.titleMobile}>Reservar en {barbershop.name}</h1>
 
         {isOwner && (
           <div className={styles.ownerBlock}>
@@ -646,6 +683,7 @@ export function ReservarFlow({
         {step === stepDatos && (
           <div className={styles.step}>
             <h2 className={styles.datosTitle}>Tus datos</h2>
+            <div className={styles.datosStepWrap}>
             <div className={styles.resumenBlock}>
               <p className={styles.resumenPrincipal}>
                 {service?.name}
@@ -725,6 +763,7 @@ export function ReservarFlow({
                 </div>
               )}
             </div>
+            <div>
             <form
               onSubmit={(e) => {
                 e.preventDefault();
@@ -776,10 +815,13 @@ export function ReservarFlow({
                     : 'Confirmar turno'}
               </button>
             </form>
+            </div>
+            </div>
           </div>
         )}
           </>
         )}
+        </div>
       </div>
 
       {modalDate && modalSlots && (

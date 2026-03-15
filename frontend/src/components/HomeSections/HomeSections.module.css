@@ -1,7 +1,6 @@
-/* ── Mobile-first: Cómo funciona ── */
+/* ── Cómo funciona: listado limpio, animación secuencial de resaltado ── */
 .section {
-  padding: 1.5rem 1rem 2.5rem;
-  background: var(--bg-primary);
+  padding: 2rem 1rem 3rem;
 }
 
 .srOnly {
@@ -20,7 +19,7 @@
   margin: 0 auto;
   opacity: 0;
   transform: translateY(12px);
-  transition: opacity 0.45s ease-out, transform 0.45s ease-out;
+  transition: opacity 0.4s ease-out, transform 0.4s ease-out;
 }
 
 .wrapper.visible {
@@ -33,7 +32,7 @@
   font-weight: 500;
   color: var(--text-muted);
   line-height: 1.5;
-  margin: 0 0 1.5rem;
+  margin: 0 0 1.75rem;
   text-align: center;
   padding: 0 0.5rem;
 }
@@ -50,115 +49,123 @@
   gap: 0.75rem 1rem;
   padding: 1rem 0;
   align-items: baseline;
-  opacity: 0;
-  transform: translateY(10px);
+  border-left: 3px solid transparent;
+  margin-left: 0;
+  padding-left: 1rem;
+  transition: opacity 1.8s ease, border-color 1.8s ease, color 1.5s ease;
 }
 
 .stepItem:first-child {
   padding-top: 0;
 }
 
-.stepItem::after {
-  content: '';
-  grid-column: 1 / -1;
-  height: 1px;
-  background: linear-gradient(90deg, var(--border) 0%, transparent 100%);
+.stepItem:not(.stepItemActive) {
+  opacity: 0.4;
 }
 
-.stepItem:last-child::after {
-  display: none;
+.stepItemActive {
+  opacity: 1;
+  border-left-color: var(--accent);
 }
 
-.wrapper.visible .stepItem {
-  animation: stepIn 0.4s ease-out forwards;
-}
-
-.wrapper.visible .stepItem:nth-child(1) { animation-delay: 0.05s; }
-.wrapper.visible .stepItem:nth-child(2) { animation-delay: 0.12s; }
-.wrapper.visible .stepItem:nth-child(3) { animation-delay: 0.19s; }
-.wrapper.visible .stepItem:nth-child(4) { animation-delay: 0.26s; }
-
-@keyframes stepIn {
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Número: estilo editorial, solo tipo */
-.stepBadge {
-  font-family: var(--font-sansation), sans-serif;
-  font-size: 0.75rem;
+.stepNum {
+  font-size: 0.9rem;
   font-weight: 700;
-  color: var(--accent);
-  letter-spacing: 0.08em;
+  color: var(--text-muted);
   line-height: 1;
+  transition: color 1.8s ease;
+}
+
+.stepItemActive .stepNum {
+  color: var(--accent);
 }
 
 .stepContent {
   min-width: 0;
 }
 
-.stepHeader {
-  display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
-}
-
 .stepTitle {
   font-size: 1rem;
   font-weight: 600;
   color: var(--text);
-  margin: 0;
+  margin: 0 0 0.2rem;
   line-height: 1.3;
+  transition: color 1.8s ease;
+}
+
+.stepItem:not(.stepItemActive) .stepTitle {
+  color: var(--text-muted);
 }
 
 .stepDescription {
   font-size: 0.8125rem;
   color: var(--text-muted);
-  line-height: 1.5;
+  line-height: 1.45;
   margin: 0;
+  transition: color 1.8s ease, opacity 1.8s ease;
 }
 
-/* Desktop */
-@media (min-width: 600px) {
+.stepItemActive .stepDescription {
+  color: var(--text);
+  opacity: 0.9;
+}
+
+/* Desktop: horizontal */
+@media (min-width: 768px) {
   .section {
-    padding: 2.5rem 1.5rem 3.5rem;
+    padding: 2.5rem 1.5rem 4rem;
   }
 
   .lead {
-    font-size: 1.15rem;
+    font-size: 1.1rem;
     margin-bottom: 2rem;
   }
 
   .wrapper {
-    max-width: 480px;
+    max-width: 720px;
+  }
+
+  .timeline {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem 1.5rem;
   }
 
   .stepItem {
-    padding: 1.25rem 0;
-    gap: 0.5rem 1.25rem;
+    padding: 1rem 0;
+    padding-left: 0;
+    padding-top: 1rem;
+    border-left: none;
+    border-top: 3px solid transparent;
+    margin-left: 0;
   }
 
-  .stepBadge {
-    font-size: 0.85rem;
+  .stepItem:first-child {
+    padding-top: 1rem;
+  }
+
+  .stepItemActive {
+    border-top-color: var(--accent);
+  }
+
+  .stepItem {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .stepNum {
+    margin-bottom: 0.35rem;
   }
 
   .stepTitle {
-    font-size: 1.05rem;
+    font-size: 1rem;
+    margin-bottom: 0.25rem;
   }
 
   .stepDescription {
-    font-size: 0.9rem;
-  }
-}
-
-@media (min-width: 768px) {
-  .section {
-    padding: 3rem 2rem 4rem;
-  }
-
-  .wrapper {
-    max-width: 520px;
+    font-size: 0.8rem;
+    line-height: 1.4;
   }
 }

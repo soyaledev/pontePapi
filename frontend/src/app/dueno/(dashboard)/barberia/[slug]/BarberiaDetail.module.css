@@ -96,35 +96,73 @@
   text-decoration: underline;
 }
 
+.barberSection {
+  margin-bottom: 1.5rem;
+}
+
+.barberSectionTitle {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin: 0 0 0.75rem;
+  font-weight: 500;
+}
+
+.barberScrollWrap {
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  margin-left: -1.5rem;
+  margin-right: -1.5rem;
+  padding: 0 1.5rem 0.5rem;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.barberScrollWrap::-webkit-scrollbar {
+  display: none;
+}
+
 .barberList {
   display: flex;
-  flex-wrap: wrap;
   gap: 0.75rem;
+  flex-wrap: nowrap;
+  width: max-content;
+  padding-right: 0.5rem;
 }
 
 .barberItem {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.35rem;
+  flex-shrink: 0;
 }
 
 .barberAvatar {
-  width: 48px;
-  height: 48px;
+  width: 80px;
+  height: 104px;
   border-radius: 0.5rem;
   object-fit: cover;
+  object-position: top;
 }
 
 .barberAvatarPlaceholder {
-  width: 48px;
-  height: 48px;
+  width: 80px;
+  height: 104px;
   border-radius: 0.5rem;
-  background: var(--bg-input);
+  background: var(--bg-card);
   border: 1px solid var(--border);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1rem;
+  font-size: 1.5rem;
   font-weight: 600;
   color: var(--text-muted);
+}
+
+.barberName {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text);
+  text-align: center;
 }

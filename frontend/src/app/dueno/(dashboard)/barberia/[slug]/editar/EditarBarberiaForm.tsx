@@ -54,20 +54,32 @@ export function EditarBarberiaForm({
       return;
     }
     const addressTrimmed = form.address.trim();
-    if (addressTrimmed && !isGoogleMapsLink(addressTrimmed)) {
+    if (!addressTrimmed) {
+      setError('La ubicación es obligatoria');
+      return;
+    }
+    if (!isGoogleMapsLink(addressTrimmed)) {
       setError('La ubicación debe ser un link de Google Maps (ej: maps.google.com o goo.gl/maps)');
+      return;
+    }
+    if (!form.city.trim()) {
+      setError('La ciudad es obligatoria');
+      return;
+    }
+    const phoneOnly = form.phone.replace(/\D/g, '').slice(0, 10);
+    if (phoneOnly.length < 6) {
+      setError('El teléfono es obligatorio (mín. 6 números)');
       return;
     }
     setLoading(true);
     try {
-      const phoneOnly = form.phone.replace(/\D/g, '').slice(0, 10);
       const { error: shopError } = await supabase
         .from('barbershops')
         .update({
           name: form.name.trim(),
-          address: addressTrimmed || null,
-          city: form.city.trim() ? toTitleCase(form.city.trim()) : null,
-          phone: phoneOnly || null,
+          address: addressTrimmed,
+          city: toTitleCase(form.city.trim()),
+          phone: phoneOnly,
           photo_url: form.photo_url.trim() || null,
         })
         .eq('id', barbershop.id);
@@ -186,29 +198,32 @@ export function EditarBarberiaForm({
           </button>
         </div>
         <label className={styles.label}>
-          Ubicación
+          Ubicación *
           <input
             type="url"
             value={form.address}
             onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))}
             className={styles.input}
             placeholder="https://maps.google.com/... o https://goo.gl/maps/..."
+            required
           />
           <span className={styles.hint}>
             Pegá el link de Google Maps de tu barbería (Compartir → Copiar enlace)
           </span>
         </label>
         <label className={styles.label}>
-          Ciudad
+          Ciudad *
           <input
             type="text"
             value={form.city}
             onChange={(e) => setForm((f) => ({ ...f, city: e.target.value }))}
             className={styles.input}
+            placeholder="Buenos Aires"
+            required
           />
         </label>
         <label className={styles.label}>
-          Teléfono (máx. 10 números)
+          Teléfono (mín. 6, máx. 10 números) *
           <input
             type="tel"
             inputMode="numeric"
@@ -220,6 +235,8 @@ export function EditarBarberiaForm({
             className={styles.input}
             placeholder="1112345678"
             maxLength={12}
+            minLength={6}
+            required
           />
         </label>
         <div className={styles.label}>

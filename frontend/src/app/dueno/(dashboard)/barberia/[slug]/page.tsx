@@ -83,9 +83,9 @@ export default async function BarberiaDetailPage({
       <div className={styles.info}>
         <dl className={styles.infoList}>
           {barbers && barbers.length > 0 && (
-            <div className={styles.infoRow}>
-              <dt>Barberos</dt>
-              <dd>
+            <div className={styles.barberSection}>
+              <h3 className={styles.barberSectionTitle}>Barberos</h3>
+              <div className={styles.barberScrollWrap}>
                 <div className={styles.barberList}>
                   {barbers.map((b) => (
                     <div key={b.id} className={styles.barberItem}>
@@ -94,11 +94,11 @@ export default async function BarberiaDetailPage({
                       ) : (
                         <div className={styles.barberAvatarPlaceholder}>{toTitleCase(b.name).charAt(0)}</div>
                       )}
-                      <span>{toTitleCase(b.name)}</span>
+                      <span className={styles.barberName}>{toTitleCase(b.name)}</span>
                     </div>
                   ))}
                 </div>
-              </dd>
+              </div>
             </div>
           )}
           {barbershop.city && (

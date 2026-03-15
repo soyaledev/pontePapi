@@ -7,21 +7,19 @@ type HowStepProps = {
   step: Step;
   isLast: boolean;
   index: number;
+  isActive: boolean;
 };
 
-export function HowStep({ step, isLast }: HowStepProps) {
+export function HowStep({ step, isActive }: HowStepProps) {
   return (
-    <div className={styles.stepItem} data-step-index={step.number}>
-      <div className={styles.stepBadge} aria-hidden>
-        {step.number}
-      </div>
+    <div
+      className={`${styles.stepItem} ${isActive ? styles.stepItemActive : ''}`}
+      data-step-index={step.number}
+    >
+      <span className={styles.stepNum} aria-hidden>{step.number}</span>
       <div className={styles.stepContent}>
-        <div className={styles.stepHeader}>
-          <div className={styles.stepText}>
-            <h3 className={styles.stepTitle}>{step.title}</h3>
-            <p className={styles.stepDescription}>{step.description}</p>
-          </div>
-        </div>
+        <h3 className={styles.stepTitle}>{step.title}</h3>
+        <p className={styles.stepDescription}>{step.description}</p>
       </div>
     </div>
   );

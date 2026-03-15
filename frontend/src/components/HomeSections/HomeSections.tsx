@@ -5,9 +5,12 @@ import { HowStep } from './HowStep';
 import { clientSteps } from './steps/clientSteps';
 import styles from './HomeSections.module.css';
 
+const CYCLE_MS = 2800;
+
 export function HomeSections() {
   const ref = useRef<HTMLElement>(null);
   const [visible, setVisible] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(0);
 
   useEffect(() => {
     const el = ref.current;
@@ -22,6 +25,14 @@ export function HomeSections() {
     return () => observer.disconnect();
   }, []);
 
+  useEffect(() => {
+    if (!visible) return;
+    const t = setInterval(() => {
+      setActiveIndex((i) => (i + 1) % clientSteps.length);
+    }, CYCLE_MS);
+    return () => clearInterval(t);
+  }, [visible]);
+
   return (
     <section ref={ref} className={styles.section} aria-labelledby="home-sections-title">
       <h2 id="home-sections-title" className={styles.srOnly}>
@@ -29,7 +40,7 @@ export function HomeSections() {
       </h2>
       <div className={`${styles.wrapper} ${visible ? styles.visible : ''}`}>
         <p className={styles.lead}>
-          PontePapi conecta a quienes buscan turno con barberías reales. Sin apps extras, sin llamadas.
+          Turnos con barberías reales. Sin apps, sin llamadas.
         </p>
         <div className={styles.timeline}>
           {clientSteps.map((step, index) => (
@@ -38,6 +49,7 @@ export function HomeSections() {
               step={step}
               isLast={index === clientSteps.length - 1}
               index={index}
+              isActive={index === activeIndex}
             />
           ))}
         </div>
